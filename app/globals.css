@@ -1,0 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-page: #F8F1EB;
+  --color-noa-chocolate: #683B0C;
+  --color-noa-chocolate-dark: #4A2808;
+  --color-noa-caramel: #D1A37A;
+  --color-noa-caramel-dark: #8C5828;
+  --card-bg: #FAF4EE;
+}
+
+html, body {
+  background-color: #F8F1EB !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 100%;
+  width: 100%;
+  color: #4A2808;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Category Pill Buttons - Borderless */
+.noa-brand-pill {
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 13.5px;
+  transition: all 0.2s ease;
+  border: none !important;
+}
+
+.noa-brand-pill.active {
+  background: #683B0C;
+  color: #FFFFFF;
+}
+
+.noa-brand-pill:not(.active) {
+  background: #FAF4EE;
+  color: #683B0C;
+}
+
+.noa-brand-pill:not(.active):hover {
+  background: #FFFFFF;
+}
+
+/* Smooth custom scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(209, 163, 122, 0.4);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(104, 59, 12, 0.6);
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* 80mm/58mm POS Thermal Printer Print Mode */
+@media print {
+  @page {
+    margin: 0;
+    size: auto;
+  }
+  body * {
+    visibility: hidden !important;
+  }
+  #thermal-receipt,
+  #thermal-receipt * {
+    visibility: visible !important;
+  }
+  #thermal-receipt {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 80mm !important;
+    max-width: 80mm !important;
+    margin: 0 auto !important;
+    padding: 10px !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}

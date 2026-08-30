@@ -1,0 +1,2348 @@
+import { Category, DiningTable, Product, Promotion, BusinessSettings, OptionGroup } from "./types";
+import { getProductImage } from "./images";
+
+export const INITIAL_TABLES: DiningTable[] = [
+  { id: "tbl-01", table_number: 1, label: "Masa 01", qr_token: "noa_tbl_01_a9f8b2c4e1d7", is_active: true },
+  { id: "tbl-02", table_number: 2, label: "Masa 02", qr_token: "noa_tbl_02_b8e7c1d3f5a9", is_active: true },
+  { id: "tbl-03", table_number: 3, label: "Masa 03", qr_token: "noa_tbl_03_c7d6e5f4a3b2", is_active: true },
+  { id: "tbl-04", table_number: 4, label: "Masa 04", qr_token: "noa_tbl_04_d6c5b4a3f2e1", is_active: true },
+  { id: "tbl-05", table_number: 5, label: "Masa 05", qr_token: "noa_tbl_05_e5f4a3b2c1d0", is_active: true },
+  { id: "tbl-06", table_number: 6, label: "Masa 06", qr_token: "noa_tbl_06_f4e3d2c1b0a9", is_active: true },
+  { id: "tbl-07", table_number: 7, label: "Masa 07", qr_token: "noa_tbl_07_a3b2c1d0e9f8", is_active: true },
+  { id: "tbl-08", table_number: 8, label: "Masa 08", qr_token: "noa_tbl_08_b2c1d0e9f8a7", is_active: true },
+  { id: "tbl-09", table_number: 9, label: "Masa 09", qr_token: "noa_tbl_09_c1d0e9f8a7b6", is_active: true },
+  { id: "tbl-10", table_number: 10, label: "Masa 10", qr_token: "noa_tbl_10_d0e9f8a7b6c5", is_active: true },
+  { id: "tbl-11", table_number: 11, label: "Masa 11", qr_token: "noa_tbl_11_e9f8a7b6c5d4", is_active: true },
+  { id: "tbl-12", table_number: 12, label: "Masa 12", qr_token: "noa_tbl_12_f8a7b6c5d4e3", is_active: true },
+  { id: "tbl-13", table_number: 13, label: "Masa 13", qr_token: "noa_tbl_13_a7b6c5d4e3f2", is_active: true },
+  { id: "tbl-14", table_number: 14, label: "Masa 14", qr_token: "noa_tbl_14_b6c5d4e3f2a1", is_active: true },
+  { id: "tbl-15", table_number: 15, label: "Masa 15", qr_token: "noa_tbl_15_c5d4e3f2a1b0", is_active: true },
+  { id: "tbl-16", table_number: 16, label: "Masa 16", qr_token: "noa_tbl_16_d4e3f2a1b0c9", is_active: true },
+  { id: "tbl-17", table_number: 17, label: "Masa 17", qr_token: "noa_tbl_17_e3f2a1b0c9d8", is_active: true },
+  { id: "tbl-18", table_number: 18, label: "Masa 18", qr_token: "noa_tbl_18_f2a1b0c9d8e7", is_active: true },
+  { id: "tbl-19", table_number: 19, label: "Masa 19", qr_token: "noa_tbl_19_a1b0c9d8e7f6", is_active: true },
+  { id: "tbl-20", table_number: 20, label: "Masa 20", qr_token: "noa_tbl_20_b0c9d8e7f6a5", is_active: true },
+];
+
+export const INITIAL_CATEGORIES: Category[] = [
+  { id: "cat-spesiyal", name: "NOA Menüler", slug: "noa-menuler", display_order: 1, is_active: true },
+  { id: "cat-klasik", name: "Klasik Tatlı", slug: "klasik-tatli-kruvasan", display_order: 2, is_active: true },
+  { id: "cat-twissy", name: "Twissy", slug: "twissy-kruvasan", display_order: 3, is_active: true },
+  { id: "cat-danish", name: "Danish", slug: "danish-kruvasan", display_order: 4, is_active: true },
+  { id: "cat-roll", name: "Roll", slug: "roll-kruvasan", display_order: 5, is_active: true },
+  { id: "cat-kup", name: "Küp", slug: "kup-kruvasan", display_order: 6, is_active: true },
+  { id: "cat-amora", name: "Amora", slug: "amora-kruvasan", display_order: 7, is_active: true },
+  { id: "cat-cheesecake", name: "Cheesecake", slug: "cheesecake", display_order: 8, is_active: true },
+  { id: "cat-waffle", name: "Waffle", slug: "waffle", display_order: 9, is_active: true },
+  { id: "cat-tuzlu", name: "Tuzlu Kruvasanlar", slug: "tuzlu-kruvasanlar", display_order: 10, is_active: true },
+  { id: "cat-special-icecek", name: "NOA İçecekler", slug: "noa-icecekler", display_order: 11, is_active: true },
+  { id: "cat-dondurma", name: "Dondurma", slug: "dondurma", display_order: 12, is_active: true },
+  { id: "cat-soguk-kahve", name: "Soğuk Kahveler", slug: "soguk-kahveler", display_order: 13, is_active: true },
+  { id: "cat-sicak", name: "Sıcak Kahveler", slug: "sicak-kahveler", display_order: 14, is_active: true },
+  { id: "cat-soft", name: "Soft İçecekler", slug: "soft-icecekler", display_order: 15, is_active: true },
+];
+
+// --- YEMEKSEPETI RESMİ "İÇ DOLGU ÇİKOLATA SEÇİMİ" (Roll, Küp ve Amora İçin) ---
+const IC_DOLGU_CIKOLATA_SECIMI: OptionGroup = {
+  id: "opt-ic-dolgu-cikolata-secimi",
+  name: "ic_dolgu_cikolata_secimi",
+  display_name: "İç Dolgu Çikolata Seçimi",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "dolgu-nutella", option_group_id: "opt-ic-dolgu-cikolata-secimi", name: "Nutella", price_modifier: 0, display_order: 1 },
+    { id: "dolgu-sutlu-belcika", option_group_id: "opt-ic-dolgu-cikolata-secimi", name: "Sütlü Belçika Çikolata", price_modifier: 20, display_order: 2 },
+    { id: "dolgu-beyaz-belcika", option_group_id: "opt-ic-dolgu-cikolata-secimi", name: "Beyaz Belçika Çikolata", price_modifier: 20, display_order: 3 },
+    { id: "dolgu-bitter-belcika", option_group_id: "opt-ic-dolgu-cikolata-secimi", name: "Bitter Belçika Çikolata", price_modifier: 20, display_order: 4 },
+  ],
+};
+
+const DONDURMA_PORSIYON: OptionGroup = {
+  id: "opt-dondurma-porsiyon",
+  name: "dondurma_porsiyon",
+  display_name: "Porsiyon Seçimi",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "porsiyon-1-top", option_group_id: "opt-dondurma-porsiyon", name: "1 Top", price_modifier: 0, display_order: 1 },
+    { id: "porsiyon-3-top", option_group_id: "opt-dondurma-porsiyon", name: "3 Top", price_modifier: 120, display_order: 2 },
+  ],
+};
+
+// --- YEMEKSEPETI "NOA TATLI KRUVASAN'INI OLUŞTUR" OPSİYONLARI ---
+const OPT_TATLI_KRUVASAN_SECIMI: OptionGroup = {
+  id: "opt-tatli-kruvasan-secimi",
+  name: "tatli_kruvasan_secimi",
+  display_name: "Kruvasan Seçimi",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "kruv-roll", option_group_id: "opt-tatli-kruvasan-secimi", name: "Roll Kruvasan", price_modifier: 0, display_order: 1 },
+    { id: "kruv-klasik", option_group_id: "opt-tatli-kruvasan-secimi", name: "Klasik Kruvasan", price_modifier: 0, display_order: 2 },
+    { id: "kruv-twissy", option_group_id: "opt-tatli-kruvasan-secimi", name: "Twissy Kruvasan", price_modifier: 0, display_order: 3 },
+  ],
+};
+
+const OPT_IC_DOLGU_CIKOLATA: OptionGroup = {
+  id: "opt-ic-dolgu-cikolata",
+  name: "ic_dolgu_cikolata",
+  display_name: "İç Dolgu Çikolata Seçimi",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "ic-dolgu-yok", option_group_id: "opt-ic-dolgu-cikolata", name: "İç Dolgu Çikolata İstemiyorum", price_modifier: 0, display_order: 1 },
+    { id: "ic-dolgu-nutella", option_group_id: "opt-ic-dolgu-cikolata", name: "Nutella", price_modifier: 0, display_order: 2 },
+    { id: "ic-dolgu-sutlu", option_group_id: "opt-ic-dolgu-cikolata", name: "Sütlü Belçika Çikolata", price_modifier: 30, display_order: 3 },
+    { id: "ic-dolgu-beyaz", option_group_id: "opt-ic-dolgu-cikolata", name: "Beyaz Belçika Çikolata", price_modifier: 30, display_order: 4 },
+    { id: "ic-dolgu-bitter", option_group_id: "opt-ic-dolgu-cikolata", name: "Bitter Belçika Çikolata", price_modifier: 30, display_order: 5 },
+  ],
+};
+
+const OPT_IC_MALZEME_TATLI: OptionGroup = {
+  id: "opt-ic-malzeme-tatli",
+  name: "ic_malzeme_tatli",
+  display_name: "İç Malzeme Seçimi",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 2,
+  options: [
+    { id: "ic-malzeme-yok", option_group_id: "opt-ic-malzeme-tatli", name: "İç Malzeme İstemiyorum", price_modifier: 0, display_order: 1 },
+    { id: "ic-malzeme-cilek", option_group_id: "opt-ic-malzeme-tatli", name: "Çilek", price_modifier: 0, display_order: 2 },
+    { id: "ic-malzeme-muz", option_group_id: "opt-ic-malzeme-tatli", name: "Muz", price_modifier: 0, display_order: 3 },
+    { id: "ic-malzeme-yaban-mersini", option_group_id: "opt-ic-malzeme-tatli", name: "Yaban Mersini", price_modifier: 0, display_order: 4 },
+    { id: "ic-malzeme-mango", option_group_id: "opt-ic-malzeme-tatli", name: "Mango", price_modifier: 0, display_order: 5 },
+    { id: "ic-malzeme-limon", option_group_id: "opt-ic-malzeme-tatli", name: "Limon Parçacıkları", price_modifier: 0, display_order: 6 },
+  ],
+};
+
+const OPT_DIS_DOLGU_CIKOLATA: OptionGroup = {
+  id: "opt-dis-dolgu-cikolata",
+  name: "dis_dolgu_cikolata",
+  display_name: "Dış Dolgu Çikolata Seçimi",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "dis-dolgu-yok", option_group_id: "opt-dis-dolgu-cikolata", name: "Dış Dolgu Çikolata İstemiyorum", price_modifier: 0, display_order: 1 },
+    { id: "dis-dolgu-nutella", option_group_id: "opt-dis-dolgu-cikolata", name: "Nutella", price_modifier: 0, display_order: 2 },
+    { id: "dis-dolgu-sutlu", option_group_id: "opt-dis-dolgu-cikolata", name: "Sütlü Belçika Çikolata", price_modifier: 30, display_order: 3 },
+    { id: "dis-dolgu-beyaz", option_group_id: "opt-dis-dolgu-cikolata", name: "Beyaz Belçika Çikolata", price_modifier: 30, display_order: 4 },
+    { id: "dis-dolgu-bitter", option_group_id: "opt-dis-dolgu-cikolata", name: "Bitter Belçika Çikolata", price_modifier: 30, display_order: 5 },
+  ],
+};
+
+const OPT_KREMA_SECIMI: OptionGroup = {
+  id: "opt-krema-secimi",
+  name: "krema_secimi",
+  display_name: "Krema Seçimi",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "krema-yok", option_group_id: "opt-krema-secimi", name: "Krema İstemiyorum", price_modifier: 0, display_order: 1 },
+    { id: "krema-pastaci", option_group_id: "opt-krema-secimi", name: "Pastacı Kreması", price_modifier: 0, display_order: 2 },
+    { id: "krema-orman-meyveli", option_group_id: "opt-krema-secimi", name: "Orman Meyveli Kreması", price_modifier: 30, display_order: 3 },
+    { id: "krema-limon", option_group_id: "opt-krema-secimi", name: "Limon Kreması", price_modifier: 30, display_order: 4 },
+    { id: "krema-lotus", option_group_id: "opt-krema-secimi", name: "Lotus Kreması", price_modifier: 50, display_order: 5 },
+    { id: "krema-fistik", option_group_id: "opt-krema-secimi", name: "Antep Fıstığı Kreması", price_modifier: 50, display_order: 6 },
+  ],
+};
+
+const OPT_EKSTRA_IC_MALZEME_TATLI: OptionGroup = {
+  id: "opt-ekstra-ic-malzeme-tatli",
+  name: "ekstra_ic_malzeme_tatli",
+  display_name: "Ekstra İç Malzeme",
+  is_required: false,
+  min_selection: 0,
+  max_selection: 99,
+  options: [
+    { id: "ekstra-cilek", option_group_id: "opt-ekstra-ic-malzeme-tatli", name: "Çilek", price_modifier: 30, display_order: 1 },
+    { id: "ekstra-muz", option_group_id: "opt-ekstra-ic-malzeme-tatli", name: "Muz", price_modifier: 20, display_order: 2 },
+    { id: "ekstra-yaban-mersini", option_group_id: "opt-ekstra-ic-malzeme-tatli", name: "Yaban Mersini", price_modifier: 50, display_order: 3 },
+    { id: "ekstra-mango", option_group_id: "opt-ekstra-ic-malzeme-tatli", name: "Mango", price_modifier: 40, display_order: 4 },
+    { id: "ekstra-limon-parcalari", option_group_id: "opt-ekstra-ic-malzeme-tatli", name: "Limon Parçacıkları", price_modifier: 20, display_order: 5 },
+  ],
+};
+
+// --- YEMEKSEPETI RESMİ "NOA TUZLU KRUVASAN'INI OLUŞTUR" OPSİYONLARI ---
+const OPT_TUZLU_KRUVASAN_SECIMI: OptionGroup = {
+  id: "opt-tuzlu-kruvasan-secimi",
+  name: "tuzlu_kruvasan_secimi",
+  display_name: "Kruvasan Seçimi",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "tuzlu-kruv-roll", option_group_id: "opt-tuzlu-kruvasan-secimi", name: "Roll Kruvasan", price_modifier: 0, display_order: 1 },
+    { id: "tuzlu-kruv-klasik", option_group_id: "opt-tuzlu-kruvasan-secimi", name: "Klasik Kruvasan", price_modifier: 0, display_order: 2 },
+  ],
+};
+
+const OPT_TUZLU_IC_MALZEME: OptionGroup = {
+  id: "opt-tuzlu-ic-malzeme",
+  name: "tuzlu_ic_malzeme",
+  display_name: "İç Malzeme Seçimi",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 4,
+  options: [
+    { id: "tuzlu-malz-yok", option_group_id: "opt-tuzlu-ic-malzeme", name: "İç Malzeme İstemiyorum", price_modifier: 0, display_order: 1 },
+    { id: "tuzlu-malz-labne", option_group_id: "opt-tuzlu-ic-malzeme", name: "Labne", price_modifier: 0, display_order: 2 },
+    { id: "tuzlu-malz-roka", option_group_id: "opt-tuzlu-ic-malzeme", name: "Roka", price_modifier: 0, display_order: 3 },
+    { id: "tuzlu-malz-domates", option_group_id: "opt-tuzlu-ic-malzeme", name: "Domates", price_modifier: 0, display_order: 4 },
+    { id: "tuzlu-malz-hindi-fume", option_group_id: "opt-tuzlu-ic-malzeme", name: "Hindi Füme", price_modifier: 0, display_order: 5 },
+    { id: "tuzlu-malz-zeytin", option_group_id: "opt-tuzlu-ic-malzeme", name: "Zeytin", price_modifier: 0, display_order: 6 },
+    { id: "tuzlu-malz-ton-baligi", option_group_id: "opt-tuzlu-ic-malzeme", name: "Ton Balığı", price_modifier: 0, display_order: 7 },
+    { id: "tuzlu-malz-salatalik", option_group_id: "opt-tuzlu-ic-malzeme", name: "Salatalık", price_modifier: 0, display_order: 8 },
+    { id: "tuzlu-malz-avokado", option_group_id: "opt-tuzlu-ic-malzeme", name: "Avokado", price_modifier: 0, display_order: 9 },
+    { id: "tuzlu-malz-yumurta-kremali", option_group_id: "opt-tuzlu-ic-malzeme", name: "Kremalı Çırpılmış Yumurta", price_modifier: 0, display_order: 10 },
+    { id: "tuzlu-malz-kasar", option_group_id: "opt-tuzlu-ic-malzeme", name: "Kaşar Peyniri", price_modifier: 0, display_order: 11 },
+    { id: "tuzlu-malz-sogan", option_group_id: "opt-tuzlu-ic-malzeme", name: "Karamelize Soğan", price_modifier: 0, display_order: 12 },
+    { id: "tuzlu-malz-kaburga", option_group_id: "opt-tuzlu-ic-malzeme", name: "Dana Kaburga", price_modifier: 0, display_order: 13 },
+    { id: "tuzlu-malz-mozzarella", option_group_id: "opt-tuzlu-ic-malzeme", name: "Mozzarella", price_modifier: 0, display_order: 14 },
+    { id: "tuzlu-malz-koz-salata", option_group_id: "opt-tuzlu-ic-malzeme", name: "Köz Salata", price_modifier: 0, display_order: 15 },
+    { id: "tuzlu-malz-ezine", option_group_id: "opt-tuzlu-ic-malzeme", name: "Ezine Peyniri", price_modifier: 0, display_order: 16 },
+    { id: "tuzlu-malz-yumurta-cirpilmis", option_group_id: "opt-tuzlu-ic-malzeme", name: "Çırpılmış Yumurta", price_modifier: 0, display_order: 17 },
+    { id: "tuzlu-malz-sosis", option_group_id: "opt-tuzlu-ic-malzeme", name: "Sosis", price_modifier: 0, display_order: 18 },
+    { id: "tuzlu-malz-cheddar", option_group_id: "opt-tuzlu-ic-malzeme", name: "Cheddar", price_modifier: 0, display_order: 19 },
+  ],
+};
+
+const OPT_TUZLU_EKSTRA_IC_MALZEME: OptionGroup = {
+  id: "opt-tuzlu-ekstra-ic-malzeme",
+  name: "tuzlu_ekstra_ic_malzeme",
+  display_name: "Ekstra İç Malzeme",
+  is_required: false,
+  min_selection: 0,
+  max_selection: 99,
+  options: [
+    { id: "ekstra-labne", option_group_id: "opt-tuzlu-ekstra-ic-malzeme", name: "Labne", price_modifier: 20, display_order: 1 },
+    { id: "ekstra-roka", option_group_id: "opt-tuzlu-ekstra-ic-malzeme", name: "Roka", price_modifier: 10, display_order: 2 },
+    { id: "ekstra-domates", option_group_id: "opt-tuzlu-ekstra-ic-malzeme", name: "Domates", price_modifier: 10, display_order: 3 },
+    { id: "ekstra-hindi-fume", option_group_id: "opt-tuzlu-ekstra-ic-malzeme", name: "Hindi Füme", price_modifier: 15, display_order: 4 },
+    { id: "ekstra-zeytin", option_group_id: "opt-tuzlu-ekstra-ic-malzeme", name: "Zeytin", price_modifier: 10, display_order: 5 },
+    { id: "ekstra-ton-baligi", option_group_id: "opt-tuzlu-ekstra-ic-malzeme", name: "Ton Balığı", price_modifier: 20, display_order: 6 },
+    { id: "ekstra-salatalik", option_group_id: "opt-tuzlu-ekstra-ic-malzeme", name: "Salatalık", price_modifier: 10, display_order: 7 },
+    { id: "ekstra-avokado", option_group_id: "opt-tuzlu-ekstra-ic-malzeme", name: "Avokado", price_modifier: 30, display_order: 8 },
+    { id: "ekstra-yumurta-kremali", option_group_id: "opt-tuzlu-ekstra-ic-malzeme", name: "Kremalı Çırpılmış Yumurta", price_modifier: 20, display_order: 9 },
+    { id: "ekstra-kasar", option_group_id: "opt-tuzlu-ekstra-ic-malzeme", name: "Kaşar Peyniri", price_modifier: 20, display_order: 10 },
+    { id: "ekstra-sogan", option_group_id: "opt-tuzlu-ekstra-ic-malzeme", name: "Karamelize Soğan", price_modifier: 15, display_order: 11 },
+    { id: "ekstra-kaburga", option_group_id: "opt-tuzlu-ekstra-ic-malzeme", name: "Dana Kaburga", price_modifier: 30, display_order: 12 },
+    { id: "ekstra-mozzarella", option_group_id: "opt-tuzlu-ekstra-ic-malzeme", name: "Mozzarella", price_modifier: 20, display_order: 13 },
+    { id: "ekstra-koz-salata", option_group_id: "opt-tuzlu-ekstra-ic-malzeme", name: "Köz Salata", price_modifier: 20, display_order: 14 },
+    { id: "ekstra-ezine", option_group_id: "opt-tuzlu-ekstra-ic-malzeme", name: "Ezine Peyniri", price_modifier: 20, display_order: 15 },
+    { id: "ekstra-yumurta-cirpilmis", option_group_id: "opt-tuzlu-ekstra-ic-malzeme", name: "Çırpılmış Yumurta", price_modifier: 15, display_order: 16 },
+    { id: "ekstra-sosis", option_group_id: "opt-tuzlu-ekstra-ic-malzeme", name: "Sosis", price_modifier: 25, display_order: 17 },
+    { id: "ekstra-cheddar", option_group_id: "opt-tuzlu-ekstra-ic-malzeme", name: "Cheddar", price_modifier: 20, display_order: 18 },
+  ],
+};
+
+const OPT_TUZLU_IKRAM_CAY: OptionGroup = {
+  id: "opt-tuzlu-ikram-cay",
+  name: "tuzlu_ikram_cay",
+  display_name: "İkram Çay",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "ikram-cay-istemiyorum", option_group_id: "opt-tuzlu-ikram-cay", name: "Çay İstemiyorum", price_modifier: 0, display_order: 1 },
+    { id: "ikram-cay-istiyorum", option_group_id: "opt-tuzlu-ikram-cay", name: "1 Adet Sıcak Çay (Ücretsiz İkram)", price_modifier: 0, display_order: 2 },
+  ],
+};
+
+const OPT_KAHVALTI_PORSIYON: OptionGroup = {
+  id: "opt-kahvalti-porsiyon",
+  name: "kahvalti_porsiyon",
+  display_name: "Porsiyon / Kişi Sayısı",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "kahvalti-1-kisi", option_group_id: "opt-kahvalti-porsiyon", name: "1 Kişilik", price_modifier: 0, display_order: 1 },
+    { id: "kahvalti-2-kisi", option_group_id: "opt-kahvalti-porsiyon", name: "2 Kişilik", price_modifier: 180, display_order: 2 },
+  ],
+};
+
+const OPT_KAHVALTI_KRUVASAN_1: OptionGroup = {
+  id: "opt-kahvalti-kruvasan-1",
+  name: "kahvalti_kruvasan_1",
+  display_name: "1. Kruvasan Seçimi",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "kruv1-sade", option_group_id: "opt-kahvalti-kruvasan-1", name: "Sade Kruvasan", price_modifier: 0, display_order: 1 },
+    { id: "kruv1-pain-chocolat", option_group_id: "opt-kahvalti-kruvasan-1", name: "Pain au Chocolat", price_modifier: 0, display_order: 2 },
+    { id: "kruv1-pain-suisse", option_group_id: "opt-kahvalti-kruvasan-1", name: "Pain Suisse", price_modifier: 0, display_order: 3 },
+  ],
+};
+
+const OPT_KAHVALTI_KRUVASAN_2: OptionGroup = {
+  id: "opt-kahvalti-kruvasan-2",
+  name: "kahvalti_kruvasan_2",
+  display_name: "2. Kruvasan Seçimi",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "kruv2-sade", option_group_id: "opt-kahvalti-kruvasan-2", name: "Sade Kruvasan", price_modifier: 0, display_order: 1 },
+    { id: "kruv2-pain-chocolat", option_group_id: "opt-kahvalti-kruvasan-2", name: "Pain au Chocolat", price_modifier: 0, display_order: 2 },
+    { id: "kruv2-pain-suisse", option_group_id: "opt-kahvalti-kruvasan-2", name: "Pain Suisse", price_modifier: 0, display_order: 3 },
+  ],
+};
+
+const OPT_KAHVALTI_IKRAM_CAY_1: OptionGroup = {
+  id: "opt-kahvalti-ikram-cay-1",
+  name: "kahvalti_ikram_cay_1",
+  display_name: "1. İkram Çay",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "cay1-istemiyorum", option_group_id: "opt-kahvalti-ikram-cay-1", name: "Çay İstemiyorum", price_modifier: 0, display_order: 1 },
+    { id: "cay1-istiyorum", option_group_id: "opt-kahvalti-ikram-cay-1", name: "1 Adet Sıcak Çay (Ücretsiz İkram)", price_modifier: 0, display_order: 2 },
+  ],
+};
+
+const OPT_KAHVALTI_IKRAM_CAY_2: OptionGroup = {
+  id: "opt-kahvalti-ikram-cay-2",
+  name: "kahvalti_ikram_cay_2",
+  display_name: "2. İkram Çay",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "cay2-istemiyorum", option_group_id: "opt-kahvalti-ikram-cay-2", name: "Çay İstemiyorum", price_modifier: 0, display_order: 1 },
+    { id: "cay2-istiyorum", option_group_id: "opt-kahvalti-ikram-cay-2", name: "1 Adet Sıcak Çay (Ücretsiz İkram)", price_modifier: 0, display_order: 2 },
+  ],
+};
+
+const WAFFLE_KOVA_BOYUT_SECIMI: OptionGroup = {
+  id: "opt-waffle-kova-boyut",
+  name: "waffle_kova_boyut",
+  display_name: "Porsiyon / Boyut Seçimi",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "waffle-boyut-kucuk", option_group_id: "opt-waffle-kova-boyut", name: "Küçük Boy", price_modifier: 0, display_order: 1 },
+    { id: "waffle-boyut-orta", option_group_id: "opt-waffle-kova-boyut", name: "Orta Boy", price_modifier: 80, display_order: 2 },
+    { id: "waffle-boyut-buyuk", option_group_id: "opt-waffle-kova-boyut", name: "Büyük Boy", price_modifier: 160, display_order: 3 },
+  ],
+};
+
+const OPT_SOS_SECIMI: OptionGroup = {
+  id: "opt-sos-secimi",
+  name: "sos_secimi",
+  display_name: "Sos Seçimi",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "sos-yok", option_group_id: "opt-sos-secimi", name: "Sos İstemiyorum", price_modifier: 0, display_order: 1 },
+    { id: "sos-guacamole", option_group_id: "opt-sos-secimi", name: "Guacamole", price_modifier: 0, display_order: 2 },
+    { id: "sos-haydari", option_group_id: "opt-sos-secimi", name: "Haydari", price_modifier: 0, display_order: 3 },
+    { id: "sos-noa", option_group_id: "opt-sos-secimi", name: "Noa Sos", price_modifier: 0, display_order: 4 },
+    { id: "sos-burger", option_group_id: "opt-sos-secimi", name: "Burger Sos", price_modifier: 0, display_order: 5 },
+    { id: "sos-cheddar", option_group_id: "opt-sos-secimi", name: "Cheddar Sos", price_modifier: 0, display_order: 6 },
+    { id: "sos-pesto", option_group_id: "opt-sos-secimi", name: "Pesto Sos", price_modifier: 0, display_order: 7 },
+    { id: "sos-mayonez", option_group_id: "opt-sos-secimi", name: "Mayonez", price_modifier: 0, display_order: 8 },
+    { id: "sos-tatli-aci", option_group_id: "opt-sos-secimi", name: "Tatlı Acı Sos", price_modifier: 0, display_order: 9 },
+  ],
+};
+
+const OPT_EKSTRA_SOS: OptionGroup = {
+  id: "opt-ekstra-sos",
+  name: "ekstra_sos",
+  display_name: "Ekstra Sos Seçimi",
+  is_required: false,
+  min_selection: 0,
+  max_selection: 99,
+  options: [
+    { id: "ekstra-sos-mayonez", option_group_id: "opt-ekstra-sos", name: "Mayonez", price_modifier: 10, display_order: 1 },
+    { id: "ekstra-sos-pesto", option_group_id: "opt-ekstra-sos", name: "Pesto Sos", price_modifier: 10, display_order: 2 },
+    { id: "ekstra-sos-noa", option_group_id: "opt-ekstra-sos", name: "Noa Sos", price_modifier: 10, display_order: 3 },
+    { id: "ekstra-sos-tatli-aci", option_group_id: "opt-ekstra-sos", name: "Tatlı Acı Sos", price_modifier: 15, display_order: 4 },
+    { id: "ekstra-sos-haydari", option_group_id: "opt-ekstra-sos", name: "Haydari", price_modifier: 15, display_order: 5 },
+    { id: "ekstra-sos-burger", option_group_id: "opt-ekstra-sos", name: "Burger Sos", price_modifier: 15, display_order: 6 },
+    { id: "ekstra-sos-cheddar", option_group_id: "opt-ekstra-sos", name: "Cheddar Sos", price_modifier: 15, display_order: 7 },
+    { id: "ekstra-sos-guacamole", option_group_id: "opt-ekstra-sos", name: "Guacamole", price_modifier: 15, display_order: 8 },
+  ],
+};
+
+const OPT_ESPRESSO_SHOT: OptionGroup = {
+  id: "opt-espresso-shot",
+  name: "espresso_shot",
+  display_name: "Espresso Seçimi",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "opt-espresso-single", option_group_id: "opt-espresso-shot", name: "Single Shot", price_modifier: 0, display_order: 1, is_default: true },
+    { id: "opt-espresso-double", option_group_id: "opt-espresso-shot", name: "Double Shot", price_modifier: 20, display_order: 2 },
+  ],
+};
+
+const OPT_CAY_BOYUT: OptionGroup = {
+  id: "opt-cay-boyut",
+  name: "cay_boyut",
+  display_name: "Bardak / Porsiyon Seçimi",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "opt-cay-kucuk", option_group_id: "opt-cay-boyut", name: "Küçük Çay", price_modifier: 0, display_order: 1, is_default: true },
+    { id: "opt-cay-buyuk", option_group_id: "opt-cay-boyut", name: "Büyük Çay (Fincan)", price_modifier: 40, display_order: 2 },
+  ],
+};
+
+const OPT_TAMEK_CESIT: OptionGroup = {
+  id: "opt-tamek-cesit",
+  name: "tamek_cesit",
+  display_name: "Meyve Suyu Çeşidi",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "tamek-seftali", option_group_id: "opt-tamek-cesit", name: "Şeftali", price_modifier: 0, display_order: 1, is_default: true },
+    { id: "tamek-visne", option_group_id: "opt-tamek-cesit", name: "Vişne", price_modifier: 0, display_order: 2 },
+    { id: "tamek-karisik", option_group_id: "opt-tamek-cesit", name: "Karışık", price_modifier: 0, display_order: 3 },
+  ],
+};
+
+const OPT_FRUTTI_CESIT: OptionGroup = {
+  id: "opt-frutti-cesit",
+  name: "frutti_cesit",
+  display_name: "Aroma Seçimi",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "frutti-karpuz-cilek", option_group_id: "opt-frutti-cesit", name: "Karpuz & Çilek", price_modifier: 0, display_order: 1, is_default: true },
+    { id: "frutti-elma", option_group_id: "opt-frutti-cesit", name: "Elma", price_modifier: 0, display_order: 2 },
+    { id: "frutti-limon", option_group_id: "opt-frutti-cesit", name: "Limon", price_modifier: 0, display_order: 3 },
+  ],
+};
+
+const OPT_FRUTTI_EXTRA_CESIT: OptionGroup = {
+  id: "opt-frutti-extra-cesit",
+  name: "frutti_extra_cesit",
+  display_name: "Aroma Seçimi",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "extra-yesil-limon", option_group_id: "opt-frutti-extra-cesit", name: "Yeşil Limonlu", price_modifier: 0, display_order: 1, is_default: true },
+    { id: "extra-kavun", option_group_id: "opt-frutti-extra-cesit", name: "Kavunlu", price_modifier: 0, display_order: 2 },
+    { id: "extra-orman-meyveli", option_group_id: "opt-frutti-extra-cesit", name: "Orman Meyveli", price_modifier: 0, display_order: 3 },
+    { id: "extra-mandalina", option_group_id: "opt-frutti-extra-cesit", name: "Mandalina", price_modifier: 0, display_order: 4 },
+  ],
+};
+
+const OPT_FUSE_TEA_CESIT: OptionGroup = {
+  id: "opt-fuse-tea-cesit",
+  name: "fuse_tea_cesit",
+  display_name: "Aroma Seçimi",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "fuse-limon", option_group_id: "opt-fuse-tea-cesit", name: "Limon", price_modifier: 0, display_order: 1, is_default: true },
+    { id: "fuse-seftali", option_group_id: "opt-fuse-tea-cesit", name: "Şeftali", price_modifier: 0, display_order: 2 },
+    { id: "fuse-kavun-cilek", option_group_id: "opt-fuse-tea-cesit", name: "Kavun & Çilek", price_modifier: 0, display_order: 3 },
+    { id: "fuse-karpuz", option_group_id: "opt-fuse-tea-cesit", name: "Karpuz", price_modifier: 0, display_order: 4 },
+    { id: "fuse-mango-ananas", option_group_id: "opt-fuse-tea-cesit", name: "Mango & Ananas", price_modifier: 0, display_order: 5 },
+  ],
+};
+
+// --- YANINDA İYİ GİDER EŞLEŞTİRMELERİ (HER ÜRÜNE ÖZEL FARKLI VE MANTIKSAL ÖNERİLER) ---
+function makePairing(id: string, options: Array<{ id: string; name: string; price: number }>): OptionGroup {
+  return {
+    id: `opt-pairing-${id}`,
+    name: "yaninda_iyi_gider",
+    display_name: "Yanında İyi Gider",
+    is_required: false,
+    min_selection: 0,
+    max_selection: 99,
+    options: options.map((opt, idx) => ({
+      id: `pair-${id}-${opt.id}`,
+      option_group_id: `opt-pairing-${id}`,
+      name: opt.name,
+      price_modifier: opt.price,
+      display_order: idx + 1,
+    })),
+  };
+}
+
+// 1. Tatlı & Çikolatalı Ürünler İçin Farklılaştırılmış Eşleştirmeler
+const PAIRING_ANTEP_FISTIKLI = makePairing("antep-fistikli", [
+  { id: "caramel-macchiato", name: "Caramel Macchiato", price: 160 },
+  { id: "iced-latte", name: "Iced Latte", price: 125 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+  { id: "limonata", name: "El Yapımı Limonata", price: 110 },
+]);
+
+const PAIRING_CILEKLI_NUTELLA = makePairing("cilekli-nutella", [
+  { id: "iced-white-chocolate-mocha", name: "Iced White Chocolate Mocha", price: 170 },
+  { id: "vanilla-latte", name: "Vanilla Latte", price: 160 },
+  { id: "limonata", name: "El Yapımı Limonata", price: 110 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_CILEKLI_KREMALI = makePairing("cilekli-kremali", [
+  { id: "caramel-latte", name: "Caramel Latte", price: 160 },
+  { id: "cilekli-limonata", name: "El Yapımı Çilekli Limonata", price: 125 },
+  { id: "turbo", name: "NOA Turbo", price: 240 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_LOTUS = makePairing("lotus", [
+  { id: "iced-caramel-macchiato", name: "Iced Caramel Macchiato", price: 170 },
+  { id: "white-chocolate-mocha", name: "White Chocolate Mocha", price: 160 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+  { id: "dizel", name: "Dizel", price: 120 },
+]);
+
+const PAIRING_ORMAN_MEYVELI = makePairing("orman-meyveli", [
+  { id: "iced-mocha", name: "Iced Mocha", price: 170 },
+  { id: "benzin", name: "Benzin", price: 120 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+  { id: "vanilla-latte", name: "Vanilla Latte", price: 160 },
+]);
+
+const PAIRING_MINI_KRUVASAN = makePairing("mini-kruvasan", [
+  { id: "caramel-latte", name: "Caramel Latte", price: 160 },
+  { id: "cay", name: "Çay", price: 40 },
+  { id: "cilekli-limonata", name: "El Yapımı Çilekli Limonata", price: 125 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_SADE_KRUVASAN = makePairing("sade-kruvasan", [
+  { id: "iced-caramel-macchiato", name: "Iced Caramel Macchiato", price: 170 },
+  { id: "white-chocolate-mocha", name: "White Chocolate Mocha", price: 160 },
+  { id: "cay", name: "Çay", price: 40 },
+  { id: "cilekli-limonata", name: "El Yapımı Çilekli Limonata", price: 125 },
+]);
+
+// 2. Twissy Grubu
+const PAIRING_ANTEP_TWISSY = makePairing("antep-twissy", [
+  { id: "iced-white-chocolate-mocha", name: "Iced White Chocolate Mocha", price: 170 },
+  { id: "full-depo", name: "NOA Full Depo", price: 260 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+  { id: "flat-white", name: "Flat White", price: 140 },
+]);
+
+const PAIRING_LIMONLU_TWISSY = makePairing("limonlu-twissy", [
+  { id: "iced-vanilla-latte", name: "Iced Vanilla Latte", price: 170 },
+  { id: "limonata", name: "El Yapımı Limonata", price: 110 },
+  { id: "cay", name: "Çay", price: 40 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_CIKOLATALI_TWISSY = makePairing("cikolatali-twissy", [
+  { id: "caramel-macchiato", name: "Caramel Macchiato", price: 160 },
+  { id: "cilekli-limonata", name: "El Yapımı Çilekli Limonata", price: 125 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+  { id: "mocha", name: "Mocha", price: 160 },
+]);
+
+// 3. Danish Grubu
+const PAIRING_YABAN_DANISH = makePairing("yaban-danish", [
+  { id: "vanilla-latte", name: "Vanilla Latte", price: 160 },
+  { id: "limonata", name: "El Yapımı Limonata", price: 110 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+  { id: "iced-caramel-macchiato", name: "Iced Caramel Macchiato", price: 170 },
+]);
+
+const PAIRING_LIMONLU_DANISH = makePairing("limonlu-danish", [
+  { id: "iced-vanilla-latte", name: "Iced Vanilla Latte", price: 170 },
+  { id: "dizel", name: "Dizel", price: 120 },
+  { id: "cay", name: "Çay", price: 40 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_FRAMBUAZ_DANISH = makePairing("frambuaz-danish", [
+  { id: "white-chocolate-mocha", name: "White Chocolate Mocha", price: 160 },
+  { id: "cilekli-limonata", name: "El Yapımı Çilekli Limonata", price: 125 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+  { id: "iced-caramel-latte", name: "Iced Caramel Latte", price: 170 },
+]);
+
+const PAIRING_ORMAN_DANISH = makePairing("orman-danish", [
+  { id: "iced-mocha", name: "Iced Mocha", price: 170 },
+  { id: "benzin", name: "Benzin", price: 120 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+  { id: "caramel-macchiato", name: "Caramel Macchiato", price: 160 },
+]);
+
+const PAIRING_CILEK_DANISH = makePairing("cilek-danish", [
+  { id: "iced-white-chocolate-mocha", name: "Iced White Chocolate Mocha", price: 170 },
+  { id: "limonata", name: "El Yapımı Limonata", price: 110 },
+  { id: "cay", name: "Çay", price: 40 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_MANGO_DANISH = makePairing("mango-danish", [
+  { id: "turbo", name: "NOA Turbo", price: 240 },
+  { id: "iced-caramel-macchiato", name: "Iced Caramel Macchiato", price: 170 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+  { id: "vanilla-latte", name: "Vanilla Latte", price: 160 },
+]);
+
+// 4. Roll Grubu
+const PAIRING_SUTLU_ROLL = makePairing("sutlu-roll", [
+  { id: "iced-caramel-latte", name: "Iced Caramel Latte", price: 170 },
+  { id: "cilekli-limonata", name: "El Yapımı Çilekli Limonata", price: 125 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+  { id: "mocha", name: "Mocha", price: 160 },
+]);
+
+const PAIRING_BITTER_ROLL = makePairing("bitter-roll", [
+  { id: "white-chocolate-mocha", name: "White Chocolate Mocha", price: 160 },
+  { id: "iced-vanilla-latte", name: "Iced Vanilla Latte", price: 170 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+  { id: "limonata", name: "El Yapımı Limonata", price: 110 },
+]);
+
+const PAIRING_BEYAZ_ROLL = makePairing("beyaz-roll", [
+  { id: "iced-mocha", name: "Iced Mocha", price: 170 },
+  { id: "limonata", name: "El Yapımı Limonata", price: 110 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+  { id: "caramel-macchiato", name: "Caramel Macchiato", price: 160 },
+]);
+
+// 5. Küp Grubu
+const PAIRING_SUTLU_KUP = makePairing("sutlu-kup", [
+  { id: "caramel-macchiato", name: "Caramel Macchiato", price: 160 },
+  { id: "noa-full-depo", name: "NOA Full Depo", price: 260 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+  { id: "iced-white-chocolate-mocha", name: "Iced White Chocolate Mocha", price: 170 },
+]);
+
+const PAIRING_BITTER_KUP = makePairing("bitter-kup", [
+  { id: "iced-vanilla-latte", name: "Iced Vanilla Latte", price: 170 },
+  { id: "white-chocolate-mocha", name: "White Chocolate Mocha", price: 160 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+  { id: "cilekli-limonata", name: "El Yapımı Çilekli Limonata", price: 125 },
+]);
+
+const PAIRING_BEYAZ_KUP = makePairing("beyaz-kup", [
+  { id: "iced-mocha", name: "Iced Mocha", price: 170 },
+  { id: "cilekli-limonata", name: "El Yapımı Çilekli Limonata", price: 125 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+  { id: "dizel", name: "Dizel", price: 120 },
+]);
+
+// 6. Amora Grubu
+const PAIRING_SUTLU_AMORA = makePairing("sutlu-amora", [
+  { id: "caramel-latte", name: "Caramel Latte", price: 160 },
+  { id: "turbo", name: "NOA Turbo", price: 240 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+  { id: "iced-caramel-macchiato", name: "Iced Caramel Macchiato", price: 170 },
+]);
+
+const PAIRING_BITTER_AMORA = makePairing("bitter-amora", [
+  { id: "white-chocolate-mocha", name: "White Chocolate Mocha", price: 160 },
+  { id: "limonata", name: "El Yapımı Limonata", price: 110 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+  { id: "iced-vanilla-latte", name: "Iced Vanilla Latte", price: 170 },
+]);
+
+const PAIRING_BEYAZ_AMORA = makePairing("beyaz-amora", [
+  { id: "iced-mocha", name: "Iced Mocha", price: 170 },
+  { id: "cilekli-limonata", name: "El Yapımı Çilekli Limonata", price: 125 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+  { id: "caramel-macchiato", name: "Caramel Macchiato", price: 160 },
+]);
+
+// 7. Cheesecake Grubu (Her ürün için özel)
+const PAIRING_SAN_SEBASTIAN_DILIM = makePairing("san-sebastian-dilim", [
+  { id: "iced-caramel-macchiato", name: "Iced Caramel Macchiato", price: 170 },
+  { id: "white-chocolate-mocha", name: "White Chocolate Mocha", price: 160 },
+  { id: "limonata", name: "El Yapımı Limonata", price: 110 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_SAN_SEBASTIAN_BUTUN = makePairing("san-sebastian-butun", [
+  { id: "full-depo", name: "NOA Full Depo", price: 260 },
+  { id: "caramel-latte", name: "Caramel Latte", price: 160 },
+  { id: "cilekli-limonata", name: "El Yapımı Çilekli Limonata", price: 125 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_LIMONLU_CHEESECAKE_DILIM = makePairing("limonlu-cheesecake-dilim", [
+  { id: "iced-vanilla-latte", name: "Iced Vanilla Latte", price: 170 },
+  { id: "white-chocolate-mocha", name: "White Chocolate Mocha", price: 160 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+  { id: "cay", name: "Çay", price: 40 },
+]);
+
+const PAIRING_LIMONLU_CHEESECAKE_BUTUN = makePairing("limonlu-cheesecake-butun", [
+  { id: "turbo", name: "NOA Turbo", price: 240 },
+  { id: "iced-caramel-macchiato", name: "Iced Caramel Macchiato", price: 170 },
+  { id: "limonata", name: "El Yapımı Limonata", price: 110 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_LOTUSLU_CHEESECAKE_DILIM = makePairing("lotuslu-cheesecake-dilim", [
+  { id: "iced-caramel-macchiato", name: "Iced Caramel Macchiato", price: 170 },
+  { id: "vanilla-latte", name: "Vanilla Latte", price: 160 },
+  { id: "dizel", name: "Dizel", price: 120 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_LOTUSLU_CHEESECAKE_BUTUN = makePairing("lotuslu-cheesecake-butun", [
+  { id: "full-depo", name: "NOA Full Depo", price: 260 },
+  { id: "caramel-latte", name: "Caramel Latte", price: 160 },
+  { id: "white-chocolate-mocha", name: "White Chocolate Mocha", price: 160 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+// 8. Waffle Grubu
+const PAIRING_BARDAKTA_WAFFLE = makePairing("bardakta-waffle", [
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+  { id: "iced-caramel-macchiato", name: "Iced Caramel Macchiato", price: 170 },
+  { id: "white-chocolate-mocha", name: "White Chocolate Mocha", price: 160 },
+  { id: "limonata", name: "El Yapımı Limonata", price: 110 },
+]);
+
+const PAIRING_KOVADA_WAFFLE = makePairing("kovada-waffle", [
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+  { id: "turbo", name: "NOA Turbo", price: 240 },
+  { id: "cilekli-limonata", name: "El Yapımı Çilekli Limonata", price: 125 },
+  { id: "iced-vanilla-latte", name: "Iced Vanilla Latte", price: 170 },
+]);
+
+// 9. Tuzlu Kruvasanlar (Çay ikram verildiği için ferahlatıcı içecekler ve tatlı kapanışlar)
+const PAIRING_YESIL_LEZZET = makePairing("yesil-lezzet", [
+  { id: "limonata", name: "El Yapımı Limonata", price: 110 },
+  { id: "benzin", name: "Benzin", price: 120 },
+  { id: "iced-vanilla-latte", name: "Iced Vanilla Latte", price: 170 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_PESTO_MILANO = makePairing("pesto-milano", [
+  { id: "limonata", name: "El Yapımı Limonata", price: 110 },
+  { id: "dizel", name: "Dizel", price: 120 },
+  { id: "iced-caramel-latte", name: "Iced Caramel Latte", price: 170 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_EGE_ESINTISI = makePairing("ege-esintisi", [
+  { id: "limonata", name: "El Yapımı Limonata", price: 110 },
+  { id: "vanilla-latte", name: "Vanilla Latte", price: 160 },
+  { id: "benzin", name: "Benzin", price: 120 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_AVOKADO_ROYALE = makePairing("avokado-royale", [
+  { id: "caramel-macchiato", name: "Caramel Macchiato", price: 160 },
+  { id: "limonata", name: "El Yapımı Limonata", price: 110 },
+  { id: "dizel", name: "Dizel", price: 120 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_KABURGA_DELUXE = makePairing("kaburga-deluxe", [
+  { id: "benzin", name: "Benzin", price: 120 },
+  { id: "dizel", name: "Dizel", price: 120 },
+  { id: "limonata", name: "El Yapımı Limonata", price: 110 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_KOZLU_PEYNIR = makePairing("kozlu-peynir", [
+  { id: "limonata", name: "El Yapımı Limonata", price: 110 },
+  { id: "iced-caramel-latte", name: "Iced Caramel Latte", price: 170 },
+  { id: "benzin", name: "Benzin", price: 120 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_HOT_DOG = makePairing("hot-dog", [
+  { id: "benzin", name: "Benzin", price: 120 },
+  { id: "limonata", name: "El Yapımı Limonata", price: 110 },
+  { id: "turbo", name: "NOA Turbo", price: 240 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+// 10. NOA Özel Menüler (Kahvaltı Tabağı & Kendin Oluştur)
+const PAIRING_KAHVALTI_TABAGI = makePairing("kahvalti-tabagi", [
+  { id: "cilekli-limonata", name: "El Yapımı Çilekli Limonata", price: 125 },
+  { id: "limonata", name: "El Yapımı Limonata", price: 110 },
+  { id: "caramel-latte", name: "Caramel Latte", price: 160 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_NOA_MENULER = makePairing("noa-menuler", [
+  { id: "cilekli-limonata", name: "El Yapımı Çilekli Limonata", price: 125 },
+  { id: "turbo", name: "NOA Turbo", price: 240 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+  { id: "iced-caramel-macchiato", name: "Iced Caramel Macchiato", price: 170 },
+]);
+
+// 11. Özel İçecekler (Full Depo, Turbo, Benzin, Dizel, Limonatalar)
+const PAIRING_NOA_FULL_DEPO = makePairing("full-depo", [
+  { id: "sade-kruvasan", name: "Sade Kruvasan", price: 150 },
+  { id: "antep-fistikli", name: "Antep Fıstıklı Kruvasan", price: 350 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_NOA_TURBO = makePairing("turbo", [
+  { id: "sade-kruvasan", name: "Sade Kruvasan", price: 150 },
+  { id: "cilekli-nutella", name: "Çilekli Muzlu Nutellalı Kruvasan", price: 350 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_BENZIN = makePairing("benzin", [
+  { id: "sade-kruvasan", name: "Sade Kruvasan", price: 150 },
+  { id: "cilek-danish", name: "Çilekli Danish", price: 220 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_DIZEL = makePairing("dizel", [
+  { id: "sade-kruvasan", name: "Sade Kruvasan", price: 150 },
+  { id: "lotus", name: "Lotuslu Kruvasan", price: 350 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_LIMONATA_CILEKLI = makePairing("cilekli-limonata", [
+  { id: "sade-kruvasan", name: "Sade Kruvasan", price: 150 },
+  { id: "cilekli-kremali", name: "Çilekli Muzlu Kremalı Kruvasan", price: 320 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_LIMONATA_KLASIK = makePairing("limonata", [
+  { id: "sade-kruvasan", name: "Sade Kruvasan", price: 150 },
+  { id: "san-sebastian-dilim", name: "San Sebastian Cheesecake (Dilim)", price: 290 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_NAR_SUYU = makePairing("nar-suyu", [
+  { id: "sade-kruvasan", name: "Sade Kruvasan", price: 150 },
+  { id: "antep-twissy", name: "Antep Fıstıklı Twissy", price: 240 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+// 12. Sıcak & Soğuk Kahveler
+const PAIRING_KAHVELER = makePairing("kahve", [
+  { id: "sade-kruvasan", name: "Sade Kruvasan", price: 150 },
+  { id: "cilekli-nutella", name: "Çilekli Muzlu Nutellalı Kruvasan", price: 350 },
+  { id: "antep-fistikli", name: "Antep Fıstıklı Kruvasan", price: 350 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_ESPRESSO = makePairing("espresso", [
+  { id: "sade-kruvasan", name: "Sade Kruvasan", price: 150 },
+  { id: "dondurma", name: "1 Top Dondurma (Affogato)", price: 75 },
+  { id: "san-sebastian-dilim", name: "San Sebastian Cheesecake (Dilim)", price: 290 },
+]);
+
+const PAIRING_FLAT_WHITE = makePairing("flat-white", [
+  { id: "sade-kruvasan", name: "Sade Kruvasan", price: 150 },
+  { id: "antep-fistikli", name: "Antep Fıstıklı Kruvasan", price: 350 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_LATTE = makePairing("latte", [
+  { id: "sade-kruvasan", name: "Sade Kruvasan", price: 150 },
+  { id: "cilekli-kremali", name: "Çilekli Muzlu Kremalı Kruvasan", price: 320 },
+  { id: "lotus", name: "Lotuslu Kruvasan", price: 350 },
+]);
+
+const PAIRING_CAPPUCCINO = makePairing("cappuccino", [
+  { id: "sade-kruvasan", name: "Sade Kruvasan", price: 150 },
+  { id: "orman-meyveli", name: "Orman Meyveli Kruvasan", price: 370 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+const PAIRING_AMERICANO = makePairing("americano", [
+  { id: "sade-kruvasan", name: "Sade Kruvasan", price: 150 },
+  { id: "san-sebastian-dilim", name: "San Sebastian Cheesecake (Dilim)", price: 290 },
+  { id: "cilekli-nutella", name: "Çilekli Muzlu Nutellalı Kruvasan", price: 350 },
+]);
+
+// 13. Çaylar
+const PAIRING_CAYLAR = makePairing("cay", [
+  { id: "sade-kruvasan", name: "Sade Kruvasan", price: 150 },
+  { id: "san-sebastian-dilim", name: "San Sebastian Cheesecake (Dilim)", price: 290 },
+  { id: "limonlu-danish", name: "Limonlu Danish", price: 220 },
+]);
+
+// 14. Soft İçecekler
+const PAIRING_SOFT = makePairing("soft", [
+  { id: "sade-kruvasan", name: "Sade Kruvasan", price: 150 },
+  { id: "mini-kruvasan", name: "Mini Kruvasan Tabağı", price: 470 },
+  { id: "dondurma", name: "1 Top Dondurma", price: 75 },
+]);
+
+// 15. Dondurma
+const PAIRING_DONDURMA = makePairing("dondurma", [
+  { id: "sade-kruvasan", name: "Sade Kruvasan", price: 150 },
+  { id: "espresso", name: "Espresso (Affogato İçin)", price: 100 },
+  { id: "cay", name: "Çay", price: 40 },
+]);
+
+// --- YEMEKSEPETI RESMİ İKİLİ MENÜ ÜRÜN SEÇİM OPSİYONLARI ---
+const OPT_IKILI_TATLI_SECIMI: OptionGroup = {
+  id: "opt-ikili-tatli-secimi",
+  name: "ikili_tatli_secimi",
+  display_name: "Tatlı Kruvasan Seçimi",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "ikili-antep-fistikli", option_group_id: "opt-ikili-tatli-secimi", name: "Antep Fıstıklı Kruvasan", price_modifier: 0, display_order: 1 },
+    { id: "ikili-cilekli-nutella", option_group_id: "opt-ikili-tatli-secimi", name: "Çilekli Muzlu Nutellalı Kruvasan", price_modifier: 0, display_order: 2 },
+    { id: "ikili-cilekli-kremali", option_group_id: "opt-ikili-tatli-secimi", name: "Çilekli Muzlu Kremalı Kruvasan", price_modifier: 0, display_order: 3 },
+    { id: "ikili-lotus", option_group_id: "opt-ikili-tatli-secimi", name: "Lotuslu Kruvasan", price_modifier: 0, display_order: 4 },
+    { id: "ikili-antep-twissy", option_group_id: "opt-ikili-tatli-secimi", name: "Antep Fıstıklı Twissy", price_modifier: 0, display_order: 5 },
+    { id: "ikili-limon-twissy", option_group_id: "opt-ikili-tatli-secimi", name: "Limonlu Twissy", price_modifier: 0, display_order: 6 },
+    { id: "ikili-cikolata-twissy", option_group_id: "opt-ikili-tatli-secimi", name: "Sütlü Belçika Çikolatalı Twissy", price_modifier: 0, display_order: 7 },
+    { id: "ikili-yaban-danish", option_group_id: "opt-ikili-tatli-secimi", name: "Yaban Mersinli Danish", price_modifier: 0, display_order: 8 },
+    { id: "ikili-limon-danish", option_group_id: "opt-ikili-tatli-secimi", name: "Limonlu Danish", price_modifier: 0, display_order: 9 },
+    { id: "ikili-orman-danish", option_group_id: "opt-ikili-tatli-secimi", name: "Orman Meyveli Danish", price_modifier: 0, display_order: 10 },
+    { id: "ikili-cilek-danish", option_group_id: "opt-ikili-tatli-secimi", name: "Çilekli Danish", price_modifier: 0, display_order: 11 },
+    { id: "ikili-mango-danish", option_group_id: "opt-ikili-tatli-secimi", name: "Mangolu Danish", price_modifier: 0, display_order: 12 },
+    { id: "ikili-frambuaz-danish", option_group_id: "opt-ikili-tatli-secimi", name: "Frambuazlı Danish", price_modifier: 0, display_order: 13 },
+    { id: "ikili-sutlu-roll", option_group_id: "opt-ikili-tatli-secimi", name: "Sütlü Belçika Çikolatalı Roll Kruvasan", price_modifier: 40, display_order: 14 },
+    { id: "ikili-bitter-roll", option_group_id: "opt-ikili-tatli-secimi", name: "Bitter Belçika Çikolatalı Roll Kruvasan", price_modifier: 40, display_order: 15 },
+    { id: "ikili-beyaz-roll", option_group_id: "opt-ikili-tatli-secimi", name: "Beyaz Belçika Çikolatalı Roll Kruvasan", price_modifier: 40, display_order: 16 },
+    { id: "ikili-sutlu-kup", option_group_id: "opt-ikili-tatli-secimi", name: "Sütlü Belçika Çikolatalı Küp Kruvasan", price_modifier: 40, display_order: 17 },
+    { id: "ikili-bitter-kup", option_group_id: "opt-ikili-tatli-secimi", name: "Bitter Belçika Çikolatalı Küp Kruvasan", price_modifier: 40, display_order: 18 },
+    { id: "ikili-beyaz-kup", option_group_id: "opt-ikili-tatli-secimi", name: "Beyaz Belçika Çikolatalı Küp Kruvasan", price_modifier: 40, display_order: 19 },
+    { id: "ikili-sutlu-amora", option_group_id: "opt-ikili-tatli-secimi", name: "Sütlü Belçika Çikolatalı Amora", price_modifier: 40, display_order: 20 },
+    { id: "ikili-bitter-amora", option_group_id: "opt-ikili-tatli-secimi", name: "Bitter Belçika Çikolatalı Amora", price_modifier: 40, display_order: 21 },
+    { id: "ikili-beyaz-amora", option_group_id: "opt-ikili-tatli-secimi", name: "Beyaz Belçika Çikolatalı Amora", price_modifier: 40, display_order: 22 },
+  ],
+};
+
+const OPT_IKILI_TUZLU_SECIMI: OptionGroup = {
+  id: "opt-ikili-tuzlu-secimi",
+  name: "ikili_tuzlu_secimi",
+  display_name: "Tuzlu Kruvasan Seçimi",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "ikili-kozlu-peynirli", option_group_id: "opt-ikili-tuzlu-secimi", name: "Közlü Peynir Kruvasan", price_modifier: 0, display_order: 1 },
+    { id: "ikili-hot-dog", option_group_id: "opt-ikili-tuzlu-secimi", name: "Hot Dog Kruvasan", price_modifier: 0, display_order: 2 },
+    { id: "ikili-yesil-lezzet", option_group_id: "opt-ikili-tuzlu-secimi", name: "Yeşil Lezzet Kruvasan", price_modifier: 10, display_order: 3 },
+    { id: "ikili-pesto-milano", option_group_id: "opt-ikili-tuzlu-secimi", name: "Pesto Milano Kruvasan", price_modifier: 10, display_order: 4 },
+    { id: "ikili-ege-esintisi", option_group_id: "opt-ikili-tuzlu-secimi", name: "Ege Esintisi Kruvasan", price_modifier: 30, display_order: 5 },
+    { id: "ikili-avokado-royale", option_group_id: "opt-ikili-tuzlu-secimi", name: "Avokado Royale Kruvasan", price_modifier: 30, display_order: 6 },
+    { id: "ikili-kaburga-deluxe", option_group_id: "opt-ikili-tuzlu-secimi", name: "Kaburga Deluxe Kruvasan", price_modifier: 30, display_order: 7 },
+  ],
+};
+
+const OPT_ROLL_SECIMI: OptionGroup = {
+  id: "opt-roll-secimi",
+  name: "roll_secimi",
+  display_name: "Roll Kruvasan Seçimi",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "roll-opt-sutlu", option_group_id: "opt-roll-secimi", name: "Sütlü Belçika Çikolatalı Roll Kruvasan", price_modifier: 0, display_order: 1 },
+    { id: "roll-opt-bitter", option_group_id: "opt-roll-secimi", name: "Bitter Belçika Çikolatalı Roll Kruvasan", price_modifier: 0, display_order: 2 },
+    { id: "roll-opt-beyaz", option_group_id: "opt-roll-secimi", name: "Beyaz Belçika Çikolatalı Roll Kruvasan", price_modifier: 0, display_order: 3 },
+  ],
+};
+
+const OPT_KUP_SECIMI: OptionGroup = {
+  id: "opt-kup-secimi",
+  name: "kup_secimi",
+  display_name: "Küp Kruvasan Seçimi",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "kup-opt-sutlu", option_group_id: "opt-kup-secimi", name: "Sütlü Belçika Çikolatalı Küp Kruvasan", price_modifier: 0, display_order: 1 },
+    { id: "kup-opt-bitter", option_group_id: "opt-kup-secimi", name: "Bitter Belçika Çikolatalı Küp Kruvasan", price_modifier: 0, display_order: 2 },
+    { id: "kup-opt-beyaz", option_group_id: "opt-kup-secimi", name: "Beyaz Belçika Çikolatalı Küp Kruvasan", price_modifier: 0, display_order: 3 },
+  ],
+};
+
+const OPT_NOA_SPECIAL_ICECEK_BASE: OptionGroup = {
+  id: "opt-noa-special-icecek",
+  name: "noa_special_icecek",
+  display_name: "NOA Special İçecek",
+  is_required: true,
+  min_selection: 1,
+  max_selection: 1,
+  options: [
+    { id: "icecek-benzin", option_group_id: "opt-noa-special-icecek", name: "NOA Benzin", price_modifier: 0, display_order: 1 },
+    { id: "icecek-dizel", option_group_id: "opt-noa-special-icecek", name: "NOA Dizel", price_modifier: 0, display_order: 2 },
+    { id: "icecek-turbo", option_group_id: "opt-noa-special-icecek", name: "NOA Turbo", price_modifier: 0, display_order: 3 },
+    { id: "icecek-cilekli-limonata", option_group_id: "opt-noa-special-icecek", name: "El Yapımı Çilekli Limonata", price_modifier: 0, display_order: 4 },
+    { id: "icecek-limonata", option_group_id: "opt-noa-special-icecek", name: "El Yapımı Limonata", price_modifier: 0, display_order: 5 },
+  ],
+};
+
+function cloneOptionGroup(group: OptionGroup, prefix: string, prefixTitle: string): OptionGroup {
+  return {
+    ...group,
+    id: `${prefix}-${group.id}`,
+    name: `${prefix}_${group.name}`,
+    display_name: `${prefixTitle} Seçimi`,
+    options: group.options.map((opt) => ({
+      ...opt,
+      id: `${prefix}-${opt.id}`,
+      option_group_id: `${prefix}-${group.id}`,
+    })),
+  };
+}
+
+export const INITIAL_PRODUCTS: Product[] = [
+  // --- KLASİK TATLI KRUVASANLAR ---
+  {
+    id: "prod-antep-fistikli",
+    category_id: "cat-klasik",
+    name: "Antep Fıstıklı Kruvasan",
+    slug: "antep-fistikli",
+    description: "Kat kat çıtır kruvasan; yoğun Antep fıstığı kreması ve Antep fıstığı parçalarıyla hazırlanır. Günlük taze olarak sunulur.",
+    base_price: 350,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("antep-fistikli"),
+    display_order: 1,
+    card_density: "large",
+    option_groups: [PAIRING_ANTEP_FISTIKLI],
+  },
+  {
+    id: "prod-cilekli-muzlu-nutella",
+    category_id: "cat-klasik",
+    name: "Çilekli Muzlu Nutellalı Kruvasan",
+    slug: "cilekli-muzlu-nutella",
+    description: "Kat kat çıtır kruvasan; taze çilek ve muz dilimleri, bol akışkan Nutella ve çikolata soslarıyla hazırlanır. Günlük taze olarak sunulur.",
+    base_price: 320,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("cilekli-muzlu-nutella"),
+    display_order: 2,
+    card_density: "large",
+    option_groups: [PAIRING_CILEKLI_NUTELLA],
+  },
+  {
+    id: "prod-cilekli-muzlu-kremali",
+    category_id: "cat-klasik",
+    name: "Çilekli Muzlu Kremalı Kruvasan",
+    slug: "cilekli-muzlu-kremali",
+    description: "Kat kat çıtır kruvasan; hafif pastacı kreması, taze çilek ve muz dilimleri, sütlü ve beyaz Belçika çikolatası soslarıyla hazırlanır.",
+    base_price: 320,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("cilekli-muzlu-kremali"),
+    display_order: 3,
+    card_density: "large",
+    option_groups: [PAIRING_CILEKLI_KREMALI],
+  },
+  {
+    id: "prod-lotus-cruffin",
+    category_id: "cat-klasik",
+    name: "Lotuslu Kruvasan",
+    slug: "lotus-cruffin",
+    description: "Kat kat çıtır kruvasan; yoğun Lotus Biscoff kreması ve karamelize bisküvi parçalarıyla hazırlanır. Günlük taze olarak sunulur.",
+    base_price: 350,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("lotus-cruffin"),
+    display_order: 4,
+    card_density: "large",
+    option_groups: [PAIRING_LOTUS],
+  },
+  {
+    id: "prod-orman-meyveli-kruvasan",
+    category_id: "cat-klasik",
+    name: "Orman Meyveli Kruvasan",
+    slug: "orman-meyveli-kruvasan",
+    description: "Taze böğürtlen, yaban mersini, ahududu, ipeksi pastacı kreması ve Belçika çikolatasıyla.",
+    base_price: 370,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("orman-meyveli-kruvasan"),
+    display_order: 5,
+    card_density: "large",
+    option_groups: [PAIRING_ORMAN_MEYVELI],
+  },
+  {
+    id: "prod-mini-kruvasan",
+    category_id: "cat-klasik",
+    name: "Mini Kruvasan Tabağı",
+    slug: "mini-kruvasan",
+    description: "Çıtır taze mini kruvasanlar, yanında sıcak eritilmiş Belçika çikolatası ve taze mevsim meyveleri ile.",
+    base_price: 470,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("mini-kruvasan"),
+    display_order: 6,
+    card_density: "large",
+    option_groups: [PAIRING_MINI_KRUVASAN],
+  },
+  // --- CHEESECAKE ---
+  {
+    id: "prod-san-sebastian-cheesecake-dilim",
+    category_id: "cat-cheesecake",
+    name: "San Sebastian Cheesecake (Dilim)",
+    slug: "san-sebastian-cheesecake-dilim",
+    description: "İpeksi kremsi dokusu, karamelize yanık üst kabuğu ve isteğe göre sıcak eritilmiş Belçika çikolatası eşliğinde tek kişilik dilim.",
+    base_price: 290,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("san-sebastian-cheesecake-dilim"),
+    display_order: 1,
+    card_density: "large",
+    option_groups: [PAIRING_SAN_SEBASTIAN_DILIM],
+  },
+  {
+    id: "prod-san-sebastian-cheesecake-butun",
+    category_id: "cat-cheesecake",
+    name: "San Sebastian Cheesecake",
+    slug: "san-sebastian-cheesecake-butun",
+    description: "Özel günler ve kutlamalar için bütün servis taze fırınlanmış kremsi San Sebastian Cheesecake.",
+    base_price: 1450,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("san-sebastian-cheesecake-butun"),
+    display_order: 1,
+    card_density: "large",
+    option_groups: [PAIRING_SAN_SEBASTIAN_BUTUN],
+  },
+  {
+    id: "prod-limonlu-cheesecake-dilim",
+    category_id: "cat-cheesecake",
+    name: "Limonlu Cheesecake (Dilim)",
+    slug: "limonlu-cheesecake-dilim",
+    description: "Tek kişilik taze dilim; fırınlanmış kremsi cheesecake ve ev yapımı limon sosu.",
+    base_price: 280,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("limonlu-cheesecake-dilim"),
+    display_order: 2,
+    card_density: "large",
+    option_groups: [PAIRING_LIMONLU_CHEESECAKE_DILIM],
+  },
+  {
+    id: "prod-limonlu-cheesecake-butun",
+    category_id: "cat-cheesecake",
+    name: "Limonlu Cheesecake",
+    slug: "limonlu-cheesecake-butun",
+    description: "Özel günler ve kutlamalar için bütün servis taze fırınlanmış Limonlu Cheesecake.",
+    base_price: 1400,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("limonlu-cheesecake-butun"),
+    display_order: 2,
+    card_density: "large",
+    option_groups: [PAIRING_LIMONLU_CHEESECAKE_BUTUN],
+  },
+  {
+    id: "prod-lotuslu-cheesecake-dilim",
+    category_id: "cat-cheesecake",
+    name: "Lotuslu Cheesecake (Dilim)",
+    slug: "lotuslu-cheesecake-dilim",
+    description: "Tek kişilik taze dilim; karamelize bisküvi tabanı ve akışkan Lotus Biscoff kreması.",
+    base_price: 290,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("lotuslu-cheesecake-dilim"),
+    display_order: 3,
+    card_density: "large",
+    option_groups: [PAIRING_LOTUSLU_CHEESECAKE_DILIM],
+  },
+  {
+    id: "prod-lotuslu-cheesecake-butun",
+    category_id: "cat-cheesecake",
+    name: "Lotuslu Cheesecake",
+    slug: "lotuslu-cheesecake-butun",
+    description: "Özel günler ve kutlamalar için bütün servis taze fırınlanmış Lotus Biscoff Cheesecake.",
+    base_price: 1450,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("lotuslu-cheesecake-butun"),
+    display_order: 4,
+    card_density: "large",
+    option_groups: [PAIRING_LOTUSLU_CHEESECAKE_BUTUN],
+  },
+
+  // --- WAFFLE ---
+  {
+    id: "prod-bardakta-waffle",
+    category_id: "cat-waffle",
+    name: "Bardakta Waffle",
+    slug: "bardakta-waffle",
+    description: "Özel waffle lokmaları, akışkan Belçika çikolatası ve taze meyve dilimleriyle pratik bardak sunumu.",
+    base_price: 200,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("bardakta-waffle"),
+    display_order: 1,
+    card_density: "large",
+    option_groups: [PAIRING_BARDAKTA_WAFFLE],
+  },
+  {
+    id: "prod-waffle-kova",
+    category_id: "cat-waffle",
+    name: "Kovada Waffle",
+    slug: "kovada-waffle",
+    description: "Çıtır mini waffle lokmaları, zengin Belçika çikolatası ve taze mevsim meyveleriyle kova boyu lezzet.",
+    base_price: 200,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("kovada-waffle"),
+    display_order: 2,
+    card_density: "large",
+    option_groups: [WAFFLE_KOVA_BOYUT_SECIMI, PAIRING_KOVADA_WAFFLE],
+  },
+
+  // --- TWISSY KRUVASAN ---
+  {
+    id: "prod-antep-fistikli-twissy",
+    category_id: "cat-twissy",
+    name: "Antep Fıstıklı Twissy",
+    slug: "antep-fistikli-twissy",
+    description: "Uzun ve özel formdaki kat kat çıtır Twissy; yoğun Antep fıstığı kreması, Antep fıstığı parçaları ve taze frambuazlarla hazırlanır.",
+    base_price: 340,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("antep-fistikli-twissy"),
+    display_order: 6,
+    card_density: "large",
+    option_groups: [PAIRING_ANTEP_TWISSY],
+  },
+  {
+    id: "prod-limonlu-twissy",
+    category_id: "cat-twissy",
+    name: "Limonlu Twissy",
+    slug: "limonlu-twissy",
+    description: "Uzun ve özel formdaki kat kat çıtır Twissy; limonlu pastacı kreması, limon sosu ve taze yaban mersinleriyle hazırlanır.",
+    base_price: 320,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("limonlu-twissy"),
+    display_order: 7,
+    card_density: "large",
+    option_groups: [PAIRING_LIMONLU_TWISSY],
+  },
+  {
+    id: "prod-cikolatali-twissy",
+    category_id: "cat-twissy",
+    name: "Sütlü Belçika Çikolatalı Twissy",
+    slug: "cikolatali-twissy",
+    description: "Uzun ve özel formdaki kat kat çıtır Twissy; hafif pastacı kreması, taze çilekler, sütlü ve bitter Belçika çikolatası sosları ile hazırlanır.",
+    base_price: 320,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("cikolatali-twissy"),
+    display_order: 8,
+    card_density: "large",
+    option_groups: [PAIRING_CIKOLATALI_TWISSY],
+  },
+
+  // --- DANISH KRUVASAN ---
+  {
+    id: "prod-yaban-mersinli-danish",
+    category_id: "cat-danish",
+    name: "Yaban Mersinli Danish",
+    slug: "yaban-mersinli-danish",
+    description: "Kat kat çıtır Danish hamuru; hafif pastacı kreması ve taze yaban mersinleriyle hazırlanır. Günlük taze olarak sunulur.",
+    base_price: 340,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("yaban-mersinli-danish"),
+    display_order: 9,
+    card_density: "large",
+    option_groups: [PAIRING_YABAN_DANISH],
+  },
+  {
+    id: "prod-limonlu-danish",
+    category_id: "cat-danish",
+    name: "Limonlu Danish",
+    slug: "limonlu-danish",
+    description: "Kat kat çıtır Danish hamuru; ferah ve hafif ekşi limon kremasıyla hazırlanır. Günlük taze olarak sunulur.",
+    base_price: 320,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("limonlu-danish"),
+    display_order: 10,
+    card_density: "large",
+    option_groups: [PAIRING_LIMONLU_DANISH],
+  },
+  {
+    id: "prod-orman-meyveli-danish",
+    category_id: "cat-danish",
+    name: "Orman Meyveli Danish",
+    slug: "orman-meyveli-danish",
+    description: "Kat kat çıtır Danish hamuru; hafif pastacı kreması ve taze orman meyveleriyle hazırlanır. Günlük taze olarak sunulur.",
+    base_price: 340,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("orman-meyveli-danish"),
+    display_order: 11,
+    card_density: "large",
+    option_groups: [PAIRING_ORMAN_DANISH],
+  },
+  {
+    id: "prod-cilekli-danish",
+    category_id: "cat-danish",
+    name: "Çilekli Danish",
+    slug: "cilekli-danish",
+    description: "Kat kat çıtır Danish hamuru; hafif pastacı kreması ve taze çileklerle hazırlanır. Günlük taze olarak sunulur.",
+    base_price: 320,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("cilekli-danish"),
+    display_order: 12,
+    card_density: "large",
+    option_groups: [PAIRING_CILEK_DANISH],
+  },
+  {
+    id: "prod-mangolu-danish",
+    category_id: "cat-danish",
+    name: "Mangolu Danish",
+    slug: "mangolu-danish",
+    description: "Kat kat çıtır Danish hamuru; hafif pastacı kreması ve taze mango dilimleriyle hazırlanır. Günlük taze olarak sunulur.",
+    base_price: 360,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("mangolu-danish"),
+    display_order: 13,
+    card_density: "large",
+    option_groups: [PAIRING_MANGO_DANISH],
+  },
+  {
+    id: "prod-frambuazli-danish",
+    category_id: "cat-danish",
+    name: "Frambuazlı Danish",
+    slug: "frambuazli-danish",
+    description: "Kat kat çıtır Danish hamuru; hafif pastacı kreması ve taze frambuazlarla hazırlanır. Günlük taze olarak sunulur.",
+    base_price: 360,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("frambuazli-danish"),
+    display_order: 14,
+    card_density: "large",
+    option_groups: [PAIRING_FRAMBUAZ_DANISH],
+  },
+
+  // --- ROLL KRUVASAN (İç Dolgu Çikolata Seçimi + İçecek Eşleştirmesi) ---
+  {
+    id: "prod-sutlu-roll-kruvasan",
+    category_id: "cat-roll",
+    name: "Sütlü Belçika Çikolatalı Roll Kruvasan",
+    slug: "sutlu-roll-kruvasan",
+    description: "Kat kat çıtır roll kruvasan; sütlü Belçika çikolatası kaplaması, Antep fıstığı parçaları ve seçiminize özel çikolata dolgusu ile hazırlanır.",
+    base_price: 340,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("sutlu-roll-kruvasan"),
+    display_order: 15,
+    card_density: "large",
+    option_groups: [IC_DOLGU_CIKOLATA_SECIMI, PAIRING_SUTLU_ROLL],
+  },
+  {
+    id: "prod-bitter-roll-kruvasan",
+    category_id: "cat-roll",
+    name: "Bitter Belçika Çikolatalı Roll Kruvasan",
+    slug: "bitter-roll-kruvasan",
+    description: "Kat kat çıtır roll kruvasan; bitter Belçika çikolatası kaplaması, Antep fıstığı parçaları ve seçiminize özel çikolata dolgusu ile hazırlanır.",
+    base_price: 340,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("bitter-roll-kruvasan"),
+    display_order: 16,
+    card_density: "large",
+    option_groups: [IC_DOLGU_CIKOLATA_SECIMI, PAIRING_BITTER_ROLL],
+  },
+  {
+    id: "prod-beyaz-roll-kruvasan",
+    category_id: "cat-roll",
+    name: "Beyaz Belçika Çikolatalı Roll Kruvasan",
+    slug: "beyaz-roll-kruvasan",
+    description: "Kat kat çıtır roll kruvasan; beyaz Belçika çikolatası kaplaması, Antep fıstığı parçaları ve seçiminize özel çikolata dolgusu ile hazırlanır.",
+    base_price: 340,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("beyaz-roll-kruvasan"),
+    display_order: 17,
+    card_density: "large",
+    option_groups: [IC_DOLGU_CIKOLATA_SECIMI, PAIRING_BEYAZ_ROLL],
+  },
+
+  // --- KÜP KRUVASAN (İç Dolgu Çikolata Seçimi + İçecek Eşleştirmesi) ---
+  {
+    id: "prod-sutlu-kup-kruvasan",
+    category_id: "cat-kup",
+    name: "Sütlü Belçika Çikolatalı Küp Kruvasan",
+    slug: "sutlu-kup-kruvasan",
+    description: "Kat kat çıtır küp kruvasan; sütlü Belçika çikolatası kaplaması, Antep fıstığı parçaları ve seçiminize özel çikolata dolgusu ile hazırlanır.",
+    base_price: 340,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("sutlu-kup-kruvasan"),
+    display_order: 18,
+    card_density: "large",
+    option_groups: [IC_DOLGU_CIKOLATA_SECIMI, PAIRING_SUTLU_KUP],
+  },
+  {
+    id: "prod-bitter-kup-kruvasan",
+    category_id: "cat-kup",
+    name: "Bitter Belçika Çikolatalı Küp Kruvasan",
+    slug: "bitter-kup-kruvasan",
+    description: "Kat kat çıtır küp kruvasan; bitter Belçika çikolatası kaplaması, Antep fıstığı parçaları ve seçiminize özel çikolata dolgusu ile hazırlanır.",
+    base_price: 340,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("bitter-kup-kruvasan"),
+    display_order: 19,
+    card_density: "large",
+    option_groups: [IC_DOLGU_CIKOLATA_SECIMI, PAIRING_BITTER_KUP],
+  },
+  {
+    id: "prod-beyaz-kup-kruvasan",
+    category_id: "cat-kup",
+    name: "Beyaz Belçika Çikolatalı Küp Kruvasan",
+    slug: "beyaz-kup-kruvasan",
+    description: "Kat kat çıtır küp kruvasan; beyaz Belçika çikolatası kaplaması, Antep fıstığı parçaları ve seçiminize özel çikolata dolgusu ile hazırlanır.",
+    base_price: 340,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("beyaz-kup-kruvasan"),
+    display_order: 20,
+    card_density: "large",
+    option_groups: [IC_DOLGU_CIKOLATA_SECIMI, PAIRING_BEYAZ_KUP],
+  },
+
+  // --- AMORA KRUVASAN (İç Dolgu Çikolata Seçimi + İçecek Eşleştirmesi) ---
+  {
+    id: "prod-amora",
+    category_id: "cat-amora",
+    name: "Sütlü Belçika Çikolatalı Amora",
+    slug: "amora",
+    description: "Kalp formundaki kat kat çıtır kruvasan; sütlü Belçika çikolatası, Antep fıstığı parçaları ve seçiminize özel çikolata dolgusu ile hazırlanır.",
+    base_price: 360,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("sutlu-amora"),
+    display_order: 21,
+    card_density: "large",
+    option_groups: [IC_DOLGU_CIKOLATA_SECIMI, PAIRING_SUTLU_AMORA],
+  },
+  {
+    id: "prod-bitter-amora",
+    category_id: "cat-amora",
+    name: "Bitter Belçika Çikolatalı Amora",
+    slug: "bitter-amora",
+    description: "Kalp formundaki kat kat çıtır kruvasan; bitter Belçika çikolatası, Antep fıstığı parçaları ve seçiminize özel çikolata dolgusu ile hazırlanır.",
+    base_price: 360,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("bitter-amora"),
+    display_order: 22,
+    card_density: "large",
+    option_groups: [IC_DOLGU_CIKOLATA_SECIMI, PAIRING_BITTER_AMORA],
+  },
+  {
+    id: "prod-beyaz-amora",
+    category_id: "cat-amora",
+    name: "Beyaz Belçika Çikolatalı Amora",
+    slug: "beyaz-amora",
+    description: "Kalp formundaki kat kat çıtır kruvasan; beyaz Belçika çikolatası, Antep fıstığı parçaları ve seçiminize özel çikolata dolgusu ile hazırlanır.",
+    base_price: 360,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("beyaz-amora"),
+    display_order: 23,
+    card_density: "large",
+    option_groups: [IC_DOLGU_CIKOLATA_SECIMI, PAIRING_BEYAZ_AMORA],
+  },
+
+  // --- TUZLU KRUVASANLAR (Yanında Kola, Soğuk İçecek, Sos vb. Eşleştirmesi) ---
+  {
+    id: "prod-sade-kruvasan",
+    category_id: "cat-tuzlu",
+    name: "Sade Kruvasan",
+    slug: "sade-kruvasan",
+    description: "Hakiki Fransız tereyağı ile 48 saat mayalanmış, kat kat çıtır ve havadar klasik kruvasan.",
+    base_price: 150,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("sade-kruvasan"),
+    display_order: 24,
+    card_density: "large",
+    option_groups: [PAIRING_SADE_KRUVASAN],
+  },
+  {
+    id: "prod-yesil-lezzet",
+    category_id: "cat-tuzlu",
+    name: "Yeşil Lezzet Kruvasan",
+    slug: "yesil-lezzet",
+    ingredients: "Labne, Guacamole Sos, Roka, Domates, Hindi Füme",
+    description: "Kat kat çıtır kruvasan; labne, guacamole sos, roka, domates ve hindi füme ile hazırlanır. Elma dilim patates ve sıcak çay eşliğinde servis edilir.",
+    base_price: 390,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("yesil-lezzet"),
+    display_order: 24,
+    card_density: "large",
+    option_groups: [OPT_TUZLU_IKRAM_CAY, PAIRING_YESIL_LEZZET],
+  },
+  {
+    id: "prod-ege-esintisi",
+    category_id: "cat-tuzlu",
+    name: "Ege Esintisi Kruvasan",
+    slug: "ege-esintisi",
+    ingredients: "Haydari, Zeytin, Ton Balığı, Salatalık",
+    description: "Kat kat çıtır kruvasan; haydari, zeytin, ton balığı ve salatalık ile hazırlanır. Elma dilim patates ve sıcak çay eşliğinde servis edilir.",
+    base_price: 410,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("ege-esintisi"),
+    display_order: 25,
+    card_density: "large",
+    option_groups: [OPT_TUZLU_IKRAM_CAY, PAIRING_EGE_ESINTISI],
+  },
+  {
+    id: "prod-avokado-royale",
+    category_id: "cat-tuzlu",
+    name: "Avokado Royale Kruvasan",
+    slug: "avokado-royale",
+    ingredients: "Labne, Avokado, Kremalı Çırpılmış Yumurta, Kaşar Peyniri, Özel Noa Sosu",
+    description: "Kat kat çıtır kruvasan; labne, avokado, kremalı çırpılmış yumurta, kaşar peyniri ve özel Noa sosuyla hazırlanır. Elma dilim patates ve sıcak çay eşliğinde servis edilir.",
+    base_price: 420,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("avokado-royale"),
+    display_order: 26,
+    card_density: "large",
+    option_groups: [OPT_TUZLU_IKRAM_CAY, PAIRING_AVOKADO_ROYALE],
+  },
+  {
+    id: "prod-kozlu-peynirli",
+    category_id: "cat-tuzlu",
+    name: "Közlü Peynir Kruvasan",
+    slug: "kozlu-peynirli",
+    ingredients: "Labne, Köz Salata, Ezine Peyniri, Domates",
+    description: "Kat kat çıtır kruvasan; labne, köz salata, Ezine peyniri ve domatesle hazırlanır. Elma dilim patates ve sıcak çay eşliğinde servis edilir.",
+    base_price: 420,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("kozlu-peynirli"),
+    display_order: 27,
+    card_density: "large",
+    option_groups: [OPT_TUZLU_IKRAM_CAY, PAIRING_KOZLU_PEYNIR],
+  },
+  {
+    id: "prod-pesto-milano",
+    category_id: "cat-tuzlu",
+    name: "Pesto Milano Kruvasan",
+    slug: "pesto-milano",
+    ingredients: "Pesto Sos, Roka, Mozzarella Peyniri, Domates",
+    description: "Kat kat çıtır kruvasan; pesto sos, roka, mozzarella peyniri ve domatesle hazırlanır. Elma dilim patates ve sıcak çay eşliğinde servis edilir.",
+    base_price: 440,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("pesto-milano"),
+    display_order: 28,
+    card_density: "large",
+    option_groups: [OPT_TUZLU_IKRAM_CAY, PAIRING_PESTO_MILANO],
+  },
+  {
+    id: "prod-kaburga-deluxe",
+    category_id: "cat-tuzlu",
+    name: "Kaburga Deluxe Kruvasan",
+    slug: "kaburga-deluxe",
+    ingredients: "Burger Sos, Karamelize Soğan, Kaşar Peyniri, Dana Kaburga Eti, Cheddar Sosu",
+    description: "Kat kat çıtır kruvasan; burger sos, karamelize soğan, kaşar peyniri, dana kaburga eti ve cheddar sosuyla hazırlanır. Elma dilim patates ve sıcak çay eşliğinde servis edilir.",
+    base_price: 480,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("kaburga-deluxe"),
+    display_order: 29,
+    card_density: "large",
+    option_groups: [OPT_TUZLU_IKRAM_CAY, PAIRING_KABURGA_DELUXE],
+  },
+  {
+    id: "prod-hot-dog",
+    category_id: "cat-tuzlu",
+    name: "Hot Dog Kruvasan",
+    slug: "hot-dog",
+    ingredients: "Mayonez, Çırpılmış Yumurta, Tatlı-Acı Sos, Dana Sosis, Cheddar Peyniri",
+    description: "Kat kat çıtır kruvasan; mayonez, çırpılmış yumurta, tatlı-acı sos, dana sosis ve cheddar peyniriyle hazırlanır. Elma dilim patates ve sıcak çay eşliğinde servis edilir.",
+    base_price: 380,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("hot-dog"),
+    display_order: 30,
+    card_density: "large",
+    option_groups: [OPT_TUZLU_IKRAM_CAY, PAIRING_HOT_DOG],
+  },
+
+  // --- NOA ÖZEL MENÜLER ---
+  {
+    id: "prod-noa-tatli-croissant-olustur",
+    category_id: "cat-spesiyal",
+    name: "NOA Tatlı Kruvasan'ını Oluştur",
+    slug: "noa-tatli-croissant-olustur",
+    description: "Kruvasan arasına; Belçika çikolatası, mevsim meyveleri, taze kremalar ve soslar seçerek kendi özel lezzetinizi tasarlayın.",
+    base_price: 360,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("noa-tatli-croissant-olustur"),
+    display_order: 31,
+    card_density: "large",
+    option_groups: [
+      OPT_TATLI_KRUVASAN_SECIMI,
+      OPT_IC_DOLGU_CIKOLATA,
+      OPT_IC_MALZEME_TATLI,
+      OPT_DIS_DOLGU_CIKOLATA,
+      OPT_KREMA_SECIMI,
+      OPT_EKSTRA_IC_MALZEME_TATLI,
+      PAIRING_NOA_MENULER,
+    ],
+  },
+  {
+    id: "prod-noa-tuzlu-kruvasan-olustur",
+    category_id: "cat-spesiyal",
+    name: "NOA Tuzlu Kruvasan'ını Oluştur",
+    slug: "noa-tuzlu-kruvasan-olustur",
+    description: "Seçeceğiniz kruvasan arasına; seçeceğiniz 4 adet malzeme, 1 adet sos. Elma dilim patates ile servis edilir.",
+    base_price: 420,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("noa-tuzlu-kruvasan-olustur"),
+    display_order: 32,
+    card_density: "large",
+    option_groups: [
+      OPT_TUZLU_IKRAM_CAY,
+      OPT_TUZLU_KRUVASAN_SECIMI,
+      OPT_TUZLU_IC_MALZEME,
+      OPT_TUZLU_EKSTRA_IC_MALZEME,
+      OPT_SOS_SECIMI,
+      OPT_EKSTRA_SOS,
+      PAIRING_NOA_MENULER,
+    ],
+  },
+  {
+    id: "prod-noa-kahvalti-tabagi",
+    category_id: "cat-spesiyal",
+    name: "NOA Kahvaltı Tabağı",
+    slug: "noa-kahvalti-tabagi",
+    ingredients: "Kruvasan, Patates Kızartması, Omlet, Domates, Salatalık, Peynir, Siyah ve Yeşil Zeytin, Nutella",
+    description: "Taptaze kruvasan, sıcacık omlet, çıtır patates kızartması, peynir, domates, salatalık, siyah & yeşil zeytin ve Nutella. Sıcak çay eşliğinde servis edilir.",
+    base_price: 320,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("noa-kahvalti-tabagi"),
+    display_order: 33,
+    card_density: "large",
+    option_groups: [
+      OPT_KAHVALTI_PORSIYON,
+      OPT_KAHVALTI_KRUVASAN_1,
+      OPT_KAHVALTI_KRUVASAN_2,
+      OPT_KAHVALTI_IKRAM_CAY_1,
+      OPT_KAHVALTI_IKRAM_CAY_2,
+      PAIRING_KAHVALTI_TABAGI,
+    ],
+  },
+  {
+    id: "prod-noa-tatli-ikili",
+    category_id: "cat-spesiyal",
+    name: "NOA Tatlı İkili",
+    slug: "noa-tatli-ikili",
+    description: "İki adet enfes tatlı kruvasan lezzeti bir arada.",
+    base_price: 580,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("noa-tatli-ikili"),
+    display_order: 34,
+    card_density: "large",
+    option_groups: [
+      cloneOptionGroup(OPT_IKILI_TATLI_SECIMI, "ti1", "1. Tatlı Kruvasan"),
+      cloneOptionGroup(OPT_IKILI_TATLI_SECIMI, "ti2", "2. Tatlı Kruvasan"),
+    ],
+  },
+  {
+    id: "prod-noa-tuzlu-ikili",
+    category_id: "cat-spesiyal",
+    name: "NOA Tuzlu İkili",
+    slug: "noa-tuzlu-ikili",
+    description: "İki adet doyurucu gurme tuzlu kruvasan servis tabağı.",
+    base_price: 650,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("noa-tuzlu-ikili"),
+    display_order: 35,
+    card_density: "large",
+    option_groups: [
+      OPT_TUZLU_IKRAM_CAY,
+      cloneOptionGroup(OPT_IKILI_TUZLU_SECIMI, "tzi1", "1. Tuzlu Kruvasan"),
+      cloneOptionGroup(OPT_IKILI_TUZLU_SECIMI, "tzi2", "2. Tuzlu Kruvasan"),
+    ],
+  },
+  {
+    id: "prod-noa-roll-kup-ikili",
+    category_id: "cat-spesiyal",
+    name: "NOA Roll & Küp İkili",
+    slug: "noa-roll-kup-ikili",
+    description: "1 adet Roll Kruvasan, 1 adet Küp Kruvasan ve 2 adet seçeceğiniz NOA Special İçecekten oluşan dopdolu menü.",
+    base_price: 790,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("noa-roll-kup-ikili"),
+    display_order: 36,
+    card_density: "large",
+    option_groups: [
+      cloneOptionGroup(OPT_ROLL_SECIMI, "rk-roll", "1. Roll Kruvasan"),
+      cloneOptionGroup(OPT_KUP_SECIMI, "rk-kup", "2. Küp Kruvasan"),
+      cloneOptionGroup(OPT_NOA_SPECIAL_ICECEK_BASE, "rk-drk1", "1. NOA Special İçecek"),
+      cloneOptionGroup(OPT_NOA_SPECIAL_ICECEK_BASE, "rk-drk2", "2. NOA Special İçecek"),
+    ],
+  },
+
+  // --- NOA İÇECEKLER ---
+  {
+    id: "prod-noa-full-depo",
+    category_id: "cat-special-icecek",
+    name: "NOA Full Depo",
+    slug: "noa-full-depo",
+    description: "NOA Benzin ve NOA Dizel'den oluşan 2 adet özel içecek paketi.",
+    base_price: 450,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("noa-full-depo"),
+    display_order: 36,
+    card_density: "large",
+    option_groups: [PAIRING_NOA_FULL_DEPO],
+  },
+  {
+    id: "prod-noa-turbo",
+    category_id: "cat-special-icecek",
+    name: "NOA Turbo",
+    slug: "noa-turbo",
+    description: "NOA Benzin ve NOA Dizel karışımıyla hazırlanan özel imza atom kokteyl.",
+    base_price: 260,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("noa-turbo"),
+    display_order: 37,
+    card_density: "large",
+    option_groups: [PAIRING_NOA_TURBO],
+  },
+  {
+    id: "prod-benzin",
+    category_id: "cat-special-icecek",
+    name: "NOA Benzin",
+    slug: "benzin",
+    description: "Pasiflora, Şeftali, Kivi, Muz, Ananas, Portakal.",
+    base_price: 250,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("benzin"),
+    display_order: 38,
+    card_density: "large",
+    option_groups: [PAIRING_BENZIN],
+  },
+  {
+    id: "prod-dizel",
+    category_id: "cat-special-icecek",
+    name: "NOA Dizel",
+    slug: "dizel",
+    description: "Kavun, Portakal, Ejder Meyvesi, Çilek, Muz.",
+    base_price: 250,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("dizel"),
+    display_order: 39,
+    card_density: "large",
+    option_groups: [PAIRING_DIZEL],
+  },
+  {
+    id: "prod-el-yapimi-cilekli-limonata",
+    category_id: "cat-special-icecek",
+    name: "El Yapımı Çilekli Limonata",
+    slug: "el-yapimi-cilekli-limonata",
+    description: "Taze bahçe çilekleri püresiyle zenginleştirilmiş ev yapımı limonata.",
+    base_price: 180,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("el-yapimi-cilekli-limonata"),
+    display_order: 40,
+    card_density: "large",
+    option_groups: [PAIRING_LIMONATA_CILEKLI],
+  },
+  {
+    id: "prod-el-yapimi-limonata",
+    category_id: "cat-special-icecek",
+    name: "El Yapımı Limonata",
+    slug: "el-yapimi-limonata",
+    description: "Taze sıkılmış limonlardan günlük el yapımı ferahlatıcı limonata.",
+    base_price: 160,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("el-yapimi-limonata"),
+    display_order: 41,
+    card_density: "large",
+    option_groups: [PAIRING_LIMONATA_KLASIK],
+  },
+  {
+    id: "prod-nar-suyu",
+    category_id: "cat-special-icecek",
+    name: "Taze Sıkma Nar Suyu",
+    slug: "taze-sikma-nar-suyu",
+    description: "Günlük taze sıkılmış %100 doğal nar suyu.",
+    base_price: 220,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("taze-sikma-nar-suyu"),
+    display_order: 42,
+    card_density: "large",
+    option_groups: [PAIRING_NAR_SUYU],
+  },
+
+  // --- DONDURMA ---
+  {
+    id: "prod-dondurma",
+    category_id: "cat-dondurma",
+    name: "Dondurma",
+    slug: "dondurma",
+    description: "Geleneksel kıvamında doğal ve taze dondurma lezzeti.",
+    base_price: 75,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("dondurma"),
+    display_order: 43,
+    card_density: "large",
+    option_groups: [DONDURMA_PORSIYON, PAIRING_DONDURMA],
+  },
+
+  // --- SOFT İÇECEKLER ---
+  {
+    id: "prod-su-330",
+    category_id: "cat-soft",
+    name: "Su (33 cl.)",
+    slug: "su-330",
+    description: "Doğal ve ferahlatıcı kaynak suyu.",
+    base_price: 40,
+    is_available: true,
+    is_featured: false,
+    display_order: 40,
+    card_density: "compact",
+    option_groups: [PAIRING_SOFT],
+  },
+  {
+    id: "prod-maden-suyu",
+    category_id: "cat-soft",
+    name: "Maden Suyu (20 cl.)",
+    slug: "maden-suyu",
+    description: "Doğal zengin mineralli ferahlatıcı maden suyu.",
+    base_price: 50,
+    is_available: true,
+    is_featured: false,
+    display_order: 41,
+    card_density: "compact",
+    option_groups: [PAIRING_SOFT],
+  },
+  {
+    id: "prod-churchill",
+    category_id: "cat-soft",
+    name: "Churchill",
+    slug: "churchill",
+    description: "Taze sıkılmış limon suyu, mineralli maden suyu ve tuz dengesiyle ferahlatıcı klasik.",
+    base_price: 120,
+    is_available: true,
+    is_featured: false,
+    display_order: 42,
+    card_density: "compact",
+    option_groups: [PAIRING_SOFT],
+  },
+  {
+    id: "prod-uludag-frutti",
+    category_id: "cat-soft",
+    name: "Uludağ Frutti (20 cl.)",
+    slug: "uludag-frutti",
+    description: "Ferahlatıcı meyve aromalarıyla zenginleştirilmiş maden suyu.",
+    base_price: 80,
+    is_available: true,
+    is_featured: false,
+    display_order: 43,
+    card_density: "compact",
+    option_groups: [OPT_FRUTTI_CESIT, PAIRING_SOFT],
+  },
+  {
+    id: "prod-uludag-frutti-extra",
+    category_id: "cat-soft",
+    name: "Uludağ Frutti Extra (25 cl.)",
+    slug: "uludag-frutti-extra",
+    description: "Yoğun meyve lezzeti ve ferahlatıcı mineral dengesi.",
+    base_price: 100,
+    is_available: true,
+    is_featured: false,
+    display_order: 44,
+    card_density: "compact",
+    option_groups: [OPT_FRUTTI_EXTRA_CESIT, PAIRING_SOFT],
+  },
+  {
+    id: "prod-coca-cola",
+    category_id: "cat-soft",
+    name: "Coca-Cola (33 cl.)",
+    slug: "coca-cola",
+    description: "Klasik ve efsanevi ferahlatıcı lezzet.",
+    base_price: 100,
+    is_available: true,
+    is_featured: false,
+    display_order: 45,
+    card_density: "compact",
+    option_groups: [PAIRING_SOFT],
+  },
+  {
+    id: "prod-coca-cola-zero",
+    category_id: "cat-soft",
+    name: "Coca-Cola Zero Sugar (33 cl.)",
+    slug: "coca-cola-zero",
+    description: "Şekersiz, hafif ve ferahlatıcı lezzet.",
+    base_price: 100,
+    is_available: true,
+    is_featured: false,
+    display_order: 46,
+    card_density: "compact",
+    option_groups: [PAIRING_SOFT],
+  },
+  {
+    id: "prod-fanta",
+    category_id: "cat-soft",
+    name: "Fanta (33 cl.)",
+    slug: "fanta",
+    description: "Canlandırıcı ve enerjik portakal lezzeti.",
+    base_price: 100,
+    is_available: true,
+    is_featured: false,
+    display_order: 47,
+    card_density: "compact",
+    option_groups: [PAIRING_SOFT],
+  },
+  {
+    id: "prod-sprite",
+    category_id: "cat-soft",
+    name: "Sprite (33 cl.)",
+    slug: "sprite",
+    description: "Limon ve misket limonu ferahlığı.",
+    base_price: 100,
+    is_available: true,
+    is_featured: false,
+    display_order: 48,
+    card_density: "compact",
+    option_groups: [PAIRING_SOFT],
+  },
+  {
+    id: "prod-fuse-tea",
+    category_id: "cat-soft",
+    name: "Fuse Tea (33 cl.)",
+    slug: "fuse-tea",
+    description: "Taze demlenmiş çay ve meyve aromalarının buz gibi buluşması.",
+    base_price: 100,
+    is_available: true,
+    is_featured: false,
+    display_order: 49,
+    card_density: "compact",
+    option_groups: [OPT_FUSE_TEA_CESIT, PAIRING_SOFT],
+  },
+  {
+    id: "prod-tamek",
+    category_id: "cat-soft",
+    name: "Tamek Meyve Suyu (25 cl.)",
+    slug: "tamek",
+    description: "Özenle seçilmiş taze meyvelerden lezzetli meyve suyu.",
+    base_price: 90,
+    is_available: true,
+    is_featured: false,
+    display_order: 50,
+    card_density: "compact",
+    option_groups: [OPT_TAMEK_CESIT, PAIRING_SOFT],
+  },
+  {
+    id: "prod-uludag-limonata",
+    category_id: "cat-soft",
+    name: "Uludağ Limonata (33 cl.)",
+    slug: "uludag-limonata",
+    description: "Geleneksel tarifle hazırlanan ferahlatıcı lezzet.",
+    base_price: 100,
+    is_available: true,
+    is_featured: false,
+    display_order: 51,
+    card_density: "compact",
+    option_groups: [PAIRING_SOFT],
+  },
+
+  // --- SOĞUK KAHVELER ---
+  {
+    id: "prod-iced-caramel-macchiato",
+    category_id: "cat-soguk-kahve",
+    name: "Iced Caramel Macchiato",
+    slug: "iced-caramel-macchiato",
+    description: "Buz, vanilyalı soğuk süt, espresso ve üzerinde karamel sos drizzle.",
+    base_price: 170,
+    is_available: true,
+    is_featured: true,
+    display_order: 48,
+    card_density: "compact",
+    option_groups: [PAIRING_KAHVELER],
+  },
+  {
+    id: "prod-iced-white-chocolate-mocha",
+    category_id: "cat-soguk-kahve",
+    name: "Iced White Chocolate Mocha",
+    slug: "iced-white-chocolate-mocha",
+    description: "Buz, soğuk süt, espresso ve kremsi beyaz Belçika çikolatası.",
+    base_price: 170,
+    is_available: true,
+    is_featured: false,
+    display_order: 49,
+    card_density: "compact",
+    option_groups: [PAIRING_KAHVELER],
+  },
+  {
+    id: "prod-iced-classic-mocha",
+    category_id: "cat-soguk-kahve",
+    name: "Iced Mocha",
+    slug: "iced-mocha",
+    description: "Buz, soğuk süt, espresso ve enfes Belçika çikolatası uyumu.",
+    base_price: 170,
+    is_available: true,
+    is_featured: false,
+    display_order: 50,
+    card_density: "compact",
+    option_groups: [PAIRING_KAHVELER],
+  },
+  {
+    id: "prod-iced-vanilla-latte",
+    category_id: "cat-soguk-kahve",
+    name: "Iced Vanilla Latte",
+    slug: "iced-vanilla-latte",
+    description: "Buz, soğuk taze süt, yoğun espresso ve doğal vanilya aroması.",
+    base_price: 170,
+    is_available: true,
+    is_featured: false,
+    display_order: 51,
+    card_density: "compact",
+    option_groups: [PAIRING_LATTE],
+  },
+  {
+    id: "prod-iced-caramel-latte",
+    category_id: "cat-soguk-kahve",
+    name: "Iced Caramel Latte",
+    slug: "iced-caramel-latte",
+    description: "Buz, soğuk taze süt, yoğun espresso ve zengin karamel dokunuşu.",
+    base_price: 170,
+    is_available: true,
+    is_featured: false,
+    display_order: 52,
+    card_density: "compact",
+    option_groups: [PAIRING_LATTE],
+  },
+  {
+    id: "prod-iced-latte",
+    category_id: "cat-soguk-kahve",
+    name: "Iced Latte",
+    slug: "iced-latte",
+    description: "Buz, soğuk taze süt ve yoğun espresso uyumu.",
+    base_price: 150,
+    is_available: true,
+    is_featured: true,
+    display_order: 60,
+    card_density: "compact",
+    option_groups: [PAIRING_LATTE],
+  },
+  {
+    id: "prod-iced-latte-macchiato",
+    category_id: "cat-soguk-kahve",
+    name: "Iced Latte Macchiato",
+    slug: "iced-latte-macchiato",
+    description: "Buz, katmanlı soğuk süt ve üzerine dökülen taze espresso.",
+    base_price: 150,
+    is_available: true,
+    is_featured: false,
+    display_order: 61,
+    card_density: "compact",
+    option_groups: [PAIRING_LATTE],
+  },
+  {
+    id: "prod-iced-cappuccino",
+    category_id: "cat-soguk-kahve",
+    name: "Iced Cappuccino",
+    slug: "iced-cappuccino",
+    description: "Buz üzerinde espresso, soğuk süt ve kadifemsi soğuk süt köpüğü.",
+    base_price: 150,
+    is_available: true,
+    is_featured: false,
+    display_order: 62,
+    card_density: "compact",
+    option_groups: [PAIRING_CAPPUCCINO],
+  },
+  {
+    id: "prod-iced-flat-white",
+    category_id: "cat-soguk-kahve",
+    name: "Iced Flat White",
+    slug: "iced-flat-white",
+    description: "Double shot espresso ve yoğun soğuk mikro süt dokusu.",
+    base_price: 150,
+    is_available: true,
+    is_featured: false,
+    display_order: 63,
+    card_density: "compact",
+    option_groups: [PAIRING_FLAT_WHITE],
+  },
+  {
+    id: "prod-iced-sutlu-americano",
+    category_id: "cat-soguk-kahve",
+    name: "Iced Sütlü Americano",
+    slug: "iced-sutlu-americano",
+    description: "Buz, soğuk su, double shot espresso ve hafif soğuk süt dokunuşu.",
+    base_price: 150,
+    is_available: true,
+    is_featured: false,
+    display_order: 64,
+    card_density: "compact",
+    option_groups: [PAIRING_AMERICANO],
+  },
+  {
+    id: "prod-iced-americano",
+    category_id: "cat-soguk-kahve",
+    name: "Iced Americano",
+    slug: "iced-americano",
+    description: "Buz ve soğuk su ile harmanlanmış ferahlatıcı double shot espresso.",
+    base_price: 140,
+    is_available: true,
+    is_featured: false,
+    display_order: 65,
+    card_density: "compact",
+    option_groups: [PAIRING_AMERICANO],
+  },
+  {
+    id: "prod-iced-espresso",
+    category_id: "cat-soguk-kahve",
+    name: "Iced Espresso",
+    slug: "iced-espresso",
+    description: "Buz ile servis edilen yoğun İtalyan espressosu. Single veya Double shot tercihiyle.",
+    base_price: 110,
+    is_available: true,
+    is_featured: false,
+    display_order: 66,
+    card_density: "compact",
+    option_groups: [OPT_ESPRESSO_SHOT, PAIRING_ESPRESSO],
+  },
+
+  // --- SICAK KAHVELER ---
+  {
+    id: "prod-caramel-macchiato",
+    category_id: "cat-sicak",
+    name: "Caramel Macchiato",
+    slug: "caramel-macchiato",
+    description: "Vanilya şurubu, sıcak süt, kadifemsi süt köpüğü, espresso ve karamel sos drizzle.",
+    base_price: 160,
+    is_available: true,
+    is_featured: true,
+    display_order: 57,
+    card_density: "compact",
+    option_groups: [PAIRING_KAHVELER],
+  },
+  {
+    id: "prod-white-chocolate-mocha",
+    category_id: "cat-sicak",
+    name: "White Chocolate Mocha",
+    slug: "white-chocolate-mocha",
+    description: "Espresso, sıcak süt ve kremsi beyaz Belçika çikolatası.",
+    base_price: 160,
+    is_available: true,
+    is_featured: false,
+    display_order: 58,
+    card_density: "compact",
+    option_groups: [PAIRING_KAHVELER],
+  },
+  {
+    id: "prod-classic-mocha",
+    category_id: "cat-sicak",
+    name: "Mocha",
+    slug: "mocha",
+    description: "Espresso, sıcak süt ve enfes Belçika çikolatası uyumu.",
+    base_price: 160,
+    is_available: true,
+    is_featured: false,
+    display_order: 59,
+    card_density: "compact",
+    option_groups: [PAIRING_KAHVELER],
+  },
+  {
+    id: "prod-vanilla-latte",
+    category_id: "cat-sicak",
+    name: "Vanilla Latte",
+    slug: "vanilla-latte",
+    description: "Yoğun espresso, kadifemsi sıcak süt ve doğal vanilya aroması.",
+    base_price: 160,
+    is_available: true,
+    is_featured: false,
+    display_order: 60,
+    card_density: "compact",
+    option_groups: [PAIRING_LATTE],
+  },
+  {
+    id: "prod-caramel-latte",
+    category_id: "cat-sicak",
+    name: "Caramel Latte",
+    slug: "caramel-latte",
+    description: "Yoğun espresso, kadifemsi sıcak süt ve zengin karamel dokunuşu.",
+    base_price: 160,
+    is_available: true,
+    is_featured: false,
+    display_order: 61,
+    card_density: "compact",
+    option_groups: [PAIRING_LATTE],
+  },
+  {
+    id: "prod-caffe-latte",
+    category_id: "cat-sicak",
+    name: "Latte",
+    slug: "caffe-latte",
+    description: "Yoğun espresso ve bol sıcak süt uyumu.",
+    base_price: 140,
+    is_available: true,
+    is_featured: true,
+    display_order: 79,
+    card_density: "compact",
+    option_groups: [PAIRING_LATTE],
+  },
+  {
+    id: "prod-latte-macchiato",
+    category_id: "cat-sicak",
+    name: "Latte Macchiato",
+    slug: "latte-macchiato",
+    description: "Katmanlı sıcak süt, süt köpüğü ve espresso.",
+    base_price: 140,
+    is_available: true,
+    is_featured: false,
+    display_order: 80,
+    card_density: "compact",
+    option_groups: [PAIRING_LATTE],
+  },
+  {
+    id: "prod-cappuccino",
+    category_id: "cat-sicak",
+    name: "Cappuccino",
+    slug: "cappuccino",
+    description: "Espresso, sıcak süt ve ipeksi süt köpüğü.",
+    base_price: 140,
+    is_available: true,
+    is_featured: false,
+    display_order: 81,
+    card_density: "compact",
+    option_groups: [PAIRING_CAPPUCCINO],
+  },
+  {
+    id: "prod-flat-white",
+    category_id: "cat-sicak",
+    name: "Flat White",
+    slug: "flat-white",
+    description: "Double shot espresso ve kadifemsi mikro süt köpüğü.",
+    base_price: 140,
+    is_available: true,
+    is_featured: false,
+    display_order: 82,
+    card_density: "compact",
+    option_groups: [PAIRING_FLAT_WHITE],
+  },
+  {
+    id: "prod-sutlu-americano",
+    category_id: "cat-sicak",
+    name: "Sütlü Americano",
+    slug: "sutlu-americano",
+    description: "Hafifletilmiş espresso ve sıcak süt dokunuşu.",
+    base_price: 140,
+    is_available: true,
+    is_featured: false,
+    display_order: 83,
+    card_density: "compact",
+    option_groups: [PAIRING_AMERICANO],
+  },
+  {
+    id: "prod-americano",
+    category_id: "cat-sicak",
+    name: "Americano",
+    slug: "americano",
+    description: "Sıcak su ve double shot taze espresso.",
+    base_price: 130,
+    is_available: true,
+    is_featured: false,
+    display_order: 84,
+    card_density: "compact",
+    option_groups: [PAIRING_AMERICANO],
+  },
+  {
+    id: "prod-espresso",
+    category_id: "cat-sicak",
+    name: "Espresso",
+    slug: "espresso",
+    description: "Yoğun İtalyan espressosu. Single veya Double shot tercihiyle.",
+    base_price: 100,
+    is_available: true,
+    is_featured: false,
+    display_order: 85,
+    card_density: "compact",
+    option_groups: [OPT_ESPRESSO_SHOT, PAIRING_ESPRESSO],
+  },
+  {
+    id: "prod-turk-kahvesi",
+    category_id: "cat-sicak",
+    name: "Türk Kahvesi",
+    slug: "turk-kahvesi",
+    description: "Özel közde pişirilmiş geleneksel Türk kahvesi.",
+    base_price: 120,
+    is_available: true,
+    is_featured: false,
+    display_order: 86,
+    card_density: "compact",
+    option_groups: [PAIRING_KAHVELER],
+  },
+  {
+    id: "prod-cay",
+    category_id: "cat-sicak",
+    name: "Çay",
+    slug: "demleme-cay",
+    description: "Taze demlenmiş geleneksel çay. Küçük bardak veya büyük fincan seçeneğiyle.",
+    base_price: 40,
+    is_available: true,
+    is_featured: true,
+    display_order: 87,
+    card_density: "compact",
+    option_groups: [OPT_CAY_BOYUT, PAIRING_CAYLAR],
+  },
+];
+
+export const INITIAL_PROMOTIONS: Promotion[] = [
+  {
+    id: "promo-tea-with-savoury",
+    code: "FREE_TEA",
+    title: "Tuzlu Kruvasan Yanına Çay İkramı",
+    description: "Sepetinizde tuzlu kruvasan bulunduğunda 1 adet demleme çay ücretsiz hediye edilir.",
+    is_active: true,
+    type: "tea_with_savoury",
+  },
+];
+
+export const INITIAL_SETTINGS: BusinessSettings = {
+  brand_name: "NOA Croissant",
+  venue_name: "NOA Croissant",
+  tagline: "Günlük taze pişirilir",
+  address: "Alanya, Antalya",
+  phone: "+90 555 000 00 00",
+  currency: "TL",
+  currency_symbol: "₺",
+  service_hours_start: "08:00",
+  service_hours_end: "23:00",
+  allow_table_orders: true,
+  allow_takeaway: false,
+  sound_notifications_enabled: true,
+  table_count: 20,
+  complimentary_tea_enabled: true,
+  order_accepting: true,
+};
