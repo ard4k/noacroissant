@@ -7,6 +7,7 @@ import {
   isRateLimited,
   recordFailedAttempt,
   resetRateLimit,
+  verifyPin,
 } from "@/lib/adminAuth";
 
 export const dynamic = "force-dynamic";
@@ -33,7 +34,7 @@ export async function POST(req: NextRequest) {
 
     // 1. Verify Action PIN or Current Session
     if (action === "verify_action") {
-      if (pin && typeof pin === "string" && pin.trim() === ADMIN_PIN) {
+      if (verifyPin(pin)) {
         return NextResponse.json({ success: true, authorized: true });
       }
       return NextResponse.json({ success: false, error: "Hatalı yetkili parolası!" }, { status: 401 });
@@ -54,7 +55,7 @@ export async function POST(req: NextRequest) {
         value: "",
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: "lax",
         path: "/",
         maxAge: 0,
       });
@@ -75,7 +76,7 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      if (pin && typeof pin === "string" && pin.trim() === ADMIN_PIN) {
+      if (verifyPin(pin)) {
         resetRateLimit(ip);
         const token = generateAdminSessionToken();
         const res = NextResponse.json({ success: true, authenticated: true });
@@ -84,7 +85,7 @@ export async function POST(req: NextRequest) {
           value: token,
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
-          sameSite: "strict",
+          sameSite: "lax",
           path: "/",
           maxAge: 24 * 60 * 60, // 24 hours
         });

@@ -62,7 +62,7 @@ class NoaStore {
       try {
         const fs = require("fs");
         const path = require("path");
-        const dirPath = process.env.VERCEL ? path.join("/tmp", ".data") : path.join(process.cwd(), ".data");
+        const dirPath = path.join(process.cwd(), ".data");
         const filePath = path.join(dirPath, "noa_store.json");
         if (fs.existsSync(filePath)) {
           const raw = fs.readFileSync(filePath, "utf-8");
@@ -136,7 +136,7 @@ class NoaStore {
       try {
         const fs = require("fs");
         const path = require("path");
-        const dirPath = process.env.VERCEL ? path.join("/tmp", ".data") : path.join(process.cwd(), ".data");
+        const dirPath = path.join(process.cwd(), ".data");
         const filePath = path.join(dirPath, "noa_store.json");
         if (!fs.existsSync(dirPath)) {
           fs.mkdirSync(dirPath, { recursive: true });

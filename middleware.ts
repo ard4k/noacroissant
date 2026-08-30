@@ -6,24 +6,9 @@ interface RateLimitRecord {
 }
 
 const rateLimitMap = new Map<string, RateLimitRecord>();
-let lastCleanup = Date.now();
 
 function isRateLimited(key: string, limit: number, windowMs: number): boolean {
   const now = Date.now();
-
-  // Lazy clean up stale IP records every 5 minutes or when map grows large
-  if (now - lastCleanup > 5 * 60 * 1000 || rateLimitMap.size > 500) {
-    lastCleanup = now;
-    for (const [k, rec] of rateLimitMap.entries()) {
-      const valid = rec.timestamps.filter((ts) => now - ts < 15 * 60 * 1000);
-      if (valid.length === 0) {
-        rateLimitMap.delete(k);
-      } else {
-        rateLimitMap.set(k, { timestamps: valid });
-      }
-    }
-  }
-
   const record = rateLimitMap.get(key) || { timestamps: [] };
 
   // Filter timestamps within the sliding window
@@ -37,6 +22,19 @@ function isRateLimited(key: string, limit: number, windowMs: number): boolean {
   rateLimitMap.set(key, { timestamps: validTimestamps });
   return false;
 }
+
+// Clean up stale IP records every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, record] of rateLimitMap.entries()) {
+    const valid = record.timestamps.filter((ts) => now - ts < 15 * 60 * 1000);
+    if (valid.length === 0) {
+      rateLimitMap.delete(key);
+    } else {
+      rateLimitMap.set(key, { timestamps: valid });
+    }
+  }
+}, 5 * 60 * 1000);
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

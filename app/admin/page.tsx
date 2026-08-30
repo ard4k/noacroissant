@@ -987,17 +987,14 @@ function AdminDashboardContent() {
             <div className="space-y-2">
               <input
                 type="password"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={6}
                 value={pinInput}
                 onChange={(e) => {
                   setPinInput(e.target.value);
                   if (pinError) setPinError(null);
                 }}
-                placeholder=""
+                placeholder="Şifreyi giriniz"
                 autoFocus
-                className={`w-full py-3.5 px-4 text-center tracking-[0.5em] font-mono text-2xl font-black rounded-2xl bg-[#FAF7F2] border transition-all focus:outline-none focus:ring-2 focus:ring-[#DC2626] text-[#381D05] ${
+                className={`w-full py-3.5 px-4 text-center tracking-[0.25em] font-mono text-xl font-bold rounded-2xl bg-[#FAF7F2] border transition-all focus:outline-none focus:ring-2 focus:ring-[#DC2626] text-[#381D05] ${
                   pinError ? "border-red-500 ring-2 ring-red-200" : "border-[#683B0C]/20"
                 }`}
               />
