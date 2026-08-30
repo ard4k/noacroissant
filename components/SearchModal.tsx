@@ -107,7 +107,7 @@ export function SearchModal({
           ) : filteredProducts.length === 0 ? (
             <div className="py-10 text-center text-stone-500 space-y-1">
               <p className="text-sm font-bold text-[#4A2808]">
-                "{query}" ile eşleşen ürün bulunamadı.
+                &quot;{query}&quot; ile eşleşen ürün bulunamadı.
               </p>
               <p className="text-xs text-stone-400">
                 Farklı bir arama terimi deneyebilirsiniz.
