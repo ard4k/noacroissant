@@ -3,11 +3,12 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Search, ShoppingBag, ChevronDown, Check, Wifi, Coffee } from "lucide-react";
+import { Search, ShoppingBag, ChevronDown, Check, Wifi, Coffee, Instagram } from "lucide-react";
 import { BRAND_ASSETS } from "@/lib/images";
 import { DiningTable } from "@/lib/types";
 import { Language, getTranslation } from "@/lib/i18n/translations";
 import { LanguageSelector } from "./LanguageSelector";
+import { BUSINESS_INFO } from "@/lib/businessConfig";
 
 interface HeaderProps {
   table: DiningTable | null;
@@ -94,8 +95,17 @@ export function Header({
             currentLanguage={language}
             onLanguageChange={onLanguageChange}
           />
-
-
+          {/* Instagram Action Button */}
+          <a
+            href={BUSINESS_INFO.social.instagram}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Instagram @noacroissant"
+            aria-label="Instagram @noacroissant"
+            className="h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white shadow-2xs hover:opacity-90 flex items-center justify-center transition-all active:scale-95 cursor-pointer shrink-0"
+          >
+            <Instagram className="w-4 h-4 text-white stroke-[2.2]" />
+          </a>
 
           {/* Wi-Fi Action Button */}
           {onOpenWifi && (

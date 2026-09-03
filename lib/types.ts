@@ -222,6 +222,7 @@ export interface BusinessSettings {
   wifi_password?: string;
   // Social
   instagram_handle?: string;
+  instagram_url?: string;
   // Global Disabled Ingredient Names (e.g. "Nutella", "Antep Fıstığı")
   disabled_ingredients?: string[];
   // Loyalty Club Program Settings (Customizable by Admin)

@@ -48,7 +48,7 @@ export const BUSINESS_INFO = {
     longitude: 31.9897,
   },
   social: {
-    instagram: "https://www.instagram.com/noacroissant",
+    instagram: "https://www.instagram.com/noacroissant/",
     instagramHandle: "@noacroissant",
     googleMapsCid: "11614042030776745743",
     googleMapsUrl: "https://maps.google.com/?cid=11614042030776745743",

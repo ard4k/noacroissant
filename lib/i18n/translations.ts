@@ -1904,6 +1904,54 @@ export const CATEGORY_TRANSLATIONS: Record<string, Record<Language, string>> = {
 };
 
 export const PRODUCT_TRANSLATIONS: Record<string, Record<Language, { name: string; desc?: string }>> = {
+  "Pain Suisse (Hindi Füme)": {
+    "tr": { "name": "Pain Suisse (Hindi Füme)", "desc": "Kat kat çıtır tereyağlı hamur içerisinde leziz hindi füme ve kaşar peyniri dolgulu Pain Suisse." },
+    "en": { "name": "Smoked Turkey Pain Suisse", "desc": "Flaky artisanal butter pastry filled with tender smoked turkey breast and melted kashar cheese." },
+    "de": { "name": "Pain Suisse mit Putenbrust", "desc": "Blättriges Buttergebäck gefüllt mit zartem geräuchertem Truthahn und geschmolzenem Käse." },
+    "ru": { "name": "Пэн Сюис с индейкой", "desc": "Слоеный масляный круассан-брусок с начинкой из копченой индейки и расплавленного сыра." },
+    "nl": { "name": "Pain Suisse met Gerookte Kalkoen", "desc": "Krokant roomboterbladerdeeg gevuld met gerookte kalkoenfilet en gesmolten kaas." },
+    "sv": { "name": "Pain Suisse med Rökt Kalkon", "desc": "Frasigt smördegssnitt fyllt med rökt kalkonbröst och smält ost." },
+    "no": { "name": "Pain Suisse med Røkt Kalkun", "desc": "Sprøtt smørdeigsbakverk fylt med røkt kalkun og smeltet ost." },
+    "fi": { "name": "Savukalkkuna Pain Suisse", "desc": "Rapea voitaikinatasku täytettynä savukalkkunalla ja sulatetulla juustolla." },
+    "pl": { "name": "Pain Suisse z Wędzoną Indykiem", "desc": "Chrupiące maślane ciasto francuskie nadziewane wędzonym indykiem i serem." },
+    "ar": { "name": "بان سويس مع الديك الرومي المدخن", "desc": "معجنات فرنسية هشة بالزبدة محشوة بشرائح الديك الرومي المدخن والجبن الذائب." }
+  },
+  "Cedric Grolet": {
+    "tr": { "name": "Cedric Grolet", "desc": "İkonik Fransız pastacılık stilinde, taze dolgusu ve ipeksi kremasıyla hazırlanan imza şef tatlısı." },
+    "en": { "name": "Cedric Grolet Signature", "desc": "Haute patisserie creation inspired by Parisian master pastry artistry with silk cream and fruit essence." },
+    "de": { "name": "Cedric Grolet Signature", "desc": "Haute-Pâtisserie-Kreation inspiriert von Pariser Meisterkunst mit samtiger Creme und feiner Frucht." },
+    "ru": { "name": "Седрик Гроле Сигнатура", "desc": "Шедевр высокой французской кондитерской с шелковистым кремом и ярким фруктовым вкусом." },
+    "nl": { "name": "Cedric Grolet Signature", "desc": "Haute patisserie creatie geïnspireerd op Franse meesterbanketbakkerskunst met zijdezachte crème." },
+    "sv": { "name": "Cedric Grolet Signatur", "desc": "Haute patisserie-skapelse med inspiration från franskt mästerkonditori med silkeslen kräm." },
+    "no": { "name": "Cedric Grolet Signatur", "desc": "Eksklusivt fransk bakverk inspirert av mesterkonditorer med silkemyk krem og frukt." },
+    "fi": { "name": "Cedric Grolet Signature", "desc": "Pariisilaisen mestarileipurin inspiroima hienostunut leivos silkkisellä kermalla." },
+    "pl": { "name": "Cedric Grolet Signature", "desc": "Ekskluzywny deser inspirowany francuskim mistrzowskim cukiernictwem z aksamitnym kremem." },
+    "ar": { "name": "سيدريك غروليه الفاخر", "desc": "ابتكار حلويات فرنسية راقية مستوحاة من براعة أشهر شيف حلويات فرنسي." }
+  },
+  "Filtre Kahve": {
+    "tr": { "name": "Filtre Kahve", "desc": "Taze çekilmiş %100 Arabica çekirdeklerinden demlenen dengeli ve aromatik filtre kahve." },
+    "en": { "name": "Filter Drip Coffee", "desc": "Freshly brewed batch-filter coffee from 100% specialty Arabica beans, balanced and aromatic." },
+    "de": { "name": "Filterkaffee", "desc": "Frisch aufgebrühter Filterkaffee aus 100% Arabica-Bohnen, aromatisch und ausgewogen." },
+    "ru": { "name": "Фильтр-кофе", "desc": "Свежезаваренный фильтр-кофе из отборных зерен 100% арабики, сбалансированный и ароматный." },
+    "nl": { "name": "Filterkoffie", "desc": "Vers gezette filterkoffie van 100% Arabica-bonen, gebalanceerd en aromatisch." },
+    "sv": { "name": "Bryggkaffe", "desc": "Nybryggt kvalitetskaffe från 100% Arabica-bönor med rund och aromatisk smak." },
+    "no": { "name": "Filterkaffe", "desc": "Nybrygget kvalitetskaffe fra 100% Arabica-bønner, balansert og aromatisk." },
+    "fi": { "name": "Suodatinkahvi", "desc": "Tuoreena suodatettu laadukas kahvi 100% Arabica-pavuista, tasapainoinen ja aromikas." },
+    "pl": { "name": "Kawa Filtrowana", "desc": "Świeżo parzona kawa przelewowa ze 100% ziaren Arabica, zbalansowana i aromatyczna." },
+    "ar": { "name": "قهوة مقطرة (فلتر)", "desc": "قهوة مقطرة طازجة من حبوب أرابيكا 100% المختارة بعناية، متوازنة وعطرية." }
+  },
+  "Double Espresso": {
+    "tr": { "name": "Double Espresso", "desc": "Çift shot yoğun İtalyan espressosu." },
+    "en": { "name": "Double Espresso (Doppio)", "desc": "Rich double shot extracted Italian espresso with velvety crema." },
+    "de": { "name": "Doppelter Espresso", "desc": "Kräftiger doppelter Espresso nach italienischer Art mit samtiger Crema." },
+    "ru": { "name": "Двойной Эспрессо (Доппио)", "desc": "Насыщенный двойной шот итальянского эспрессо с плотной крема." },
+    "nl": { "name": "Dubbele Espresso", "desc": "Rijke dubbele shot Italiaanse espresso met fluweelzachte crema." },
+    "sv": { "name": "Dubbel Espresso", "desc": "Fyllig dubbel shot italiensk espresso med sammetslen crema." },
+    "no": { "name": "Dobbel Espresso", "desc": "Rik dobbel shot italiensk espresso med fyldig crema." },
+    "fi": { "name": "Tupla Espresso", "desc": "Täyteläinen tuplashotti italialaista espressoa samettisella cremalla." },
+    "pl": { "name": "Podwójne Espresso", "desc": "Głębokie podwójne espresso w stylu włoskim z gęstą cremą." },
+    "ar": { "name": "دبل إسبريسو", "desc": "جرعة مضاعفة غنية من الإسبريسو الإيطالي المركز مع كريما ناعمة." }
+  },
   "NOA Tatlı Kruvasan'ını Oluştur": {
     "tr": {
       "name": "NOA Tatlı Kruvasan'ını Oluştur",

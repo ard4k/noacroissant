@@ -336,6 +336,21 @@ export const PRODUCT_IMAGES: Record<string, ProductImageMeta> = {
     alt: "Hot Dog Kruvasan",
     objectPosition: "center",
   },
+  "pain-suisse": {
+    src: "/sade-kruvasan.jpg",
+    alt: "Pain Suisse (Hindi Füme)",
+    objectPosition: "center",
+  },
+  "pain-suisse-hindi-fume": {
+    src: "/sade-kruvasan.jpg",
+    alt: "Pain Suisse (Hindi Füme)",
+    objectPosition: "center",
+  },
+  "cedric-grolet": {
+    src: "/noa-croissant.jpg",
+    alt: "Cedric Grolet",
+    objectPosition: "center",
+  },
 
   // İçecekler
   "benzin": {
