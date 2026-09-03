@@ -103,6 +103,19 @@ export function Footer() {
 
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-400">
           <p>© {new Date().getFullYear()} {BUSINESS_INFO.name}. Tüm hakları saklıdır.</p>
+          <p className="flex items-center gap-1 text-[11px] text-stone-400">
+            <span>made with</span>
+            <span className="text-[#D1A37A]">♡</span>
+            <span>by</span>
+            <a
+              href="https://553adx.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#D1A37A] font-semibold hover:underline underline-offset-2 transition-colors"
+            >
+              553adx.com
+            </a>
+          </p>
           <p className="text-[11px] text-stone-500">Alanya Artisan Croissant & Specialty Coffee</p>
         </div>
       </div>
