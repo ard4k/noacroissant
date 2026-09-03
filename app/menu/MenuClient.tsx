@@ -535,7 +535,7 @@ export function MenuClient({
       </main>
 
       {/* Footer */}
-      <footer className="max-w-3xl mx-auto px-4 sm:px-6 pt-10 pb-20 border-t border-[#683B0C]/12 flex flex-col items-center justify-center">
+      <footer className="max-w-3xl mx-auto px-4 sm:px-6 pt-10 pb-20 border-t border-[#683B0C]/12 flex flex-col items-center justify-center gap-3">
         <div className="relative w-12 h-12 opacity-80 hover:opacity-100 transition-opacity">
           <Image
             src="/brand/noa-icon.png"
@@ -545,6 +545,19 @@ export function MenuClient({
             className="object-contain"
           />
         </div>
+        <p className="text-[11px] text-[#683B0C]/70 flex items-center gap-1">
+          <span>made with</span>
+          <span className="text-[#D1A37A]">♡</span>
+          <span>by</span>
+          <a
+            href="https://553adx.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#683B0C] font-semibold hover:underline underline-offset-2 transition-colors"
+          >
+            553adx.com
+          </a>
+        </p>
       </footer>
 
       {/* Floating Bottom Cart Bar */}
