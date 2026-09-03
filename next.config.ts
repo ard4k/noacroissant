@@ -5,7 +5,19 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: true,
   images: {
-    unoptimized: true, // Allow local asset direct serving without external loader restrictions
+    formats: ["image/avif", "image/webp"],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+  },
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "noacroissant.com" }],
+        destination: "https://www.noacroissant.com/:path*",
+        permanent: true,
+      },
+    ];
   },
   async headers() {
     return [
@@ -46,6 +58,13 @@ const nextConfig: NextConfig = {
           { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive, nosnippet" },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Cache-Control", value: "no-store, max-age=0, must-revalidate" },
+        ],
+      },
+      {
+        source: "/siparis/:path*",
+        headers: [
+          { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive, nosnippet" },
           { key: "Cache-Control", value: "no-store, max-age=0, must-revalidate" },
         ],
       },

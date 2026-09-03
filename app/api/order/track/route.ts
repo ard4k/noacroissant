@@ -12,7 +12,27 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const order = noaStore.getOrderByTrackingToken(token);
+  // 1. Try Firestore first (primary source of truth for serverless)
+  let order = null;
+  try {
+    const { getOrderByTrackingTokenFromFirestore, isFirebaseConfigured } = await import("@/lib/firebase/firestore");
+    if (isFirebaseConfigured) {
+      const firestoreOrder = await getOrderByTrackingTokenFromFirestore(token);
+      if (firestoreOrder) {
+        order = firestoreOrder;
+        // Hydrate in-memory store for local dev consistency
+        noaStore.hydrateOrder(firestoreOrder);
+      }
+    }
+  } catch (e) {
+    console.warn("Firestore order tracking lookup warning:", e);
+  }
+
+  // 2. Fallback to in-memory store (works in local dev with single process)
+  if (!order) {
+    order = noaStore.getOrderByTrackingToken(token);
+  }
+
   if (!order) {
     return NextResponse.json(
       { error: "Geçersiz takip kodu veya sipariş bulunamadı." },
@@ -49,3 +69,4 @@ export async function GET(req: NextRequest) {
     },
   });
 }
+

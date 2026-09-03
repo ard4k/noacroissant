@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { INITIAL_PRODUCTS, INITIAL_CATEGORIES } from "@/lib/seedData";
+import { BUSINESS_INFO } from "@/lib/businessConfig";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin", "latin-ext"],
@@ -15,49 +16,42 @@ const playfair = Playfair_Display({
   variable: "--font-playfair",
 });
 
-const SITE_URL = "https://noacroissant.com";
-const SITE_TITLE = "NOA Croissant | Menü";
-const SITE_DESC =
-  "Günlük taze pişirilen çıtır Fransız kruvasanları, Belçika çikolatalı özel tatlılar, doyurucu tuzlu menüler, waffle ve 3. nesil aromalı kahveler. Masadan temassız QR sipariş deneyimi.";
+const SITE_URL = BUSINESS_INFO.siteUrl;
+const DEFAULT_TITLE = "NOA Croissant | Menü";
+const DEFAULT_DESC = BUSINESS_INFO.description.tr;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: SITE_TITLE,
-  description: SITE_DESC,
+  title: DEFAULT_TITLE,
+  description: DEFAULT_DESC,
   applicationName: "NOA Croissant",
   authors: [{ name: "NOA Croissant", url: SITE_URL }],
   generator: "Next.js",
   keywords: [
     "NOA Croissant",
-    "NOA",
-    "kruvasan",
-    "croissant",
+    "NOA Croissant Alanya",
     "Alanya kruvasan",
-    "tatlı kruvasan",
-    "tuzlu kruvasan",
-    "Belçika çikolatası",
-    "Antep fıstıklı kruvasan",
-    "çilekli kruvasan",
-    "Twissy",
-    "Danish",
+    "Alanya croissant",
+    "Alanya cafe",
+    "Alanya kahve",
+    "Alanya tatlı",
+    "Alanya kahvaltı",
+    "Alanya kruvasan menüsü",
+    "Alanya cheesecake",
+    "Alanya waffle",
+    "croissant Alanya",
+    "cafe in Alanya",
+    "croissant cafe Alanya",
+    "breakfast cafe Alanya",
+    "desserts in Alanya",
+    "coffee and croissant Alanya",
     "Roll kruvasan",
     "Küp kruvasan",
-    "Amora kruvasan",
-    "Cheesecake",
-    "Limonlu cheesecake",
-    "Lotus cheesecake",
-    "Waffle",
-    "Bardakta waffle",
-    "Waffle kova",
-    "üçüncü nesil kahve",
-    "specialty coffee",
-    "latte",
-    "mocha",
-    "karamel macchiato",
+    "Danish",
+    "Amora",
+    "San Sebastian cheesecake",
+    "specialty coffee Alanya",
     "QR menü",
-    "temassız sipariş",
-    "bakery",
-    "patisserie",
   ],
   creator: "NOA Croissant",
   publisher: "NOA Croissant",
@@ -70,21 +64,22 @@ export const metadata: Metadata = {
   alternates: {
     canonical: SITE_URL,
     languages: {
-      "tr-TR": `${SITE_URL}?lang=tr`,
-      "en-US": `${SITE_URL}?lang=en`,
-      "de-DE": `${SITE_URL}?lang=de`,
-      "ru-RU": `${SITE_URL}?lang=ru`,
-      "nl-NL": `${SITE_URL}?lang=nl`,
-      "sv-SE": `${SITE_URL}?lang=sv`,
-      "no-NO": `${SITE_URL}?lang=no`,
-      "fi-FI": `${SITE_URL}?lang=fi`,
-      "pl-PL": `${SITE_URL}?lang=pl`,
-      "ar-AE": `${SITE_URL}?lang=ar`,
+      "tr": `${SITE_URL}`,
+      "en": `${SITE_URL}?lang=en`,
+      "de": `${SITE_URL}?lang=de`,
+      "ru": `${SITE_URL}?lang=ru`,
+      "nl": `${SITE_URL}?lang=nl`,
+      "sv": `${SITE_URL}?lang=sv`,
+      "no": `${SITE_URL}?lang=no`,
+      "fi": `${SITE_URL}?lang=fi`,
+      "pl": `${SITE_URL}?lang=pl`,
+      "ar": `${SITE_URL}?lang=ar`,
+      "x-default": `${SITE_URL}`,
     },
   },
   openGraph: {
-    title: SITE_TITLE,
-    description: SITE_DESC,
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESC,
     url: SITE_URL,
     siteName: "NOA Croissant",
     locale: "tr_TR",
@@ -92,33 +87,33 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/Noa%20Croissant.jpg",
+        url: "/noa-croissant.jpg",
         width: 1200,
-        height: 800,
-        alt: "NOA Croissant — Taze Pişirilen Artisan Kruvasan & Kahve",
+        height: 630,
+        alt: "NOA Croissant Alanya — Taze Pişirilen Artisan Kruvasan, Tatlı & Nitelikli Kahve",
       },
       {
         url: "/brand/logo.png",
-        width: 800,
-        height: 600,
+        width: 512,
+        height: 512,
         alt: "NOA Croissant Logo",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: SITE_TITLE,
-    description: SITE_DESC,
-    images: ["/Noa%20Croissant.jpg"],
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESC,
+    images: ["/noa-croissant.jpg"],
     creator: "@noacroissant",
   },
   icons: {
     icon: [
-      { url: "/favicon.png?v=5", sizes: "512x512", type: "image/png" },
+      { url: "/favicon.png?v=6", sizes: "512x512", type: "image/png" },
     ],
-    shortcut: "/favicon.png?v=5",
+    shortcut: "/favicon.png?v=6",
     apple: [
-      { url: "/favicon.png?v=5", sizes: "512x512", type: "image/png" },
+      { url: "/favicon.png?v=6", sizes: "512x512", type: "image/png" },
     ],
   },
   manifest: "/manifest.webmanifest",
@@ -140,8 +135,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
+  userScalable: true,
   themeColor: "#F8F1EB",
 };
 
@@ -150,7 +145,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Rich Menu Structure for all 104 products across 15 categories
+  // Rich Menu Structure for all products across categories
   const menuSections = INITIAL_CATEGORIES.map((cat) => {
     const items = INITIAL_PRODUCTS.filter((p) => p.category_id === cat.id);
     return {
@@ -160,14 +155,13 @@ export default function RootLayout({
         "@type": "MenuItem",
         name: prod.name,
         description: prod.description,
-        image: prod.image_url ? `${SITE_URL}${encodeURI(prod.image_url)}` : `${SITE_URL}/Noa%20Croissant.jpg`,
+        image: prod.image_url ? `${SITE_URL}${encodeURI(prod.image_url)}` : `${SITE_URL}/noa-croissant.jpg`,
         offers: {
           "@type": "Offer",
           price: prod.base_price,
           priceCurrency: "TRY",
           availability: "https://schema.org/InStock",
         },
-        suitableForDiet: "https://schema.org/HalalDiet",
       })),
     };
   });
@@ -176,27 +170,38 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@graph": [
       {
-        "@type": "Bakery",
+        "@type": BUSINESS_INFO.schemaTypes,
         "@id": `${SITE_URL}/#bakery`,
-        name: "NOA Croissant",
-        description: SITE_DESC,
+        name: BUSINESS_INFO.name,
+        legalName: BUSINESS_INFO.legalName,
+        description: DEFAULT_DESC,
         url: SITE_URL,
         logo: `${SITE_URL}/brand/logo.png`,
-        image: `${SITE_URL}/Noa%20Croissant.jpg`,
-        servesCuisine: ["French", "Bakery", "Desserts", "Specialty Coffee"],
-        priceRange: "₺₺",
-        currenciesAccepted: "TRY",
-        paymentAccepted: "Cash, Credit Card, Contactless",
+        image: `${SITE_URL}/noa-croissant.jpg`,
+        servesCuisine: BUSINESS_INFO.servesCuisine,
+        priceRange: BUSINESS_INFO.priceRange,
+        currenciesAccepted: BUSINESS_INFO.currenciesAccepted,
+        paymentAccepted: BUSINESS_INFO.paymentAccepted,
+        telephone: BUSINESS_INFO.telephone,
         address: {
           "@type": "PostalAddress",
-          addressLocality: "Alanya",
-          addressRegion: "Antalya",
-          addressCountry: "TR",
+          streetAddress: BUSINESS_INFO.address.streetAddress,
+          postalCode: BUSINESS_INFO.address.postalCode,
+          addressLocality: BUSINESS_INFO.address.addressLocality,
+          addressRegion: BUSINESS_INFO.address.addressRegion,
+          addressCountry: BUSINESS_INFO.address.addressCountry,
         },
+        geo: {
+          "@type": "GeoCoordinates",
+          latitude: BUSINESS_INFO.geo.latitude,
+          longitude: BUSINESS_INFO.geo.longitude,
+        },
+        openingHoursSpecification: BUSINESS_INFO.openingHoursSpecification,
+        sameAs: [BUSINESS_INFO.social.instagram],
         hasMenu: {
           "@type": "Menu",
           name: "NOA Croissant Resmi Menü",
-          url: `${SITE_URL}/#menu`,
+          url: `${SITE_URL}/menu`,
           hasMenuSection: menuSections,
         },
       },
@@ -206,9 +211,6 @@ export default function RootLayout({
   return (
     <html lang="tr" className={`${jakarta.variable} ${playfair.variable} bg-[#F8F1EB] m-0 p-0`} suppressHydrationWarning>
       <head>
-        <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png?v=5" />
-        <link rel="shortcut icon" type="image/png" href="/favicon.png?v=5" />
-        <link rel="apple-touch-icon" href="/favicon.png?v=5" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -217,7 +219,7 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              if ('serviceWorker' in navigator && window.location.protocol === 'https:' || window.location.hostname === 'localhost') {
+              if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
                 window.addEventListener('load', function() {
                   navigator.serviceWorker.register('/sw.js').catch(function() {});
                 });

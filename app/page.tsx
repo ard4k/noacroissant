@@ -7,11 +7,10 @@ export const dynamic = "force-dynamic";
 export default function HomePage() {
   const products = noaStore.getProducts();
   const categories = noaStore.getCategories();
-  const tables = noaStore.getTables();
 
   return (
     <Suspense fallback={null}>
-      <MenuClient products={products} categories={categories} tables={tables} />
+      <MenuClient products={products} categories={categories} />
     </Suspense>
   );
 }

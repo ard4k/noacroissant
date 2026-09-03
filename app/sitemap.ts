@@ -1,18 +1,19 @@
 import { MetadataRoute } from "next";
+import { BUSINESS_INFO } from "@/lib/businessConfig";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://noacroissant.com";
-  const lastModified = new Date();
+  const baseUrl = BUSINESS_INFO.siteUrl;
+  const releaseDate = new Date("2026-08-31T00:00:00.000Z");
 
   return [
     {
       url: baseUrl,
-      lastModified,
+      lastModified: releaseDate,
       changeFrequency: "daily",
       priority: 1.0,
       alternates: {
         languages: {
-          tr: `${baseUrl}?lang=tr`,
+          tr: `${baseUrl}`,
           en: `${baseUrl}?lang=en`,
           de: `${baseUrl}?lang=de`,
           ru: `${baseUrl}?lang=ru`,
@@ -22,6 +23,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
           fi: `${baseUrl}?lang=fi`,
           pl: `${baseUrl}?lang=pl`,
           ar: `${baseUrl}?lang=ar`,
+          "x-default": `${baseUrl}`,
         },
       },
     },

@@ -16,11 +16,18 @@ import {
   CheckCircle2,
   QrCode,
   ArrowLeft,
+  ArrowRight,
+  ReceiptText,
   Sparkles,
 } from "lucide-react";
-import { CartItem, Product } from "@/lib/types";
+import { CartItem, Product, LocalizedText } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
 import { Language, getTranslation } from "@/lib/i18n/translations";
+import {
+  resolveLocalizedText,
+  formatLocalizedPrice,
+  getSortedAndFormattedOptionsLocalized,
+} from "@/lib/i18n/resolver";
 import { BRAND_ASSETS } from "@/lib/images";
 
 interface CartDrawerProps {
@@ -47,17 +54,113 @@ interface CartDrawerProps {
 interface UpsellItem {
   id: string;
   name: string;
+  name_i18n?: LocalizedText;
   price: number;
   description: string;
+  description_i18n?: LocalizedText;
   category: "coffee" | "drink" | "bakery";
 }
 
 const ALL_UPSELL_ITEMS: UpsellItem[] = [
+  // NOA Special İçecekler
+  {
+    id: "prod-noa-turbo",
+    name: "NOA Turbo",
+    price: 140,
+    description: "Özel tazeleyici enerji kokteyli",
+    category: "drink",
+  },
+  {
+    id: "prod-noa-full-depo",
+    name: "NOA Full Depo",
+    price: 140,
+    description: "Süper vitamin taze meyve kokteyli",
+    category: "drink",
+  },
+  {
+    id: "prod-noa-benzin",
+    name: "NOA Benzin",
+    price: 140,
+    description: "Kırmızı orman meyveli özel NOA karışımı",
+    category: "drink",
+  },
+  {
+    id: "prod-noa-dizel",
+    name: "NOA Dizel",
+    price: 140,
+    description: "Tropikal meyve aromalı ferahlatıcı kokteyl",
+    category: "drink",
+  },
+  {
+    id: "prod-noa-mazot",
+    name: "NOA Mazot",
+    price: 140,
+    description: "Şefin gizli tarifi ferahlatıcı NOA lezzeti",
+    category: "drink",
+  },
+  {
+    id: "prod-noa-antifriz",
+    name: "NOA Antifriz",
+    price: 140,
+    description: "Buz gibi canlandırıcı nane ve narenciye",
+    category: "drink",
+  },
+  {
+    id: "prod-noa-motor-yagi",
+    name: "NOA Motor Yağı",
+    price: 140,
+    description: "Koyu çikolatalı yoğun buzlu gurme içecek",
+    category: "drink",
+  },
+  {
+    id: "prod-el-yapimi-cilekli-limonata",
+    name: "El Yapımı Çilekli Limonata",
+    price: 130,
+    description: "Taze bahçe çilekleri püreli limonata",
+    category: "drink",
+  },
+  {
+    id: "prod-el-yapimi-limonata",
+    name: "El Yapımı Limonata",
+    price: 110,
+    description: "Taze sıkılmış ferahlatıcı limonata",
+    category: "drink",
+  },
+  {
+    id: "prod-hibiscus-limonata",
+    name: "Hibiscus Limonata",
+    price: 130,
+    description: "Doğal hibiscus çayı ve taze limon",
+    category: "drink",
+  },
+  {
+    id: "prod-taze-portakal",
+    name: "Taze Portakal Suyu",
+    price: 120,
+    description: "Sipariş üzerine sıkılmış %100 doğal",
+    category: "drink",
+  },
+
+  // Kahveler & Çay
   {
     id: "prod-iced-latte",
     name: "Iced Latte",
     price: 125,
     description: "Buz, soğuk süt ve taze espresso",
+    category: "coffee",
+  },
+  {
+    id: "prod-iced-caramel-macchiato",
+    name: "Iced Caramel Macchiato",
+    price: 135,
+    description: "Soğuk süt, vanilya, espresso & karamel",
+    category: "coffee",
+  },
+  {
+    id: "prod-cold-brew",
+    name: "Cold Brew",
+    price: 130,
+    description: "16 saat soğuk demlenmiş zengin kahve",
     category: "coffee",
   },
   {
@@ -75,6 +178,13 @@ const ALL_UPSELL_ITEMS: UpsellItem[] = [
     category: "coffee",
   },
   {
+    id: "prod-cortado",
+    name: "Cortado",
+    price: 110,
+    description: "Eşit oranda espresso ve kadifemsi süt",
+    category: "coffee",
+  },
+  {
     id: "prod-turk-kahvesi",
     name: "Türk Kahvesi",
     price: 90,
@@ -82,32 +192,18 @@ const ALL_UPSELL_ITEMS: UpsellItem[] = [
     category: "coffee",
   },
   {
-    id: "prod-el-yapimi-limonata",
-    name: "El Yapımı Limonata",
+    id: "prod-filtre-kahve",
+    name: "Filtre Kahve",
+    price: 100,
+    description: "Taze çekilmiş çekirdeklerden filtre kahve",
+    category: "coffee",
+  },
+  {
+    id: "prod-iced-americano",
+    name: "Iced Americano",
     price: 110,
-    description: "Taze sıkılmış ferahlatıcı limonata",
-    category: "drink",
-  },
-  {
-    id: "prod-el-yapimi-cilekli-limonata",
-    name: "El Yapımı Çilekli Limonata",
-    price: 130,
-    description: "Taze bahçe çilekleri püreli limonata",
-    category: "drink",
-  },
-  {
-    id: "prod-noa-full-depo",
-    name: "NOA Full Depo",
-    price: 140,
-    description: "Süper vitamin taze meyve kokteyli",
-    category: "drink",
-  },
-  {
-    id: "prod-coca-cola",
-    name: "Coca-Cola (33 cl.)",
-    price: 70,
-    description: "Kutu 330 ml.",
-    category: "drink",
+    description: "Buz ve soğuk su ile ferahlatıcı espresso",
+    category: "coffee",
   },
   {
     id: "prod-cay",
@@ -116,6 +212,15 @@ const ALL_UPSELL_ITEMS: UpsellItem[] = [
     description: "Taze demlenmiş geleneksel çay",
     category: "drink",
   },
+
+  // Fırın & Tatlı
+  {
+    id: "prod-dondurma",
+    name: "1 Top Dondurma",
+    price: 75,
+    description: "Doğal ve taze lezzet eşlikçisi",
+    category: "bakery",
+  },
   {
     id: "prod-sade-kruvasan",
     name: "Sade Kruvasan",
@@ -123,95 +228,31 @@ const ALL_UPSELL_ITEMS: UpsellItem[] = [
     description: "Hakiki Fransız tereyağlı çıtır kruvasan",
     category: "bakery",
   },
-  {
-    id: "prod-dondurma",
-    name: "Dondurma",
-    price: 75,
-    description: "1 Top doğal taze dondurma",
-    category: "bakery",
-  },
 ];
+
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const temp = shuffled[i];
+    shuffled[i] = shuffled[j];
+    shuffled[j] = temp;
+  }
+  return shuffled;
+}
 
 function getDynamicRecommendations(items: CartItem[]): UpsellItem[] {
   const inCartNames = items.map((it) => it.product_name.toLowerCase());
 
-  // Detect cart contents
-  const hasSavoury = items.some((it) => {
-    const name = it.product_name.toLowerCase();
-    return (
-      name.includes("tuzlu") ||
-      name.includes("yeşil") ||
-      name.includes("ege") ||
-      name.includes("avokado") ||
-      name.includes("köz") ||
-      name.includes("pesto") ||
-      name.includes("kaburga") ||
-      name.includes("hot dog")
-    );
-  });
-
-  const hasSweet = items.some((it) => {
-    const name = it.product_name.toLowerCase();
-    return (
-      name.includes("tatlı") ||
-      name.includes("çikolata") ||
-      name.includes("nutella") ||
-      name.includes("fıstık") ||
-      name.includes("lotus") ||
-      name.includes("danish") ||
-      name.includes("twissy") ||
-      name.includes("roll") ||
-      name.includes("küp") ||
-      name.includes("amora")
-    );
-  });
-
-  const hasOnlyDrinks = items.length > 0 && items.every((it) => {
-    const name = it.product_name.toLowerCase();
-    return (
-      name.includes("kahve") ||
-      name.includes("latte") ||
-      name.includes("americano") ||
-      name.includes("espresso") ||
-      name.includes("cappuccino") ||
-      name.includes("flat white") ||
-      name.includes("çay") ||
-      name.includes("limonata") ||
-      name.includes("su") ||
-      name.includes("cola") ||
-      name.includes("depo") ||
-      name.includes("turbo") ||
-      name.includes("benzin") ||
-      name.includes("dizel")
-    );
-  });
-
-  let candidates: UpsellItem[] = [];
-
-  if (hasOnlyDrinks) {
-    // Only drinks -> recommend bakery/croissant/ice cream
-    candidates = ALL_UPSELL_ITEMS.filter((u) => u.category === "bakery");
-  } else if (hasSavoury && !hasSweet) {
-    // Only savoury -> recommend refreshing lemonade/cold drink/tea
-    candidates = ALL_UPSELL_ITEMS.filter((u) => u.category === "drink");
-  } else if (hasSweet) {
-    // Sweet croissants -> recommend coffees (Iced Latte, Flat White, Cappuccino, Turkish Coffee, etc.)
-    candidates = ALL_UPSELL_ITEMS.filter((u) => u.category === "coffee" || u.name === "Çay");
-  } else {
-    candidates = ALL_UPSELL_ITEMS;
-  }
-
   // Filter out products already in cart
-  const available = candidates.filter(
+  const available = ALL_UPSELL_ITEMS.filter(
     (u) => !inCartNames.some((cName) => cName.includes(u.name.toLowerCase()) || u.name.toLowerCase().includes(cName))
   );
 
-  if (available.length >= 2) return available.slice(0, 2);
+  const randomized = shuffleArray(available);
+  if (randomized.length >= 2) return randomized.slice(0, 2);
 
-  // Fallback to any remaining item not in cart
-  const fallback = ALL_UPSELL_ITEMS.filter(
-    (u) => !inCartNames.some((cName) => cName.includes(u.name.toLowerCase()) || u.name.toLowerCase().includes(cName))
-  );
+  const fallback = shuffleArray(ALL_UPSELL_ITEMS);
   return fallback.slice(0, 2);
 }
 
@@ -302,6 +343,14 @@ export function CartDrawer({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showQrModal, setShowQrModal] = useState(false);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
+  const [activeIconConcept, setActiveIconConcept] = useState<1 | 2 | 3 | 4 | 5 | 6>(1);
+  const [recommendations, setRecommendations] = useState<UpsellItem[]>([]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setRecommendations(getDynamicRecommendations(items));
+    }
+  }, [isOpen, items]);
 
   const t = (key: string, fallback?: string) => getTranslation(language, key, fallback);
 
@@ -318,7 +367,7 @@ export function CartDrawer({
 
     const payload = {
       type: "NOA_WAITER_ORDER",
-      table: tableLabel || "Masa 01",
+      table: tableLabel || "Self Servis",
       total: total,
       totalCount: totalCount,
       note: generalNote || "",
@@ -368,7 +417,7 @@ export function CartDrawer({
         {/* Top Header */}
         <div className="shrink-0 flex items-center justify-between px-5 sm:px-6 py-4 bg-white border-b border-[#683B0C]/10">
           <div className="flex items-center gap-2.5">
-            {showQrModal ? (
+            {showQrModal && (
               <button
                 type="button"
                 onClick={() => setShowQrModal(false)}
@@ -377,19 +426,9 @@ export function CartDrawer({
               >
                 <ArrowLeft className="w-4 h-4 stroke-[2.5]" />
               </button>
-            ) : (
-              <div className="relative w-8 h-8 rounded-full overflow-hidden shrink-0 shadow-xs border border-[#683B0C]/15 bg-white">
-                <Image
-                  src="/noa_icon.jpg"
-                  alt="NOA"
-                  fill
-                  sizes="32px"
-                  className="object-cover"
-                />
-              </div>
             )}
-            <h2 id="cart-modal-title" className="text-lg font-black text-[#381D05] tracking-tight">
-              {showQrModal ? "Kasaya Göster" : "Sepetim"}
+            <h2 id="cart-modal-title" className="text-lg font-black text-[#381D05] tracking-wide uppercase">
+              {showQrModal ? t("showToCashier", "KASAYA GÖSTER") : t("myCart", "SEPETİM")}
             </h2>
           </div>
 
@@ -399,9 +438,9 @@ export function CartDrawer({
               onClose();
             }}
             aria-label="Kapat"
-            className="w-8 h-8 rounded-full border border-[#683B0C]/20 flex items-center justify-center text-[#381D05] hover:bg-[#FAF4EE] active:scale-95 transition-all cursor-pointer"
+            className="w-8 h-8 rounded-full bg-[#EF4444] hover:bg-[#DC2626] text-white flex items-center justify-center active:scale-95 transition-all cursor-pointer shadow-xs border-0"
           >
-            <X className="w-4 h-4 stroke-[2.5]" />
+            <X className="w-4 h-4 stroke-[3]" />
           </button>
         </div>
 
@@ -442,13 +481,22 @@ export function CartDrawer({
             <div className="w-full bg-white rounded-2xl border border-[#683B0C]/20 p-4 space-y-2.5 shadow-xs font-mono text-left">
               <div className="space-y-2 text-xs text-[#381D05]">
                 {items.map((item) => {
-                  const formattedOpts = getSortedAndFormattedOptions(item.selected_options);
+                  const formattedOpts = getSortedAndFormattedOptionsLocalized(
+                    item.selected_options,
+                    language
+                  );
+                  const translatedName = resolveLocalizedText(
+                    item.product_name_i18n || item.product_name,
+                    language
+                  );
 
                   return (
                     <div key={item.id} className="space-y-0.5">
                       <div className="flex items-center justify-between text-[12px] font-bold">
-                        <span className="truncate pr-2">• {item.product_name} <span className="text-[#8C5828]">x{item.quantity}</span></span>
-                        <span className="shrink-0">{formatPrice(item.total_price)}</span>
+                        <span className="truncate pr-2">
+                          • {translatedName} <span className="text-[#8C5828]">x{item.quantity}</span>
+                        </span>
+                        <span className="shrink-0">{formatLocalizedPrice(item.total_price, language)}</span>
                       </div>
                       {formattedOpts.length > 0 && (
                         <div className="space-y-0.5 pt-0.5 pl-3 font-sans">
@@ -465,8 +513,10 @@ export function CartDrawer({
               </div>
 
               <div className="pt-2 border-t border-[#683B0C]/20 flex items-center justify-between text-xs font-black text-[#381D05]">
-                <span className="tracking-wider">TOPLAM</span>
-                <span className="text-sm font-black text-[#381D05] font-sans">{formatPrice(total)}</span>
+                <span className="tracking-wider">{t("total", "TOPLAM")}</span>
+                <span className="text-sm font-black text-[#381D05] font-sans">
+                  {formatLocalizedPrice(total, language)}
+                </span>
               </div>
             </div>
 
@@ -494,13 +544,13 @@ export function CartDrawer({
               </div>
 
               <p className="text-[10px] text-[#8C5828] font-bold uppercase tracking-wider max-w-xs leading-relaxed">
-                QR KOD OKUTULDUĞUNDA SİPARİŞ LİSTESİ KASA PANELİNE OTOMATİK AKTARILIR.
+                {t("qrWaiterNotice", "QR KOD OKUTULDUĞUNDA SİPARİŞ LİSTESİ KASA PANELİNE OTOMATİK AKTARILIR.")}
               </p>
             </div>
 
             {/* Footer Notice */}
             <span className="text-[11px] font-black text-[#381D05] uppercase tracking-wider block pt-1">
-              BU EKRANI KASAYA GÖSTEREBİLİRSİNİZ
+              {t("showToCashier", "BU EKRANI KASAYA GÖSTEREBİLİRSİNİZ")}
             </span>
           </div>
         ) : (
@@ -511,9 +561,9 @@ export function CartDrawer({
                 <div className="w-16 h-16 rounded-full bg-[#FAF0E4] flex items-center justify-center text-[#8C5828]">
                   <ShoppingBag className="w-8 h-8 stroke-[1.5]" />
                 </div>
-                <h3 className="text-base font-black text-[#381D05]">Sepetiniz Boş</h3>
+                <h3 className="text-base font-black text-[#381D05]">{t("emptyCart", "Sepetiniz Boş")}</h3>
                 <p className="text-xs text-[#5C3818]/70 max-w-xs leading-relaxed">
-                  Menüden dilediğiniz lezzetleri seçerek sepetinize ekleyebilirsiniz.
+                  {t("emptyCartDesc", "Menüden dilediğiniz lezzetleri seçerek sepetinize ekleyebilirsiniz.")}
                 </p>
               </div>
             ) : (
@@ -521,17 +571,24 @@ export function CartDrawer({
                 {/* Product Items List */}
                 <div className="divide-y divide-dashed divide-[#683B0C]/15">
                   {items.map((item) => {
-                    const formattedOptions = getSortedAndFormattedOptions(item.selected_options);
+                    const formattedOptions = getSortedAndFormattedOptionsLocalized(
+                      item.selected_options,
+                      language
+                    );
+                    const translatedItemName = resolveLocalizedText(
+                      item.product_name_i18n || item.product_name,
+                      language
+                    );
 
                     return (
                       <div key={item.id} className="py-3.5 first:pt-0 last:pb-0 flex items-start justify-between gap-3">
                         {/* Item Info */}
                         <div className="flex-1 min-w-0 pr-2">
                           <h4 className="text-[14px] font-black text-[#381D05] leading-tight">
-                            {item.product_name}
+                            {translatedItemName}
                           </h4>
                           <p className="text-[11.5px] font-medium text-[#8C5828] mt-0.5">
-                            {formatPrice(item.unit_price)} / adet
+                            {formatLocalizedPrice(item.unit_price, language)} {t("perItem", "/ adet")}
                           </p>
 
                           {/* Selected Options Badges */}
@@ -542,7 +599,7 @@ export function CartDrawer({
                                   key={idx}
                                   className="px-2 py-0.5 rounded-md bg-[#FAF0E4] text-[#683B0C] text-[10.5px] font-bold border border-[#683B0C]/10"
                                 >
-                                  +{optLabel}
+                                  {optLabel}
                                 </span>
                               ))}
                             </div>
@@ -583,7 +640,7 @@ export function CartDrawer({
 
                           {/* Item Total Price */}
                           <span className="text-[14px] font-black text-[#381D05] font-sans min-w-[55px] text-right">
-                            {formatPrice(item.total_price)}
+                            {formatLocalizedPrice(item.total_price, language)}
                           </span>
 
                           {/* Trash Delete */}
@@ -604,10 +661,10 @@ export function CartDrawer({
                 {/* TOPLAM Row */}
                 <div className="pt-3 border-t border-[#683B0C]/15 flex items-center justify-between">
                   <span className="text-sm font-black uppercase tracking-wider text-[#381D05]">
-                    TOPLAM
+                    {t("total", "TOPLAM")}
                   </span>
                   <span className="text-xl font-black text-[#15803D] font-sans">
-                    {formatPrice(total)}
+                    {formatLocalizedPrice(total, language)}
                   </span>
                 </div>
 
@@ -615,13 +672,20 @@ export function CartDrawer({
                 <div className="p-4 bg-white rounded-[20px] border border-[#683B0C]/15 space-y-2.5 shadow-xs font-mono">
                   <div className="space-y-2 text-xs text-[#381D05]">
                     {items.map((item) => {
-                      const formattedOpts = getSortedAndFormattedOptions(item.selected_options);
+                      const formattedOpts = getSortedAndFormattedOptionsLocalized(
+                        item.selected_options,
+                        language
+                      );
+                      const translatedItemName = resolveLocalizedText(
+                        item.product_name_i18n || item.product_name,
+                        language
+                      );
 
                       return (
                         <div key={item.id} className="space-y-0.5">
                           <div className="flex items-center justify-between text-[11.5px] font-bold">
-                            <span className="truncate pr-2">• {item.product_name} x{item.quantity}</span>
-                            <span className="shrink-0">{formatPrice(item.total_price)}</span>
+                            <span className="truncate pr-2">• {translatedItemName} x{item.quantity}</span>
+                            <span className="shrink-0">{formatLocalizedPrice(item.total_price, language)}</span>
                           </div>
                           {formattedOpts.length > 0 && (
                             <div className="space-y-0.5 text-[11px] text-[#8C5828] pl-3 font-sans mt-0.5">
@@ -635,7 +699,7 @@ export function CartDrawer({
                           )}
                           {item.item_note && (
                             <div className="text-[10.5px] italic text-[#8C5828] pl-3 font-sans">
-                              Not: {item.item_note}
+                              {t("notePrefix", "Not")}: {item.item_note}
                             </div>
                           )}
                         </div>
@@ -644,107 +708,104 @@ export function CartDrawer({
                   </div>
 
                   <div className="pt-2 border-t border-dashed border-[#683B0C]/20 flex items-center justify-between text-xs font-black text-[#381D05]">
-                    <span>TOTAL</span>
-                    <span className="text-sm font-black text-[#15803D] font-sans">{formatPrice(total)}</span>
+                    <span>{t("total", "TOTAL")}</span>
+                    <span className="text-sm font-black text-[#15803D] font-sans">{formatLocalizedPrice(total, language)}</span>
                   </div>
                 </div>
 
                 {/* Smart Upselling Recommendations Box */}
                 {(() => {
-                  const availableUpsells = getDynamicRecommendations(items);
+                  const availableUpsells = recommendations.length > 0 ? recommendations : getDynamicRecommendations(items);
                   if (availableUpsells.length === 0) return null;
 
                   return (
                     <div className="p-3.5 bg-gradient-to-r from-[#FAF0E4] to-[#F5E6D3] rounded-[22px] border border-[#683B0C]/20 space-y-2.5 shadow-2xs">
                       <div className="flex items-center gap-2 text-xs font-black text-[#381D05]">
-                        <div className="w-5 h-5 rounded-full overflow-hidden shrink-0 border border-[#8C5828]/25 shadow-2xs relative">
+                        <div className="w-5 h-5 shrink-0 relative">
                           <Image
-                            src={BRAND_ASSETS.logo || "/noa_icon.jpg"}
+                            src="/brand/noa-icon.png"
                             alt="NOA"
                             fill
                             sizes="20px"
-                            className="object-cover"
+                            className="object-contain"
                           />
                         </div>
                         <span>{t("smartUpsellTitle", "Kruvasanının yanına nefis bir eşlikçi!")}</span>
                       </div>
 
                       <div className="grid grid-cols-2 gap-2">
-                        {availableUpsells.map((up) => (
-                          <div
-                            key={up.id}
-                            className="p-2.5 bg-white rounded-xl border border-[#683B0C]/15 flex flex-col justify-between space-y-2 shadow-xs hover:border-[#683B0C]/30 transition-all"
-                          >
-                            <div>
-                              <div className="font-black text-[12px] text-[#381D05] leading-tight truncate">
-                                {up.name}
+                        {availableUpsells.map((up) => {
+                          const upName = resolveLocalizedText(up.name_i18n || up.name, language);
+                          const upDesc = resolveLocalizedText(up.description_i18n || up.description, language);
+
+                          return (
+                            <div
+                              key={up.id}
+                              className="p-2.5 bg-white rounded-xl border border-[#683B0C]/15 flex flex-col justify-between space-y-2 shadow-xs hover:border-[#683B0C]/30 transition-all"
+                            >
+                              <div>
+                                <div className="font-black text-[12px] text-[#381D05] leading-tight truncate">
+                                  {upName}
+                                </div>
+                                <div className="text-[10px] text-[#8C5828] font-medium line-clamp-1 mt-0.5">
+                                  {upDesc}
+                                </div>
                               </div>
-                              <div className="text-[10px] text-[#8C5828] font-medium line-clamp-1 mt-0.5">
-                                {up.description}
+                              <div className="flex items-center justify-between pt-1 border-t border-[#683B0C]/10">
+                                <span className="text-[11px] font-black text-[#15803D]">{formatPrice(up.price)}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (onAddDirectProduct) {
+                                      onAddDirectProduct({
+                                        id: up.id,
+                                        name: up.name,
+                                        base_price: up.price,
+                                        description: up.description,
+                                        category_id: "drinks",
+                                        is_available: true,
+                                        option_groups: [],
+                                      });
+                                      showToast(
+                                        language === "tr"
+                                          ? `${up.name} sepete eklendi! ✨`
+                                          : `${upName} added to cart! ✨`
+                                      );
+                                    }
+                                  }}
+                                  className="px-2 py-1 rounded-lg bg-[#381D05] hover:bg-[#251202] text-white text-[10.5px] font-black flex items-center gap-1 transition-all active:scale-90 cursor-pointer shadow-xs"
+                                >
+                                  <Plus className="w-3 h-3 stroke-[3]" />
+                                  <span>{t("smartUpsellAdd", "Ekle")}</span>
+                                </button>
                               </div>
                             </div>
-                            <div className="flex items-center justify-between pt-1 border-t border-[#683B0C]/10">
-                              <span className="text-[11px] font-black text-[#15803D]">{formatPrice(up.price)}</span>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  if (onAddDirectProduct) {
-                                    onAddDirectProduct({
-                                      id: up.id,
-                                      name: up.name,
-                                      base_price: up.price,
-                                      description: up.description,
-                                      category_id: "drinks",
-                                      is_available: true,
-                                      option_groups: [],
-                                    });
-                                    showToast(`${up.name} sepete eklendi! ✨`);
-                                  }
-                                }}
-                                className="px-2 py-1 rounded-lg bg-[#381D05] hover:bg-[#251202] text-white text-[10.5px] font-black flex items-center gap-1 transition-all active:scale-90 cursor-pointer shadow-xs"
-                              >
-                                <Plus className="w-3 h-3 stroke-[3]" />
-                                <span>{t("smartUpsellAdd", "Ekle")}</span>
-                              </button>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   );
                 })()}
 
-                {/* Self-Servis Action Buttons Grid */}
-                <div className="space-y-2.5 pt-1">
-                  {/* Primary Actions Row (KASAYA GÖSTER + SİPARİŞİ TAMAMLA) */}
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowQrModal(true)}
-                      className="flex items-center justify-center gap-1.5 py-3.5 px-2 rounded-[16px] bg-[#381D05] hover:bg-[#251202] text-[#FAF0E4] text-[10.5px] sm:text-xs font-black uppercase tracking-wider shadow-sm active:scale-95 transition-all cursor-pointer border border-[#683B0C]/40"
-                    >
-                      <QrCode className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5] text-[#D1A37A] shrink-0" />
-                      <span className="whitespace-nowrap">KASAYA GÖSTER</span>
-                    </button>
+                {/* Action Buttons */}
+                <div className="space-y-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={onProceedCheckout}
+                    className="w-full h-14 rounded-2xl bg-[#15803D] hover:bg-[#166534] text-white text-sm font-black uppercase tracking-wider shadow-md active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2 border border-[#15803D]"
+                  >
+                    <ReceiptText className="w-5 h-5 stroke-[2.5]" />
+                    <span>{t("completeOrder", "SİPARİŞİ OLUŞTUR")}</span>
+                  </button>
 
-                    <button
-                      type="button"
-                      onClick={onProceedCheckout}
-                      className="flex items-center justify-center gap-1.5 py-3.5 px-2 rounded-[16px] bg-[#15803D] hover:bg-[#166534] text-white text-[10.5px] sm:text-xs font-black uppercase tracking-wider shadow-xs active:scale-95 transition-all cursor-pointer border border-[#15803D]"
-                    >
-                      <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5] text-white shrink-0" />
-                      <span className="whitespace-nowrap">SİPARİŞİ TAMAMLA</span>
-                    </button>
-                  </div>
-
-                  {/* Destructive Clear Cart Button - Solid Red */}
+                  {/* Destructive Clear Cart Button */}
                   <button
                     type="button"
                     onClick={onClearCart}
-                    className="w-full py-3 rounded-[16px] bg-[#DC2626] hover:bg-[#B91C1C] text-white text-xs font-black uppercase tracking-wider shadow-sm active:scale-98 transition-all cursor-pointer mt-1 flex items-center justify-center gap-1.5"
+                    className="w-full py-3 rounded-2xl bg-[#DC2626] hover:bg-[#B91C1C] text-white text-xs font-black uppercase tracking-wider shadow-sm active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2"
                   >
-                    <Trash2 className="w-4 h-4" />
-                    <span>SEPETİ TEMİZLE</span>
+                    <Trash2 className="w-4 h-4 stroke-[2.5]" />
+                    <span>{t("clearCart", "SEPETİ TEMİZLE")}</span>
                   </button>
                 </div>
               </>

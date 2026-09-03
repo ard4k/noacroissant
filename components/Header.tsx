@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Search, ShoppingBag, ChevronDown, Check } from "lucide-react";
+import { Search, ShoppingBag, ChevronDown, Check, Wifi, Coffee } from "lucide-react";
 import { BRAND_ASSETS } from "@/lib/images";
 import { DiningTable } from "@/lib/types";
 import { Language, getTranslation } from "@/lib/i18n/translations";
@@ -17,6 +17,10 @@ interface HeaderProps {
   onOpenCart: () => void;
   onOpenSearch: () => void;
   onOpenStory?: () => void;
+  onOpenWifi?: () => void;
+  onOpenLoyalty?: () => void;
+  loyaltyStamps?: number;
+  hasFreeReward?: boolean;
   isDevMode?: boolean;
   language?: Language;
   onLanguageChange?: (lang: Language) => void;
@@ -30,12 +34,18 @@ export function Header({
   onOpenCart,
   onOpenSearch,
   onOpenStory,
+  onOpenWifi,
+  onOpenLoyalty,
+  loyaltyStamps,
+  hasFreeReward = false,
   isDevMode = false,
   language = "tr",
   onLanguageChange = () => {},
 }: HeaderProps) {
+  const isAtTable = Boolean(table && table.table_number > 0);
+
   return (
-    <header className="w-full bg-[#F8F1EB] border-b border-[#D1A37A]/30">
+    <header className="w-full bg-[#F8F1EB] border-b border-[#D1A37A]/30 sticky top-0 z-30 shadow-2xs backdrop-blur-md bg-[#F8F1EB]/95">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-2.5 sm:gap-4">
         {/* Brand with Story Ring & Static Dot */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
@@ -43,7 +53,8 @@ export function Header({
             type="button"
             onClick={onOpenStory}
             className="relative p-0.5 rounded-full bg-gradient-to-tr from-[#D97706] via-[#B45309] to-[#F59E0B] shadow-xs hover:scale-105 active:scale-95 transition-all cursor-pointer group"
-            title="Hikayemiz"
+            title={getTranslation(language, "ourStory", "Hikayemiz")}
+            aria-label={getTranslation(language, "ourStory", "Hikayemiz")}
           >
             <div className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden border-2 border-white bg-white">
               <Image
@@ -76,21 +87,38 @@ export function Header({
           </Link>
         </div>
 
-        {/* Right: Language Selector & Wide Search Bar */}
-        <div className="flex-1 max-w-[240px] sm:max-w-xs md:max-w-sm flex items-center justify-end gap-2 min-w-0">
+        {/* Right Actions: Dil Seçici, Wi-Fi & Arama */}
+        <div className="flex items-center justify-end gap-1.5 sm:gap-2 shrink-0">
+          {/* Language Selector (Translate) */}
           <LanguageSelector
             currentLanguage={language}
             onLanguageChange={onLanguageChange}
           />
 
+
+
+          {/* Wi-Fi Action Button */}
+          {onOpenWifi && (
+            <button
+              type="button"
+              onClick={onOpenWifi}
+              title={getTranslation(language, "connectWifi", "Wi-Fi Ağına Bağlan")}
+              aria-label={getTranslation(language, "wifiNetwork", "Wi-Fi Ağı")}
+              className="h-9 w-9 sm:h-10 sm:w-10 rounded-full bg-[#16A34A] hover:bg-[#15803D] text-white border-0 shadow-none flex items-center justify-center transition-all active:scale-95 cursor-pointer shrink-0"
+            >
+              <Wifi className="w-4 h-4 text-white stroke-[2.4]" />
+            </button>
+          )}
+
+          {/* Search Box */}
           <button
             onClick={onOpenSearch}
-            aria-label="Ürün veya lezzet ara"
-            className="flex-1 h-9 sm:h-10 px-3 sm:px-3.5 rounded-full bg-[#FAF4EE] hover:bg-white text-[#4A2808] flex items-center gap-2 border border-[#683B0C]/15 shadow-2xs transition-all cursor-pointer group active:scale-[0.98] min-w-0"
+            aria-label={getTranslation(language, "searchAria", "Ürün veya lezzet ara...")}
+            className="h-9 sm:h-10 px-3 sm:px-3.5 rounded-full bg-white hover:bg-stone-50 text-[#381D05] flex items-center gap-2 border border-[#683B0C]/20 shadow-2xs transition-all cursor-pointer group active:scale-[0.98]"
           >
-            <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#8C5828] group-hover:text-[#381D05] transition-colors shrink-0 stroke-[2.2]" />
-            <span className="text-[11px] sm:text-xs text-[#8C5828]/80 font-medium group-hover:text-[#381D05] truncate">
-              {getTranslation(language, "searchPlaceholder", "Ara...")}
+            <Search className="w-3.5 h-3.5 text-[#8C5828] group-hover:text-[#381D05] transition-colors shrink-0 stroke-[2.2]" />
+            <span className="hidden sm:inline text-xs text-[#8C5828]/80 font-medium group-hover:text-[#381D05] truncate max-w-[130px] md:max-w-[170px]">
+              {getTranslation(language, "searchPlaceholder", "Ürün veya lezzet ara...")}
             </span>
           </button>
         </div>

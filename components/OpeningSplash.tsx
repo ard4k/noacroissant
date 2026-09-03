@@ -1,23 +1,68 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { BRAND_ASSETS } from "@/lib/images";
 
+import { Language, getTranslation, detectDeviceLanguage } from "@/lib/i18n/translations";
+
 interface OpeningSplashProps {
   onComplete?: () => void;
   onOpenStory?: () => void;
+  language?: Language;
 }
 
 export function OpeningSplash({
   onComplete,
   onOpenStory,
+  language = "tr",
 }: OpeningSplashProps) {
   const [isVisible, setIsVisible] = useState(true);
+  const [activeLang, setActiveLang] = useState<Language>(language);
+
+  useEffect(() => {
+    setActiveLang(detectDeviceLanguage());
+  }, []);
+
+  useEffect(() => {
+    if (language) setActiveLang(language);
+  }, [language]);
+
+  // Lock body & html scrolling completely while splash is visible
+  useEffect(() => {
+    if (!isVisible) return;
+
+    const origBodyOverflow = document.body.style.overflow;
+    const origHtmlOverflow = document.documentElement.style.overflow;
+    const origTouchAction = document.body.style.touchAction;
+
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+
+    // Prevent default touch moves and wheel events
+    const preventScroll = (e: Event) => {
+      e.preventDefault();
+    };
+
+    window.addEventListener("touchmove", preventScroll, { passive: false });
+    window.addEventListener("wheel", preventScroll, { passive: false });
+
+    return () => {
+      document.body.style.overflow = origBodyOverflow;
+      document.documentElement.style.overflow = origHtmlOverflow;
+      document.body.style.touchAction = origTouchAction;
+      window.removeEventListener("touchmove", preventScroll);
+      window.removeEventListener("wheel", preventScroll);
+    };
+  }, [isVisible]);
 
   const handleDismiss = () => {
     setIsVisible(false);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
     onComplete?.();
   };
 
@@ -28,26 +73,28 @@ export function OpeningSplash({
           initial={{ opacity: 1 }}
           exit={{ opacity: 0, scale: 1.04 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-full h-full min-h-[100dvh] z-50 flex flex-col items-center justify-center bg-[#F8F1EB] select-none overflow-hidden"
+          onTouchMove={(e) => e.preventDefault()}
+          onWheel={(e) => e.preventDefault()}
+          className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-full h-[100dvh] min-h-[100dvh] z-[99999] flex flex-col items-center justify-center bg-[#F8F1EB] select-none overflow-hidden touch-none overscroll-none"
           style={{ willChange: "opacity, transform" }}
         >
           {/* Central Animated Content Card */}
           <div className="relative flex flex-col items-center text-center px-4 max-w-sm w-full">
-            {/* 1. NOA Icon Badge - Clean & Pure */}
+            {/* 1. NOA Icon Badge - Clean & Pure (Borderless Transparent Emblem) */}
             <motion.div
               initial={{ scale: 0.85, opacity: 0, y: -10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
               className="relative mb-5"
             >
-              <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-white border border-[#683B0C]/15 shadow-sm">
+              <div className="relative w-28 h-28 sm:w-32 sm:h-32">
                 <Image
-                  src={BRAND_ASSETS.logo || "/noa_icon.jpg"}
+                  src="/brand/noa-icon.png"
                   alt="NOA Croissant Logo"
                   fill
                   sizes="128px"
                   priority
-                  className="object-cover"
+                  className="object-contain"
                 />
               </div>
             </motion.div>
@@ -97,18 +144,18 @@ export function OpeningSplash({
                       handleDismiss();
                       onOpenStory();
                     }}
-                    className="flex-1 min-w-[130px] px-3.5 py-3 rounded-full bg-gradient-to-r from-[#FAF0E4] via-[#F6E9DA] to-[#EFE2D2] hover:from-[#F6E9DA] hover:to-[#EAD8C5] text-[#381D05] border border-[#8C5828]/35 font-extrabold text-[11.5px] sm:text-xs tracking-wider shadow-sm flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer group whitespace-nowrap shrink-0"
+                    className="flex-1 min-w-[135px] px-3.5 py-3 rounded-full bg-gradient-to-r from-[#FAF0E4] via-[#F6E9DA] to-[#EFE2D2] hover:from-[#F6E9DA] hover:to-[#EAD8C5] text-[#381D05] border border-[#8C5828]/35 font-extrabold text-[11.5px] sm:text-xs tracking-wider shadow-sm flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer whitespace-nowrap shrink-0 group"
                   >
-                    <div className="relative w-5 h-5 min-w-[20px] min-h-[20px] rounded-full overflow-hidden shrink-0 border border-[#8C5828]/50 shadow-2xs group-hover:scale-105 transition-transform">
+                    <div className="relative w-4.5 h-4.5 min-w-[18px] min-h-[18px] shrink-0 group-hover:scale-110 transition-transform">
                       <Image
-                        src="/noa_icon.jpg"
+                        src="/brand/noa-icon.png"
                         alt="NOA"
                         fill
-                        sizes="20px"
-                        className="object-cover"
+                        sizes="18px"
+                        className="object-contain"
                       />
                     </div>
-                    <span>Hikayemiz</span>
+                    <span>{getTranslation(activeLang, "ourStory", "Hikayemiz")}</span>
                     <span className="text-[#8C5828] text-[13px] font-extrabold -ml-0.5">↗</span>
                   </button>
                 )}
@@ -121,7 +168,7 @@ export function OpeningSplash({
                   className="flex-1 min-w-[155px] px-4 py-3 rounded-full bg-[#381D05] hover:bg-[#683B0C] text-[#FAF0E4] font-extrabold text-[12px] sm:text-[13px] tracking-wide shadow-lg flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer whitespace-nowrap shrink-0"
                 >
                   <span className="text-sm">🥐</span>
-                  <span>Menüyü Keşfet</span>
+                  <span>{getTranslation(activeLang, "exploreMenu", "Menüyü Keşfet")}</span>
                   <span className="text-[#D97706]">➔</span>
                 </button>
               </div>

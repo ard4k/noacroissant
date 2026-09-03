@@ -1,28 +1,35 @@
 import { Category, DiningTable, Product, Promotion, BusinessSettings, OptionGroup } from "./types";
 import { getProductImage } from "./images";
 
+// ---------------------------------------------------------------------------
+// SECURITY: QR tokens are intentionally empty in this seed file.
+// Real tokens are stored in Firestore and loaded server-side at runtime.
+// They are NEVER embedded in the client bundle.
+// To regenerate a token: Admin Panel → Masalar → Token Yenile
+// ---------------------------------------------------------------------------
 export const INITIAL_TABLES: DiningTable[] = [
-  { id: "tbl-01", table_number: 1, label: "Masa 01", qr_token: "noa_tbl_01_a9f8b2c4e1d7", is_active: true },
-  { id: "tbl-02", table_number: 2, label: "Masa 02", qr_token: "noa_tbl_02_b8e7c1d3f5a9", is_active: true },
-  { id: "tbl-03", table_number: 3, label: "Masa 03", qr_token: "noa_tbl_03_c7d6e5f4a3b2", is_active: true },
-  { id: "tbl-04", table_number: 4, label: "Masa 04", qr_token: "noa_tbl_04_d6c5b4a3f2e1", is_active: true },
-  { id: "tbl-05", table_number: 5, label: "Masa 05", qr_token: "noa_tbl_05_e5f4a3b2c1d0", is_active: true },
-  { id: "tbl-06", table_number: 6, label: "Masa 06", qr_token: "noa_tbl_06_f4e3d2c1b0a9", is_active: true },
-  { id: "tbl-07", table_number: 7, label: "Masa 07", qr_token: "noa_tbl_07_a3b2c1d0e9f8", is_active: true },
-  { id: "tbl-08", table_number: 8, label: "Masa 08", qr_token: "noa_tbl_08_b2c1d0e9f8a7", is_active: true },
-  { id: "tbl-09", table_number: 9, label: "Masa 09", qr_token: "noa_tbl_09_c1d0e9f8a7b6", is_active: true },
-  { id: "tbl-10", table_number: 10, label: "Masa 10", qr_token: "noa_tbl_10_d0e9f8a7b6c5", is_active: true },
-  { id: "tbl-11", table_number: 11, label: "Masa 11", qr_token: "noa_tbl_11_e9f8a7b6c5d4", is_active: true },
-  { id: "tbl-12", table_number: 12, label: "Masa 12", qr_token: "noa_tbl_12_f8a7b6c5d4e3", is_active: true },
-  { id: "tbl-13", table_number: 13, label: "Masa 13", qr_token: "noa_tbl_13_a7b6c5d4e3f2", is_active: true },
-  { id: "tbl-14", table_number: 14, label: "Masa 14", qr_token: "noa_tbl_14_b6c5d4e3f2a1", is_active: true },
-  { id: "tbl-15", table_number: 15, label: "Masa 15", qr_token: "noa_tbl_15_c5d4e3f2a1b0", is_active: true },
-  { id: "tbl-16", table_number: 16, label: "Masa 16", qr_token: "noa_tbl_16_d4e3f2a1b0c9", is_active: true },
-  { id: "tbl-17", table_number: 17, label: "Masa 17", qr_token: "noa_tbl_17_e3f2a1b0c9d8", is_active: true },
-  { id: "tbl-18", table_number: 18, label: "Masa 18", qr_token: "noa_tbl_18_f2a1b0c9d8e7", is_active: true },
-  { id: "tbl-19", table_number: 19, label: "Masa 19", qr_token: "noa_tbl_19_a1b0c9d8e7f6", is_active: true },
-  { id: "tbl-20", table_number: 20, label: "Masa 20", qr_token: "noa_tbl_20_b0c9d8e7f6a5", is_active: true },
+  { id: "tbl-01", table_number: 1, label: "Masa 01", qr_token: "", is_active: true },
+  { id: "tbl-02", table_number: 2, label: "Masa 02", qr_token: "", is_active: true },
+  { id: "tbl-03", table_number: 3, label: "Masa 03", qr_token: "", is_active: true },
+  { id: "tbl-04", table_number: 4, label: "Masa 04", qr_token: "", is_active: true },
+  { id: "tbl-05", table_number: 5, label: "Masa 05", qr_token: "", is_active: true },
+  { id: "tbl-06", table_number: 6, label: "Masa 06", qr_token: "", is_active: true },
+  { id: "tbl-07", table_number: 7, label: "Masa 07", qr_token: "", is_active: true },
+  { id: "tbl-08", table_number: 8, label: "Masa 08", qr_token: "", is_active: true },
+  { id: "tbl-09", table_number: 9, label: "Masa 09", qr_token: "", is_active: true },
+  { id: "tbl-10", table_number: 10, label: "Masa 10", qr_token: "", is_active: true },
+  { id: "tbl-11", table_number: 11, label: "Masa 11", qr_token: "", is_active: true },
+  { id: "tbl-12", table_number: 12, label: "Masa 12", qr_token: "", is_active: true },
+  { id: "tbl-13", table_number: 13, label: "Masa 13", qr_token: "", is_active: true },
+  { id: "tbl-14", table_number: 14, label: "Masa 14", qr_token: "", is_active: true },
+  { id: "tbl-15", table_number: 15, label: "Masa 15", qr_token: "", is_active: true },
+  { id: "tbl-16", table_number: 16, label: "Masa 16", qr_token: "", is_active: true },
+  { id: "tbl-17", table_number: 17, label: "Masa 17", qr_token: "", is_active: true },
+  { id: "tbl-18", table_number: 18, label: "Masa 18", qr_token: "", is_active: true },
+  { id: "tbl-19", table_number: 19, label: "Masa 19", qr_token: "", is_active: true },
+  { id: "tbl-20", table_number: 20, label: "Masa 20", qr_token: "", is_active: true },
 ];
+
 
 export const INITIAL_CATEGORIES: Category[] = [
   { id: "cat-spesiyal", name: "NOA Menüler", slug: "noa-menuler", display_order: 1, is_active: true },
@@ -43,18 +50,102 @@ export const INITIAL_CATEGORIES: Category[] = [
 ];
 
 // --- YEMEKSEPETI RESMİ "İÇ DOLGU ÇİKOLATA SEÇİMİ" (Roll, Küp ve Amora İçin) ---
-const IC_DOLGU_CIKOLATA_SECIMI: OptionGroup = {
+export const IC_DOLGU_CIKOLATA_SECIMI: OptionGroup = {
   id: "opt-ic-dolgu-cikolata-secimi",
   name: "ic_dolgu_cikolata_secimi",
   display_name: "İç Dolgu Çikolata Seçimi",
+  display_name_i18n: {
+    tr: "İç Dolgu Çikolata Seçimi",
+    en: "Choose Your Chocolate Filling",
+    de: "Wählen Sie Ihre Schokoladenfüllung",
+    ru: "Выберите шоколадную начинку",
+    nl: "Kies Je Chocoladevulling",
+    sv: "Välj Din Chokladfyllning",
+    no: "Velg Din Sjokoladefyll",
+    fi: "Valitse Suklaatäyte",
+    pl: "Wybierz Nadzienie Czekoladowe",
+    ar: "اختر حشوة الشوكولاتة",
+  },
   is_required: true,
   min_selection: 1,
   max_selection: 1,
   options: [
-    { id: "dolgu-nutella", option_group_id: "opt-ic-dolgu-cikolata-secimi", name: "Nutella", price_modifier: 0, display_order: 1 },
-    { id: "dolgu-sutlu-belcika", option_group_id: "opt-ic-dolgu-cikolata-secimi", name: "Sütlü Belçika Çikolata", price_modifier: 20, display_order: 2 },
-    { id: "dolgu-beyaz-belcika", option_group_id: "opt-ic-dolgu-cikolata-secimi", name: "Beyaz Belçika Çikolata", price_modifier: 20, display_order: 3 },
-    { id: "dolgu-bitter-belcika", option_group_id: "opt-ic-dolgu-cikolata-secimi", name: "Bitter Belçika Çikolata", price_modifier: 20, display_order: 4 },
+    {
+      id: "dolgu-nutella",
+      option_group_id: "opt-ic-dolgu-cikolata-secimi",
+      name: "Nutella",
+      name_i18n: {
+        tr: "Nutella",
+        en: "Nutella",
+        de: "Nutella",
+        ru: "Нутелла",
+        nl: "Nutella",
+        sv: "Nutella",
+        no: "Nutella",
+        fi: "Nutella",
+        pl: "Nutella",
+        ar: "نوتيلا",
+      },
+      price_modifier: 0,
+      display_order: 1,
+    },
+    {
+      id: "dolgu-sutlu-belcika",
+      option_group_id: "opt-ic-dolgu-cikolata-secimi",
+      name: "Sütlü Belçika Çikolata",
+      name_i18n: {
+        tr: "Sütlü Belçika Çikolata",
+        en: "Belgian Milk Chocolate",
+        de: "Belgische Vollmilchschokolade",
+        ru: "Бельгийский молочный шоколад",
+        nl: "Belgische Melkchocolade",
+        sv: "Belgisk Mjölkchoklad",
+        no: "Belgisk Melkesjokolade",
+        fi: "Belgialainen Maitosuklaa",
+        pl: "Belgijska Czekolada Mleczna",
+        ar: "شوكولاتة الحليب البلجيكية",
+      },
+      price_modifier: 20,
+      display_order: 2,
+    },
+    {
+      id: "dolgu-beyaz-belcika",
+      option_group_id: "opt-ic-dolgu-cikolata-secimi",
+      name: "Beyaz Belçika Çikolata",
+      name_i18n: {
+        tr: "Beyaz Belçika Çikolata",
+        en: "Belgian White Chocolate",
+        de: "Belgische weiße Schokolade",
+        ru: "Бельгийский белый шоколад",
+        nl: "Belgische Witte Chocolade",
+        sv: "Belgisk Vit Choklad",
+        no: "Belgisk Hvit Sjokolade",
+        fi: "Belgialainen Valkosuklaa",
+        pl: "Belgijska Biała Czekolada",
+        ar: "شوكولاتة بيضاء بلجيكية",
+      },
+      price_modifier: 20,
+      display_order: 3,
+    },
+    {
+      id: "dolgu-bitter-belcika",
+      option_group_id: "opt-ic-dolgu-cikolata-secimi",
+      name: "Bitter Belçika Çikolata",
+      name_i18n: {
+        tr: "Bitter Belçika Çikolata",
+        en: "Belgian Dark Chocolate",
+        de: "Belgische Zartbitterschokolade",
+        ru: "Бельгийский темный шоколад",
+        nl: "Belgische Pure Chocolade",
+        sv: "Belgisk Mörk Choklad",
+        no: "Belgisk Mørk Sjokolade",
+        fi: "Belgialainen Tumma Suklaa",
+        pl: "Belgijska Ciemna Czekolada",
+        ar: "شوكولاتة داكنة بلجيكية",
+      },
+      price_modifier: 20,
+      display_order: 4,
+    },
   ],
 };
 
@@ -72,7 +163,7 @@ const DONDURMA_PORSIYON: OptionGroup = {
 };
 
 // --- YEMEKSEPETI "NOA TATLI KRUVASAN'INI OLUŞTUR" OPSİYONLARI ---
-const OPT_TATLI_KRUVASAN_SECIMI: OptionGroup = {
+export const OPT_TATLI_KRUVASAN_SECIMI: OptionGroup = {
   id: "opt-tatli-kruvasan-secimi",
   name: "tatli_kruvasan_secimi",
   display_name: "Kruvasan Seçimi",
@@ -85,6 +176,7 @@ const OPT_TATLI_KRUVASAN_SECIMI: OptionGroup = {
     { id: "kruv-twissy", option_group_id: "opt-tatli-kruvasan-secimi", name: "Twissy Kruvasan", price_modifier: 0, display_order: 3 },
   ],
 };
+export const TATLI_KRUVASAN_SECIMI = OPT_TATLI_KRUVASAN_SECIMI;
 
 const OPT_IC_DOLGU_CIKOLATA: OptionGroup = {
   id: "opt-ic-dolgu-cikolata",
@@ -1647,6 +1739,23 @@ export const INITIAL_PRODUCTS: Product[] = [
     ],
   },
   {
+    id: "prod-noa-tatli-tuzlu-ikili",
+    category_id: "cat-spesiyal",
+    name: "NOA Tatlı & Tuzlu İkili",
+    slug: "noa-tatli-tuzlu-ikili",
+    description: "Dopdolu ikili servis: Şefin seçtiği tatlı ve tuzlu kruvasan ikilisi.",
+    base_price: 720,
+    is_available: true,
+    is_featured: true,
+    image_url: getProductImage("noa-tatli-tuzlu-ikili"),
+    display_order: 33.5,
+    card_density: "large",
+    option_groups: [
+      cloneOptionGroup(OPT_IKILI_TATLI_SECIMI, "tti-tatli", "Tatlı Kruvasan"),
+      cloneOptionGroup(OPT_IKILI_TUZLU_SECIMI, "tti-tuzlu", "Tuzlu Kruvasan"),
+    ],
+  },
+  {
     id: "prod-noa-tatli-ikili",
     category_id: "cat-spesiyal",
     name: "NOA Tatlı İkili",
@@ -2333,16 +2442,23 @@ export const INITIAL_SETTINGS: BusinessSettings = {
   brand_name: "NOA Croissant",
   venue_name: "NOA Croissant",
   tagline: "Günlük taze pişirilir",
-  address: "Alanya, Antalya",
-  phone: "+90 555 000 00 00",
+  address: "Saray, Yunus Emre Cd., 07400 Alanya/Antalya",
+  phone: "+90 540 423 33 07",
   currency: "TL",
   currency_symbol: "₺",
-  service_hours_start: "08:00",
-  service_hours_end: "23:00",
+  service_hours_start: "09:30",
+  service_hours_end: "00:00",
   allow_table_orders: true,
   allow_takeaway: false,
   sound_notifications_enabled: true,
   table_count: 20,
   complimentary_tea_enabled: true,
   order_accepting: true,
+  wifi_ssid: "Noa Croissant",
+  wifi_password: "noa330738",
+  disabled_ingredients: [],
+  loyalty_enabled: true,
+  loyalty_required_stamps: 7,
+  loyalty_reward_name: "Hediye Kahve",
+  loyalty_stamp_item_type: "Kahve",
 };

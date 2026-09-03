@@ -19,13 +19,14 @@ export async function GET(req: NextRequest) {
     );
   }
 
+  // Return only non-sensitive table identifiers; qr_token is NOT returned
+  // (caller already has the token — returning it would just be redundant exposure)
   return NextResponse.json({
     valid: true,
     table: {
       id: table.id,
       table_number: table.table_number,
       label: table.label,
-      qr_token: table.qr_token,
     },
   });
 }

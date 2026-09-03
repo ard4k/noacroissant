@@ -6,7 +6,13 @@ import { Minus, Plus, Check, MessageSquare, AlertCircle, Sparkles } from "lucide
 import { Product, CartItemOption } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
 import { getProductImage } from "@/lib/images";
-import { Language, translateProduct, getTranslation } from "@/lib/i18n/translations";
+import { Language, getTranslation } from "@/lib/i18n/translations";
+import {
+  resolveLocalizedText,
+  resolveProductName,
+  resolveProductDescription,
+  formatLocalizedPrice,
+} from "@/lib/i18n/resolver";
 
 interface ProductDetailDrawerProps {
   product: Product | null;
@@ -19,6 +25,7 @@ interface ProductDetailDrawerProps {
     itemNote?: string
   ) => void;
   language?: Language;
+  disabledIngredients?: string[];
 }
 
 // Robust Turkish-aware helper to identify "İstemiyorum" / "Yok" options
@@ -35,36 +42,122 @@ function isNoneOption(name: string, id?: string): boolean {
   );
 }
 
-// Helper to resolve high-res thumbnail photos for pairing / upsell items
+// Helper to resolve high-res thumbnail photos for pairing / upsell items, with /noa_icon.jpg fallback
 function getPairingThumbnail(optionId: string, optionName: string): string {
   const name = optionName.toLocaleLowerCase("tr-TR");
-  
-  // Signature NOA Drinks & Refreshers
+
+  // 1. Dondurma (Gelato / Ice Cream)
+  if (
+    name.includes("dondurma") ||
+    name.includes("gelato") ||
+    name.includes("ice cream") ||
+    name.includes("affogato") ||
+    name.includes("мороженого") ||
+    name.includes("ijs") ||
+    name.includes("jäätelö") ||
+    name.includes("lody")
+  ) {
+    return "/dondurma.jpg";
+  }
+
+  // 2. Limonata & Nar Suyu
+  if (
+    name.includes("çilekli limonata") ||
+    name.includes("cilekli limonata") ||
+    name.includes("strawberry lemonade") ||
+    name.includes("erdbeer-limonade") ||
+    name.includes("клубничный лимонад")
+  ) {
+    return "/el-yapimi-cilekli-limonata.jpg";
+  }
+  if (
+    name.includes("limonata") ||
+    name.includes("lemonade") ||
+    name.includes("limonade") ||
+    name.includes("лимонад")
+  ) {
+    return "/el-yapimi-limonata.jpg";
+  }
+  if (
+    name.includes("nar") ||
+    name.includes("pomegranate") ||
+    name.includes("granatapfel") ||
+    name.includes("гранатовый")
+  ) {
+    return "/el-yapimi-nar-suyu.jpg";
+  }
+
+  // 3. NOA Özel İçecekler (Turbo, Full Depo, Benzin, Dizel)
   if (name.includes("turbo")) return "/noa-turbo.jpg";
-  if (name.includes("full depo") || name.includes("depo")) return "/noa-full-depo.jpg";
+  if (name.includes("full depo") || name.includes("full-depo")) return "/noa-full-depo.jpg";
   if (name.includes("benzin")) return "/benzin.jpg";
-  if (name.includes("dizel")) return "/dizel.jpg";
-  if (name.includes("çilekli limonata") || name.includes("cilekli limonata")) return "/el-yapimi-cilekli-limonata.jpg";
-  if (name.includes("nar")) return "/el-yapimi-nar-suyu.jpg";
-  if (name.includes("limonata")) return "/el-yapimi-limonata.jpg";
-  
-  // Dondurma
-  if (name.includes("dondurma")) return "/dondurma.jpg";
-  
-  // Bakery items
-  if (name.includes("fıstık") || name.includes("fistik")) return "/antep-fistikli.jpg";
-  if (name.includes("kremalı") || name.includes("çilekli muzlu") || name.includes("nutella")) return "/cilekli-muzlu-nutella.jpg";
-  if (name.includes("lotus")) return "/lotus-cruffin.jpg";
-  if (name.includes("sade") || name.includes("kruvasan")) return "/noa-croissant.jpg";
-  if (name.includes("twissy")) return "/antep-fistikli-twissy.jpg";
-  if (name.includes("danish")) return "/cilekli-danish.jpg";
-  if (name.includes("roll")) return "/sutlu-roll-kruvasan.jpg";
-  if (name.includes("küp") || name.includes("kup")) return "/sutlu-kup-kruvasan.jpg";
-  if (name.includes("amora")) return "/sutlu-amora.jpg";
-  if (name.includes("cheesecake")) return "/san-sebastian-cheesecake-dilim.jpg";
-  if (name.includes("waffle")) return "/bardakta-waffle.jpg";
-  if (name.includes("kahvaltı") || name.includes("kahvalti")) return "/kahvalti-tabagi.jpg";
-  
+  if (name.includes("dizel") || name.includes("diesel")) return "/dizel.jpg";
+
+  // 4. Cheesecakes
+  if (name.includes("san sebastian")) return "/san-sebastian-cheesecake-dilim.jpg";
+  if (name.includes("lotus") && name.includes("cheesecake")) return "/lotuslu-cheesecake-dilim.jpg";
+  if (name.includes("limon") && name.includes("cheesecake")) return "/limonlu-cheesecake-dilim.jpg";
+
+  // 5. Pastries & Croissants
+  if (
+    name.includes("sade kruvasan") ||
+    name.includes("plain croissant") ||
+    name.includes("butterhörnchen") ||
+    name.includes("klasik kruvasan")
+  ) {
+    return "/noa-klasik.jpg";
+  }
+  if (
+    name.includes("antep fıstıklı kruvasan") ||
+    name.includes("antep fistikli kruvasan") ||
+    name.includes("pistachio croissant") ||
+    name.includes("pistazien-croissant")
+  ) {
+    return "/antep-fistikli.jpg";
+  }
+  if (name.includes("twissy")) {
+    if (name.includes("limon") || name.includes("lemon")) return "/limonlu-twissy.jpg";
+    if (name.includes("çikolata") || name.includes("cikolata") || name.includes("chocolate") || name.includes("schoko")) return "/sutlu-belcika-cikolatali-twissy.jpg";
+    return "/antep-fistikli-twissy.jpg";
+  }
+  if (name.includes("danish")) {
+    if (name.includes("limon") || name.includes("lemon")) return "/limonlu-danish.jpg";
+    if (name.includes("frambuaz") || name.includes("raspberry") || name.includes("himbeer")) return "/frambuazli-danish.jpg";
+    if (name.includes("orman") || name.includes("berry") || name.includes("waldbeeren")) return "/orman-meyveli-danish.jpg";
+    if (name.includes("yaban") || name.includes("mersin") || name.includes("blueberry") || name.includes("blaubeer")) return "/yaban-mersinli-danish.jpg";
+    if (name.includes("mango")) return "/mangolu-danish.jpg";
+    return "/cilekli-danish.jpg";
+  }
+  if (
+    name.includes("çilekli muzlu nutella") ||
+    name.includes("cilekli muzlu nutella") ||
+    name.includes("nutellalı kruvasan") ||
+    name.includes("nutellali kruvasan") ||
+    name.includes("nutella croissant")
+  ) {
+    return "/cilekli-muzlu-nutella.jpg";
+  }
+  if (
+    name.includes("çilekli muzlu kremalı") ||
+    name.includes("cilekli muzlu kremali") ||
+    name.includes("kremalı kruvasan") ||
+    name.includes("kremali kruvasan") ||
+    name.includes("cream croissant")
+  ) {
+    return "/cilekli-muzlu-kremali-kruvasan.jpg";
+  }
+  if (name.includes("lotus") && (name.includes("kruvasan") || name.includes("croissant") || name.includes("cruffin"))) {
+    return "/lotus-cruffin.jpg";
+  }
+  if (name.includes("orman meyveli") || name.includes("forest berry") || name.includes("waldbeere")) {
+    return "/orman-meyveli-kruvasan.jpg";
+  }
+  if (name.includes("waffle")) {
+    if (name.includes("kova") || name.includes("bucket")) return "/waffle-kova.jpg";
+    return "/bardakta-waffle.jpg";
+  }
+
+  // 6. Fallback for coffees, teas, sodas, and other generic items -> Official NOA Icon Badge
   return "/noa_icon.jpg";
 }
 
@@ -74,6 +167,7 @@ export function ProductDetailDrawer({
   onClose,
   onAddToCart,
   language = "tr",
+  disabledIngredients = [],
 }: ProductDetailDrawerProps) {
   const [quantity, setQuantity] = useState(1);
   const [selectedOptionsMap, setSelectedOptionsMap] = useState<Record<string, string[]>>({});
@@ -81,9 +175,18 @@ export function ProductDetailDrawer({
   const [activeVariantImageKey, setActiveVariantImageKey] = useState<string | undefined>(undefined);
   const lastOpenedProductIdRef = useRef<string | null>(null);
 
-  const translated = product ? translateProduct(product, language) : { name: "", description: "" };
-  const displayName = translated.name || product?.name || "";
-  const displayDesc = translated.description || product?.description || "";
+  const isOptionDisabledByStock = (optName: string) => {
+    if (!disabledIngredients || disabledIngredients.length === 0) return false;
+    const lowerOpt = optName.toLocaleLowerCase("tr-TR");
+    return disabledIngredients.some((ing) => lowerOpt.includes(ing.toLocaleLowerCase("tr-TR")));
+  };
+
+  const displayName = product
+    ? resolveProductName(product, language)
+    : "";
+  const displayDesc = product
+    ? resolveProductDescription(product, language)
+    : "";
   const t = (key: string, fallback?: string) => getTranslation(language, key, fallback);
 
   // Reset selections ONLY when a new product is opened or drawer transitions from closed to open
@@ -259,8 +362,10 @@ export function ProductDetailDrawer({
             list.push({
               option_group_id: group.id,
               option_group_name: group.display_name,
+              option_group_name_i18n: group.display_name_i18n,
               option_value_id: optVal.id,
               option_value_name: optVal.name,
+              option_value_name_i18n: optVal.name_i18n,
               price_modifier: optVal.price_modifier,
             });
           }
@@ -278,7 +383,8 @@ export function ProductDetailDrawer({
 
   if (!isOpen || !product) return null;
 
-  const currentImageSrc = getProductImage(product.slug, activeVariantImageKey) || product.image_url;
+  const rawImageSrc = getProductImage(product.slug, activeVariantImageKey) || product.image_url || "";
+  const currentImageSrc = rawImageSrc.trim();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -308,7 +414,7 @@ export function ProductDetailDrawer({
           <div className="flex items-center">
             <button
               onClick={handleClose}
-              aria-label="Pencereyi Kapat"
+              aria-label={t("closeModal", "Pencereyi Kapat")}
               className="w-4 h-4 rounded-full bg-[#FF5F56] border border-[#E0443E] hover:opacity-80 active:scale-95 transition-transform flex items-center justify-center group shadow-xs cursor-pointer"
             >
               <span className="opacity-0 group-hover:opacity-100 text-[9px] font-black text-black/70 leading-none">✕</span>
@@ -327,13 +433,13 @@ export function ProductDetailDrawer({
         {/* Scrollable Modal Body */}
         <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6">
           {/* Visual Header Image Frame */}
-          {currentImageSrc && (
+          {Boolean(currentImageSrc) && (
             <div className="relative aspect-square w-full rounded-[22px] overflow-hidden bg-[#EFE8DF] shadow-inner border border-[#683B0C]/5">
               <Image
                 src={currentImageSrc}
                 alt={product.name}
                 fill
-                sizes="(max-width: 640px) 100vw, 500px"
+                unoptimized
                 className="object-contain"
                 priority
               />
@@ -406,7 +512,7 @@ export function ProductDetailDrawer({
                           <path d="M14 1c0 1.2.8 1.8.8 2.8" />
                         </svg>
                         <span className="text-[12.5px] font-black uppercase tracking-wider text-[#381D05]">
-                          {group.display_name}
+                          {t("pairingsTitle", "Yanında İyi Gider")}
                         </span>
                       </div>
 
@@ -415,6 +521,10 @@ export function ProductDetailDrawer({
                         {group.options.map((opt) => {
                           const isChecked = currentSelected.includes(opt.id);
                           const thumbUrl = getPairingThumbnail(opt.id, opt.name);
+                          const translatedPairingName = resolveLocalizedText(
+                            opt.name_i18n || opt.name,
+                            language
+                          );
 
                           return (
                             <div
@@ -429,7 +539,7 @@ export function ProductDetailDrawer({
                               }`}
                             >
                               {/* Frameless Organic Preview Thumbnail */}
-                              <div className="relative w-12 h-12 rounded-[16px] overflow-hidden shrink-0 shadow-xs">
+                              <div className="relative w-12 h-12 rounded-[16px] overflow-hidden shrink-0 shadow-xs flex items-center justify-center bg-[#FAF4EE] border border-[#683B0C]/10">
                                 <Image
                                   src={thumbUrl}
                                   alt={opt.name}
@@ -442,10 +552,10 @@ export function ProductDetailDrawer({
                               {/* Title & Price - Full Text Visibility */}
                               <div className="flex-1 min-w-0">
                                 <h4 className="text-[13px] font-black text-[#381D05] leading-snug">
-                                  {opt.name}
+                                  {translatedPairingName}
                                 </h4>
                                 <span className="text-[12px] font-black text-[#15803D] font-sans mt-0.5 block">
-                                  +{formatPrice(opt.price_modifier)}
+                                  +{formatLocalizedPrice(opt.price_modifier, language)}
                                 </span>
                               </div>
 
@@ -458,7 +568,7 @@ export function ProductDetailDrawer({
                                     : "bg-[#FAF4EE] text-[#4A2808] hover:bg-[#381D05] hover:text-white"
                                 }`}
                               >
-                                {isChecked ? "✓ Eklendi" : "+ Ekle"}
+                                {isChecked ? t("added", "✓ Eklendi") : t("add", "+ Ekle")}
                               </button>
                             </div>
                           );
@@ -469,13 +579,18 @@ export function ProductDetailDrawer({
                 }
 
                 // --- 2. STANDARD PRODUCT OPTION GROUPS ---
+                const groupTitle = resolveLocalizedText(
+                  group.display_name_i18n || group.display_name || group.name,
+                  language
+                );
+
                 return (
                   <div key={group.id} className="space-y-3">
                     {/* Section Header with Status Badge */}
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0">
                         <span className="text-[12px] font-black uppercase tracking-wider text-[#381D05] truncate">
-                          {group.display_name}
+                          {groupTitle}
                         </span>
                         {group.is_required && (
                           <span
@@ -485,16 +600,16 @@ export function ProductDetailDrawer({
                                 : "bg-[#DC2626] text-white"
                             }`}
                           >
-                            {isGroupSatisfied ? "✓ Seçildi" : "Zorunlu"}
+                            {isGroupSatisfied ? t("selected", "✓ Seçildi") : t("required", "Zorunlu")}
                           </span>
                         )}
                       </div>
                       <span className="text-[11px] font-bold text-[#8C5828] shrink-0 whitespace-nowrap">
                         {isRadio
-                          ? "1 Seçim"
+                          ? t("oneChoice", "1 Seçim")
                           : group.max_selection >= 10
-                          ? "İsteğe Bağlı"
-                          : `En fazla ${group.max_selection} seçim`}
+                          ? t("optional", "İsteğe Bağlı")
+                          : t("maxChoices", `En fazla ${group.max_selection} seçim`).replace("{n}", String(group.max_selection))}
                       </span>
                     </div>
 
@@ -503,7 +618,12 @@ export function ProductDetailDrawer({
                       {group.options.map((opt) => {
                         const isChecked = currentSelected.includes(opt.id);
                         const isOptNone = isNoneOption(opt.name, opt.id);
-                        const isBlocked = !isRadio && !isOptNone && isMaxReached && !isChecked;
+                        const isOutOfStock = isOptionDisabledByStock(opt.name);
+                        const isBlocked = isOutOfStock || (!isRadio && !isOptNone && isMaxReached && !isChecked);
+                        const translatedOptName = resolveLocalizedText(
+                          opt.name_i18n || opt.name,
+                          language
+                        );
 
                         return (
                           <button
@@ -511,6 +631,7 @@ export function ProductDetailDrawer({
                             type="button"
                             disabled={isBlocked}
                             onClick={() =>
+                              !isOutOfStock &&
                               handleToggleOption(
                                 group.id,
                                 opt.id,
@@ -521,7 +642,9 @@ export function ProductDetailDrawer({
                               )
                             }
                             className={`group relative flex items-center justify-between p-3.5 rounded-[18px] text-left transition-all duration-200 cursor-pointer ${
-                              isChecked
+                              isOutOfStock
+                                ? "bg-stone-100 text-stone-400 border border-stone-200 cursor-not-allowed opacity-60"
+                                : isChecked
                                 ? "bg-[#15803D] text-white border border-[#15803D] shadow-md -translate-y-0.5"
                                 : isBlocked
                                 ? "bg-white/40 text-[#5C3818]/30 border border-black/[0.04] cursor-not-allowed opacity-35"
@@ -532,7 +655,9 @@ export function ProductDetailDrawer({
                               {/* Sleek Custom Unified Circular Indicator */}
                               <div
                                 className={`w-5 h-5 rounded-full flex items-center justify-center transition-all shrink-0 ${
-                                  isChecked
+                                  isOutOfStock
+                                    ? "border border-stone-300 bg-stone-200"
+                                    : isChecked
                                     ? "bg-white text-[#15803D] shadow-xs scale-105"
                                     : "border-[1.5px] border-[#683B0C]/30 bg-[#FAF7F2] group-hover:border-[#15803D]"
                                 }`}
@@ -541,7 +666,7 @@ export function ProductDetailDrawer({
                               </div>
 
                               {(() => {
-                                const match = opt.name.match(/^(.*?)\s*\((.*?)\)$/);
+                                const match = translatedOptName.match(/^(.*?)\s*\((.*?)\)$/);
                                 if (match) {
                                   const mainTitle = match[1];
                                   const subTitle = match[2];
@@ -570,23 +695,29 @@ export function ProductDetailDrawer({
                                       isChecked ? "font-black" : "font-extrabold"
                                     }`}
                                   >
-                                    {opt.name}
+                                    {translatedOptName}
                                   </span>
                                 );
                               })()}
                             </div>
 
-                            {/* Extra Price Pill Badge */}
-                            {opt.price_modifier > 0 && (
-                              <span
-                                className={`text-[11.5px] font-black shrink-0 px-2.5 py-1 rounded-full transition-colors ${
-                                  isChecked
-                                    ? "bg-white/20 text-white"
-                                    : "bg-[#15803D]/10 text-[#15803D]"
-                                }`}
-                              >
-                                +{formatPrice(opt.price_modifier)}
+                            {/* Extra Price Pill Badge or Out of Stock Badge */}
+                            {isOutOfStock ? (
+                              <span className="text-[10px] font-black shrink-0 px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200">
+                                {t("outOfStock", "Tükendi")}
                               </span>
+                            ) : (
+                              opt.price_modifier > 0 && (
+                                <span
+                                  className={`text-[11.5px] font-black shrink-0 px-2.5 py-1 rounded-full transition-colors ${
+                                    isChecked
+                                      ? "bg-white/20 text-white"
+                                      : "bg-[#15803D]/10 text-[#15803D]"
+                                  }`}
+                                >
+                                  +{formatLocalizedPrice(opt.price_modifier, language)}
+                                </span>
+                              )
                             )}
                           </button>
                         );
@@ -605,14 +736,14 @@ export function ProductDetailDrawer({
               className="flex items-center gap-1.5 text-xs font-black text-[#381D05] uppercase tracking-wider"
             >
               <MessageSquare className="w-3.5 h-3.5 text-[#683B0C]" />
-              <span>Sipariş Notu (İsteğe bağlı)</span>
+              <span>{t("orderNote", "Sipariş Notu (İsteğe bağlı)")}</span>
             </label>
             <input
               id="item-note-input"
               type="text"
               value={itemNote}
               onChange={(e) => setItemNote(e.target.value)}
-              placeholder="Örn: Çikolatası bol olsun, sıcak servis..."
+              placeholder={t("orderNotePlaceholder", "Örn: Çikolatası bol olsun, sıcak servis...")}
               maxLength={150}
               className="w-full px-4 py-3 rounded-[16px] border border-[#683B0C]/15 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-[#683B0C] text-[#381D05] shadow-xs transition-all placeholder:text-[#5C3818]/40"
             />
@@ -624,7 +755,7 @@ export function ProductDetailDrawer({
           {isMissingRequired && (
             <div className="flex items-center gap-2 text-[12px] font-black text-[#DC2626] bg-[#DC2626]/10 px-4 py-2.5 rounded-[14px] border border-[#DC2626]/25 shadow-xs">
               <AlertCircle className="w-4 h-4 shrink-0 text-[#DC2626]" />
-              <span>Lütfen tüm zorunlu seçimleri tamamlayınız.</span>
+              <span>{t("completeRequiredSelections", "Lütfen tüm zorunlu seçimleri tamamlayınız.")}</span>
             </div>
           )}
 
@@ -635,7 +766,7 @@ export function ProductDetailDrawer({
                 type="button"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
                 disabled={quantity <= 1}
-                aria-label="Adet Azalt"
+                aria-label={t("decreaseQuantity", "Adet Azalt")}
                 className="w-9 h-9 rounded-[12px] flex items-center justify-center text-[#381D05] disabled:opacity-30 hover:bg-[#F4EDE4] active:scale-95 transition-all cursor-pointer"
               >
                 <Minus className="w-4 h-4 stroke-[2.5]" />
@@ -648,7 +779,7 @@ export function ProductDetailDrawer({
               <button
                 type="button"
                 onClick={() => setQuantity(quantity + 1)}
-                aria-label="Adet Artır"
+                aria-label={t("increaseQuantity", "Adet Artır")}
                 className="w-9 h-9 rounded-[12px] flex items-center justify-center text-[#381D05] hover:bg-[#F4EDE4] active:scale-95 transition-all cursor-pointer"
               >
                 <Plus className="w-4 h-4 stroke-[2.5]" />
@@ -664,7 +795,7 @@ export function ProductDetailDrawer({
             >
               <span className="tracking-wide">{t("addToCart", "Sepete Ekle")}</span>
               <span className="text-white font-black text-base tracking-tight font-sans">
-                {formatPrice(currentTotal)}
+                {formatLocalizedPrice(currentTotal, language)}
               </span>
             </button>
           </div>

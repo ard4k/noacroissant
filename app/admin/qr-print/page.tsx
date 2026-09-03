@@ -27,6 +27,9 @@ export default function QRPrintPage() {
     // Generate QR Data URLs
     const generateQRs = async () => {
       const qrs: Record<string, string> = {};
+      const settings = noaStore.getSettings();
+      const ssid = settings.wifi_ssid || "Noa Croissant";
+      const password = settings.wifi_password || "noa330738";
 
       // Master Self-Service QR
       try {
@@ -35,6 +38,17 @@ export default function QRPrintPage() {
           width: 340,
           margin: 1,
           color: { dark: "#381D05", light: "#FFFFFF" },
+          errorCorrectionLevel: "H",
+        });
+      } catch (e) {}
+
+      // Wi-Fi Fast Connect QR
+      try {
+        const wifiString = `WIFI:S:${ssid};T:WPA;P:${password};;`;
+        qrs["wifi"] = await QRCode.toDataURL(wifiString, {
+          width: 340,
+          margin: 1,
+          color: { dark: "#15803D", light: "#FFFFFF" },
           errorCorrectionLevel: "H",
         });
       } catch (e) {}
@@ -145,6 +159,56 @@ export default function QRPrintPage() {
 
             <div className="text-[10px] font-mono text-stone-400 pt-2 border-t border-[#683B0C]/15 w-full">
               noacroissant.com • Kasa & Giriş Standı
+            </div>
+          </div>
+        )}
+
+        {/* 2. DÜKKAN Wİ-Fİ HIZLI BAĞLANTI STAND KARTI */}
+        {qrImages["wifi"] && (
+          <div
+            className="print-card rounded-3xl bg-[#FFFDF9] border-2 border-[#15803D] p-6 sm:p-8 shadow-sm flex flex-col items-center justify-between text-center relative overflow-hidden space-y-4 col-span-1 sm:col-span-2"
+            style={{ minHeight: "420px" }}
+          >
+            <div className="space-y-1 relative z-10">
+              <div className="w-14 h-14 mx-auto rounded-full bg-white p-1.5 shadow-sm border border-emerald-200 flex items-center justify-center">
+                <Image
+                  src={BRAND_ASSETS.logo}
+                  alt="NOA Croissant"
+                  width={48}
+                  height={48}
+                  className="object-contain"
+                />
+              </div>
+              <h2 className="text-2xl font-black text-[#381D05] tracking-tight mt-2">
+                MİSAFİR Wİ-Fİ AĞI
+              </h2>
+              <span className="text-[10px] uppercase font-black tracking-[0.2em] text-[#15803D] block">
+                NOA CROISSANT • ÜCRETSİZ İNTERNET
+              </span>
+            </div>
+
+            <div className="p-4 bg-white rounded-2xl shadow-sm border border-emerald-300 relative z-10">
+              <img
+                src={qrImages["wifi"]}
+                alt="NOA Wi-Fi QR Kodu"
+                width={190}
+                height={190}
+                className="rounded-lg"
+              />
+            </div>
+
+            <div className="space-y-2 relative z-10">
+              <div className="inline-block px-6 py-2 rounded-full bg-[#15803D] text-white text-base font-black tracking-wider shadow">
+                KODU OKUT & DİREKT BAĞLAN
+              </div>
+              <div className="bg-[#FAF7F2] p-3 rounded-xl border border-[#683B0C]/15 text-xs text-[#381D05] max-w-sm mx-auto space-y-1">
+                <div>Ağ Adı: <strong>{noaStore.getSettings().wifi_ssid || "Noa Croissant"}</strong></div>
+                <div>Şifre: <strong className="font-mono">{noaStore.getSettings().wifi_password || "noa330738"}</strong></div>
+              </div>
+            </div>
+
+            <div className="text-[10px] font-mono text-stone-400 pt-2 border-t border-[#683B0C]/15 w-full">
+              noacroissant.com • Masalar & Masaüstü Pleksi Standı
             </div>
           </div>
         )}

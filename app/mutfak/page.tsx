@@ -13,22 +13,50 @@ import {
   RefreshCw,
   XCircle,
   LayoutDashboard,
+  Lock,
+  KeyRound,
+  LogOut,
+  Loader2,
+  ShieldCheck,
+  ChefHat,
+  AlertCircle,
 } from "lucide-react";
 import { noaStore } from "@/lib/store";
 import { OrderRecord, OrderStatus } from "@/lib/types";
 import { formatPrice, formatDateTime, playOrderChime } from "@/lib/utils";
 import { ThermalReceipt } from "@/components/ThermalReceipt";
+import { printThermalHtml } from "@/lib/printUtils";
+import { subscribeToOrders } from "@/lib/firebase/firestore";
 
-function formatElapsedMMSS(createdDateString: string) {
-  const start = new Date(createdDateString).getTime();
+function formatOrderDuration(order: OrderRecord) {
+  const isCompleted = order.status === "served" || order.status === "ready";
+  const start = new Date(order.created_at).getTime();
   if (isNaN(start)) return "00:00";
-  const diffSec = Math.max(0, Math.floor((Date.now() - start) / 1000));
+
+  let end = Date.now();
+  if (isCompleted) {
+    const finishTimeStr = order.ready_at || order.updated_at || order.created_at;
+    const finishTime = new Date(finishTimeStr).getTime();
+    if (!isNaN(finishTime) && finishTime > start) {
+      end = finishTime;
+    } else {
+      end = start;
+    }
+  }
+
+  const diffSec = Math.max(0, Math.floor((end - start) / 1000));
   const m = Math.floor(diffSec / 60);
   const s = diffSec % 60;
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
 export default function KitchenPage() {
+  // Staff Auth State
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [pinInput, setPinInput] = useState<string>("");
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
+
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [activeFilter, setActiveFilter] = useState<"active" | "ready" | "completed" | "all">("active");
   const [soundEnabled, setSoundEnabled] = useState(false);
@@ -36,8 +64,66 @@ export default function KitchenPage() {
   const [printingOrder, setPrintingOrder] = useState<OrderRecord | null>(null);
   const prevOrderCountRef = useRef(0);
 
-  // Load orders and subscribe to real-time events
+  // Check Staff Auth Status
   useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("/api/admin/auth?role=kitchen");
+        if (res.ok) {
+          const data = await res.json();
+          setIsAuthenticated(Boolean(data.authenticated));
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch (e) {
+        setIsAuthenticated(false);
+      } finally {
+        setIsAuthLoading(false);
+      }
+    };
+    checkAuth();
+  }, []);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPinError(null);
+    try {
+      const res = await fetch("/api/admin/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "login", pin: pinInput, role: "kitchen" }),
+      });
+      const data = await res.json();
+      if (res.ok && data.authenticated) {
+        setIsAuthenticated(true);
+        setPinError(null);
+        setPinInput("");
+      } else {
+        setPinError(data.error || "Hatalı şifre! Lütfen tekrar deneyiniz.");
+      }
+    } catch (e) {
+      setPinError("Giriş yapılamadı, lütfen tekrar deneyiniz.");
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/admin/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "logout" }),
+      });
+    } catch (e) {}
+    setIsAuthenticated(false);
+    setOrders([]);
+    setPinInput("");
+    setPinError(null);
+  };
+
+  // Load orders and subscribe to real-time events ONLY when authenticated
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
     const mergeOrderLists = (current: OrderRecord[], incoming: OrderRecord[]): OrderRecord[] => {
       if (!incoming || incoming.length === 0) return current;
       const map = new Map<string, OrderRecord>();
@@ -62,17 +148,58 @@ export default function KitchenPage() {
       );
     };
 
+    // Stable Order State Updater that eliminates UI flicker/re-renders when data has not changed
+    const applyOrdersUpdate = (incoming: OrderRecord[]) => {
+      if (!incoming || !Array.isArray(incoming)) return;
+      setOrders((prev) => {
+        const merged = mergeOrderLists(prev, incoming);
+        if (prev.length === merged.length) {
+          let isIdentical = true;
+          for (let i = 0; i < prev.length; i++) {
+            const a = prev[i];
+            const b = merged[i];
+            if (
+              a.id !== b.id ||
+              a.status !== b.status ||
+              a.payment_status !== b.payment_status ||
+              a.updated_at !== b.updated_at ||
+              a.total !== b.total ||
+              a.order_number !== b.order_number
+            ) {
+              isIdentical = false;
+              break;
+            }
+          }
+          if (isIdentical) return prev;
+        }
+
+        noaStore.setOrders(merged);
+
+        if (merged.length > prevOrderCountRef.current && prevOrderCountRef.current > 0) {
+          if (soundEnabled) {
+            playOrderChime();
+          }
+        }
+        prevOrderCountRef.current = merged.length;
+        return merged;
+      });
+    };
+
     const syncOrders = () => {
       const all = noaStore.getOrders();
-      setOrders(all);
-
-      if (all.length > prevOrderCountRef.current && prevOrderCountRef.current > 0) {
-        if (soundEnabled) {
-          playOrderChime();
-        }
-      }
-      prevOrderCountRef.current = all.length;
+      applyOrdersUpdate(all);
     };
+
+    // 0. Direct Firestore Real-Time Listeners (0ms cloud push across all devices)
+    let unsubscribeFirestore: (() => void) | null = null;
+
+    try {
+      unsubscribeFirestore = subscribeToOrders((firestoreOrders) => {
+        if (firestoreOrders && Array.isArray(firestoreOrders)) {
+          applyOrdersUpdate(firestoreOrders);
+        }
+      });
+    } catch (e) {}
 
     const fetchServerOrders = async () => {
       try {
@@ -80,25 +207,19 @@ export default function KitchenPage() {
         if (res.ok) {
           const data = await res.json();
           if (data.orders && Array.isArray(data.orders)) {
-            setOrders(data.orders);
-            if (data.orders.length > prevOrderCountRef.current && prevOrderCountRef.current > 0) {
-              if (soundEnabled) {
-                playOrderChime();
-              }
-            }
-            prevOrderCountRef.current = data.orders.length;
+            applyOrdersUpdate(data.orders);
           }
         }
       } catch (e) {}
     };
 
+    syncOrders();
+    const unsubStore = noaStore.subscribe(syncOrders);
     fetchServerOrders();
-    const pollInterval = setInterval(fetchServerOrders, 2000);
+    const interval = setInterval(fetchServerOrders, 3000);
 
     const handleFocus = () => fetchServerOrders();
     window.addEventListener("focus", handleFocus);
-
-    const unsubscribeStore = noaStore.subscribe(fetchServerOrders);
 
     // 0ms Real-Time Server-Sent Events (SSE) Stream
     let eventSource: EventSource | null = null;
@@ -108,13 +229,7 @@ export default function KitchenPage() {
         try {
           const payload = JSON.parse(event.data);
           if (payload.orders && Array.isArray(payload.orders)) {
-            setOrders(payload.orders);
-            if (payload.orders.length > prevOrderCountRef.current && prevOrderCountRef.current > 0) {
-              if (soundEnabled) {
-                playOrderChime();
-              }
-            }
-            prevOrderCountRef.current = payload.orders.length;
+            applyOrdersUpdate(payload.orders);
           }
         } catch (e) {}
       };
@@ -129,22 +244,18 @@ export default function KitchenPage() {
     }, 1000);
 
     return () => {
-      unsubscribeStore();
-      clearInterval(pollInterval);
+      if (unsubscribeFirestore) unsubscribeFirestore();
+      unsubStore();
+      clearInterval(interval);
       window.removeEventListener("focus", handleFocus);
       if (eventSource) eventSource.close();
       clearInterval(timer);
     };
-  }, [soundEnabled]);
+  }, [soundEnabled, isAuthenticated]);
 
   // Toggle sound
   const handleToggleSound = () => {
-    if (!soundEnabled) {
-      playOrderChime();
-      setSoundEnabled(true);
-    } else {
-      setSoundEnabled(false);
-    }
+    setSoundEnabled((prev) => !prev);
   };
 
   // Status transitions
@@ -192,9 +303,6 @@ export default function KitchenPage() {
 
   // Print Order Receipt Function matching reference design
   const handlePrintOrder = (order: OrderRecord) => {
-    const printWindow = window.open("", "_blank", "width=380,height=650");
-    if (!printWindow) return;
-
     const dateObj = new Date(order.created_at);
     const formattedDate = dateObj.toLocaleDateString("tr-TR", {
       day: "2-digit",
@@ -204,21 +312,22 @@ export default function KitchenPage() {
     const formattedTime = dateObj.toLocaleTimeString("tr-TR", {
       hour: "2-digit",
       minute: "2-digit",
-      second: "2-digit",
     });
 
-    const totalAmount =
-      order.total ||
-      order.subtotal ||
-      order.items.reduce((sum, it) => sum + (it.total_price || 0), 0);
+    const isSelfService =
+      order.table_number === 0 ||
+      order.table_number === undefined ||
+      order.table_label?.toLowerCase().includes("self");
+
+    const totalAmount = order.total || order.subtotal || 0;
 
     const itemsHtml = order.items
       .map((it) => {
         const optionsHtml = (it.options || [])
           .map(
             (o) =>
-              `<div style="font-size: 11.5px; font-weight: 600; color: #222; padding-left: 10px; margin-top: 2px;">↳ ${
-                o.option_group_name ? `${o.option_group_name}: ` : ""
+              `<div style="font-size: 11px; color: #444; padding-left: 10px; margin-top: 2px;">• ${
+                o.option_group_name ? o.option_group_name + ": " : ""
               }<strong>${o.option_value_name}</strong></div>`
           )
           .join("");
@@ -244,7 +353,7 @@ export default function KitchenPage() {
       ? `<div style="border-top: 1px dashed #000; padding: 6px 0; font-size: 11.5px;"><strong>MÜŞTERİ NOTU:</strong> ${order.general_note}</div>`
       : "";
 
-    printWindow.document.write(`
+    const html = `
       <!DOCTYPE html>
       <html>
         <head>
@@ -278,64 +387,52 @@ export default function KitchenPage() {
               font-weight: 900;
               letter-spacing: 1.5px;
             }
-            .header-box {
-              border: 2px solid #000;
-              padding: 5px;
-              text-align: center;
-              font-weight: 900;
-              font-size: 12px;
-              letter-spacing: 1px;
-              margin: 8px 0 14px 0;
+            .dashed-divider {
+              border-top: 1px dashed #000;
+              margin: 6px 0;
             }
             .meta-table {
               width: 100%;
               font-size: 12px;
-              font-weight: 700;
-              margin-bottom: 10px;
-              border-collapse: collapse;
+              margin: 4px 0;
             }
             .meta-table td {
-              padding: 2px 0;
+              padding: 1.5px 0;
             }
             .meta-label {
-              color: #444;
-              letter-spacing: 0.5px;
+              font-weight: bold;
+              width: 45%;
             }
             .meta-value {
               text-align: right;
               font-weight: 900;
             }
-            .dashed-divider {
-              border-top: 1px dashed #000;
-              margin: 10px 0;
-            }
             .footer-sign {
               text-align: center;
               font-size: 11px;
-              font-weight: 800;
-              letter-spacing: 2px;
-              color: #444;
-              margin-top: 16px;
-              text-transform: uppercase;
+              font-weight: 900;
+              margin-top: 10px;
+              letter-spacing: 1px;
             }
           </style>
         </head>
         <body>
           <div class="brand-wrap">
-            <img class="brand-logo" src="${window.location.origin}/noa_icon.jpg" alt="NOA Icon" />
+            <img src="/noa_icon.jpg" class="brand-logo" alt="NOA" />
             <div class="brand-title">NOA CROISSANT</div>
+            <div style="font-size: 11px; font-weight: bold; letter-spacing: 0.5px;">MUTFAK SİPARİŞ FİŞİ</div>
           </div>
 
-          <div class="header-box">MUTFAK SİPARİŞİ / KITCHEN ORDER</div>
-          
+          <div class="dashed-divider"></div>
+
           <table class="meta-table">
             <tr>
-              <td class="meta-label">TARİH / DATE:</td>
-              <td class="meta-value">${formattedDate}</td>
+              <td class="meta-label">TARİH / SAAT:</td>
+              <td class="meta-value">${formattedDate} ${formattedTime}</td>
             </tr>
             <tr>
-              <td class="meta-label">SAAT / TIME:</td>
-              <td class="meta-value">${formattedTime}</td>
+              <td class="meta-label">SİPARİŞ TÜRÜ:</td>
+              <td class="meta-value" style="font-size: 14px; font-weight: 900;">GEL-AL / SELF SERVİS</td>
             </tr>
             <tr>
               <td class="meta-label">SİPARİŞ NO / ORDER NO:</td>
@@ -361,18 +458,90 @@ export default function KitchenPage() {
           <div class="dashed-divider"></div>
 
           <div class="footer-sign">NOA CROISSANT</div>
-
-          <script>
-            window.onload = function() {
-              window.print();
-              setTimeout(function() { window.close(); }, 500);
-            }
-          </script>
         </body>
       </html>
-    `);
-    printWindow.document.close();
+    `;
+
+    printThermalHtml(html);
   };
+
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white space-y-4">
+        <Loader2 className="w-8 h-8 animate-spin text-[#D35400]" />
+        <p className="text-sm font-medium text-stone-400">Mutfak paneli yükleniyor...</p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center p-4 text-white font-sans">
+        <div className="w-full max-w-sm bg-[#141414] rounded-3xl p-8 border border-[#262626] shadow-[0_20px_50px_rgba(0,0,0,0.6)] flex flex-col items-center text-center space-y-6">
+          {/* Logo */}
+          <div className="relative w-20 h-20 shrink-0">
+            <Image
+              src="/brand/noa-icon.png"
+              alt="NOA Emblem"
+              fill
+              sizes="80px"
+              className="object-contain"
+              priority
+            />
+          </div>
+
+          <div>
+            <span className="text-xs font-black tracking-widest uppercase text-[#D1A37A] block">
+              NOA CROISSANT
+            </span>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleLogin} className="w-full space-y-4">
+            <div className="space-y-2">
+              <input
+                type="password"
+                value={pinInput}
+                onChange={(e) => {
+                  setPinInput(e.target.value);
+                  if (pinError) setPinError(null);
+                }}
+                placeholder="Şifreyi giriniz"
+                autoFocus
+                className={`w-full py-3.5 px-4 text-center tracking-[0.25em] font-mono text-xl font-bold rounded-2xl bg-[#1A1A1A] border transition-all focus:outline-none focus:ring-2 focus:ring-[#DC2626] text-white ${
+                  pinError ? "border-red-500 ring-2 ring-red-900/40" : "border-[#333333]"
+                }`}
+              />
+
+              {pinError && (
+                <div className="p-3 rounded-2xl bg-red-950/50 border border-red-800 text-xs font-bold text-red-400 flex items-center gap-3 text-left shadow-2xs">
+                  <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
+                  <div className="flex-1 flex flex-col justify-center leading-tight">
+                    {pinError.includes("15 dakika") ? (
+                      <>
+                        <span className="block font-bold text-xs text-red-400">Çok fazla hatalı giriş denemesi.</span>
+                        <span className="block font-semibold text-[11px] text-red-300 mt-0.5">Güvenlik nedeniyle 15 dakika kilitlendi.</span>
+                      </>
+                    ) : (
+                      <span>{pinError}</span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3.5 rounded-2xl bg-[#DC2626] hover:bg-[#B91C1C] text-white font-black text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.98] cursor-pointer"
+            >
+              <KeyRound className="w-4 h-4" />
+              <span>Giriş Yap</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   // Only orders that are approved/paid (preparing, ready, served, cancelled) exist in the kitchen scope
   const kitchenOrders = orders.filter(
@@ -494,7 +663,7 @@ export default function KitchenPage() {
           </button>
         </div>
 
-        {/* Action Controls (Sound, Admin Link) */}
+        {/* Action Controls (Sound, Admin Link, Logout) */}
         <div className="flex items-center gap-2">
           {/* Sound Notification Control */}
           <button
@@ -518,6 +687,15 @@ export default function KitchenPage() {
             <LayoutDashboard className="w-3.5 h-3.5 text-white" />
             <span>Yönetim Paneli</span>
           </Link>
+
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            title="Güvenli Çıkış Yap"
+            className="p-2 rounded-xl bg-[#141414] hover:bg-[#222222] text-stone-400 hover:text-red-400 transition-all border border-[#222222] cursor-pointer"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
       </header>
 
@@ -684,30 +862,21 @@ export default function KitchenPage() {
                       <span className={`text-xl sm:text-2xl font-black tracking-tight ${themeHeaderText}`}>
                         #{order.order_number || order.id}
                       </span>
-                      <div className="flex items-center gap-1.5 text-xs text-stone-300 font-mono mt-0.5">
-                        <Clock className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+                      <div className="text-xs text-stone-300 font-mono mt-0.5">
                         <span>{formatDateTime(order.created_at)}</span>
                       </div>
                     </div>
 
                     {/* Right: Elapsed Pill + Print Button + Item Counter */}
                     <div className="flex items-center gap-2 shrink-0">
-                      {/* Live Elapsed Timer */}
+                      {/* Live Elapsed / Preparation Duration Timer */}
                       <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono font-black shadow-xs border ${themeTimerPill}`}>
-                        <span className={`w-2 h-2 rounded-full animate-pulse ${themeTimerDot}`} />
-                        <span>{formatElapsedMMSS(order.created_at)}</span>
-                        {isOverdue && <span className="text-[9px] uppercase tracking-wider font-extrabold ml-0.5">GECİKTİ</span>}
+                        <span className={`w-2 h-2 rounded-full ${!isGreen ? "animate-pulse " + themeTimerDot : themeTimerDot}`} />
+                        <span>{formatOrderDuration(order)}</span>
+                        {isOverdue && !isGreen && (
+                          <span className="text-[9px] uppercase tracking-wider font-extrabold ml-0.5">GECİKTİ</span>
+                        )}
                       </div>
-
-                      {/* Print Receipt Button */}
-                      <button
-                        onClick={() => setPrintingOrder(order)}
-                        title="Fişi Yazdır"
-                        className="px-3.5 py-1.5 rounded-xl bg-[#FAF0E4] hover:bg-white text-[#381D05] font-black text-xs flex items-center gap-1.5 shadow-sm transition-all active:scale-95 cursor-pointer"
-                      >
-                        <Printer className="w-4 h-4 text-[#8C5828]" />
-                        <span className="hidden sm:inline">FİŞİ YAZDIR</span>
-                      </button>
 
                       {/* Item Counter */}
                       <div className="px-3 py-1.5 rounded-xl bg-[#181818] text-stone-200 border border-[#333333] text-xs font-mono font-black">

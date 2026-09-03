@@ -98,6 +98,7 @@ export function useCart() {
         id: itemKey,
         product_id: product.id,
         product_name: product.name,
+        product_name_i18n: product.name_i18n,
         product_slug: product.slug,
         product_image: product.image_url,
         base_price: product.base_price,

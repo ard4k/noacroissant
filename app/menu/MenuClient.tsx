@@ -2,23 +2,57 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { Header } from "@/components/Header";
 import { CategoryTabs } from "@/components/CategoryTabs";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductDetailDrawer } from "@/components/ProductDetailDrawer";
 import { CartDrawer } from "@/components/CartDrawer";
 import { CartBar } from "@/components/CartBar";
-import { CheckoutModal } from "@/components/CheckoutModal";
-import { SearchModal } from "@/components/SearchModal";
 import { OpeningSplash } from "@/components/OpeningSplash";
-import { StoryModal } from "@/components/StoryModal";
+import { Coffee, Gift, Sparkles, Award, Crown, Star, ChevronRight } from "lucide-react";
+
+// Lazy-load non-critical modals for improved initial page load performance
+const CheckoutModal = dynamic(
+  () => import("@/components/CheckoutModal").then((mod) => mod.CheckoutModal),
+  { ssr: false }
+);
+const SearchModal = dynamic(
+  () => import("@/components/SearchModal").then((mod) => mod.SearchModal),
+  { ssr: false }
+);
+const StoryModal = dynamic(
+  () => import("@/components/StoryModal").then((mod) => mod.StoryModal),
+  { ssr: false }
+);
+const WifiModal = dynamic(
+  () => import("@/components/WifiModal").then((mod) => mod.WifiModal),
+  { ssr: false }
+);
+const LoyaltyModal = dynamic(
+  () => import("@/components/LoyaltyModal").then((mod) => mod.LoyaltyModal),
+  { ssr: false }
+);
+const CookieBanner = dynamic(
+  () => import("@/components/CookieBanner").then((mod) => mod.CookieBanner),
+  { ssr: false }
+);
 import { useCart } from "@/lib/useCart";
 import { useSearchParams } from "next/navigation";
 import { Category, Product, DiningTable } from "@/lib/types";
 import { BRAND_ASSETS } from "@/lib/images";
-import { INITIAL_CATEGORIES, INITIAL_PRODUCTS, INITIAL_TABLES } from "@/lib/seedData";
+import { INITIAL_CATEGORIES, INITIAL_PRODUCTS } from "@/lib/seedData";
 import { noaStore } from "@/lib/store";
-import { Language, translateCategory, translateNotice, detectDeviceLanguage, savePreferredLanguage } from "@/lib/i18n/translations";
+import { fetchLoyaltyCard, getStoredCustomerPhone, LoyaltyCard } from "@/lib/loyalty";
+import {
+  Language,
+  getTranslation,
+  translateCategory,
+  translateNotice,
+  detectDeviceLanguage,
+  savePreferredLanguage,
+} from "@/lib/i18n/translations";
+import { resolveLocalizedText } from "@/lib/i18n/resolver";
 import { trackViewItem, trackAddToCart } from "@/lib/analytics";
 
 // Category notices matching reference
@@ -105,7 +139,7 @@ interface MenuClientProps {
 export function MenuClient({
   categories = INITIAL_CATEGORIES,
   products = INITIAL_PRODUCTS,
-  tables = INITIAL_TABLES,
+  tables = [],
   initialTable = null,
   tableTokenFromUrl = null,
   isDevMode = process.env.NODE_ENV === "development",
@@ -118,51 +152,160 @@ export function MenuClient({
   const [liveCategories, setLiveCategories] = useState<Category[]>(categories);
   const [liveProducts, setLiveProducts] = useState<Product[]>(products);
   const [liveTables, setLiveTables] = useState<DiningTable[]>(tables);
+  const [disabledIngredients, setDisabledIngredients] = useState<string[]>([]);
+  const [wifiSettings, setWifiSettings] = useState<{ ssid: string; password: string }>({
+    ssid: "",
+    password: "",
+  });
+  const [loyaltySettings, setLoyaltySettings] = useState<{
+    enabled: boolean;
+    requiredStamps: number;
+    rewardName: string;
+    itemType: string;
+  }>({
+    enabled: true,
+    requiredStamps: 7,
+    rewardName: "Hediye Kahve",
+    itemType: "Kahve",
+  });
+
 
   useEffect(() => {
+    // Deep diffing helper to avoid redundant re-renders and image flickering
+    const applyProductsDiff = (incoming: Product[]) => {
+      if (!incoming || !Array.isArray(incoming) || incoming.length === 0) return;
+      setLiveProducts((prev) => {
+        if (prev.length !== incoming.length) return incoming;
+        const hasDiff = incoming.some((inc, idx) => {
+          const p = prev[idx];
+          return (
+            !p ||
+            p.id !== inc.id ||
+            p.is_available !== inc.is_available ||
+            p.base_price !== inc.base_price ||
+            p.name !== inc.name ||
+            p.image_url !== inc.image_url
+          );
+        });
+        return hasDiff ? incoming : prev;
+      });
+    };
+
+    const applyCategoriesDiff = (incoming: Category[]) => {
+      if (!incoming || !Array.isArray(incoming) || incoming.length === 0) return;
+      setLiveCategories((prev) => {
+        if (prev.length !== incoming.length) return incoming;
+        const hasDiff = incoming.some((inc, idx) => {
+          const c = prev[idx];
+          return !c || c.id !== inc.id || c.name !== inc.name || c.display_order !== inc.display_order;
+        });
+        return hasDiff ? incoming : prev;
+      });
+    };
+
     const syncFromStore = () => {
       const prods = noaStore.getProducts();
-      if (prods && prods.length > 0) setLiveProducts(prods);
+      if (prods && prods.length > 0) applyProductsDiff(prods);
       const cats = noaStore.getCategories();
-      if (cats && cats.length > 0) setLiveCategories(cats);
-      const tbls = noaStore.getTables();
-      if (tbls && tbls.length > 0) setLiveTables(tbls);
+      if (cats && cats.length > 0) applyCategoriesDiff(cats);
+      const settings = noaStore.getSettings();
+      if (settings) {
+        if (settings.disabled_ingredients) {
+          setDisabledIngredients((prev) => {
+            const same = JSON.stringify(prev) === JSON.stringify(settings.disabled_ingredients);
+            return same ? prev : settings.disabled_ingredients || [];
+          });
+        }
+        if (settings.wifi_ssid !== undefined || settings.wifi_password !== undefined) {
+          setWifiSettings({
+            ssid: settings.wifi_ssid || "",
+            password: settings.wifi_password || "",
+          });
+        }
+        setLoyaltySettings({
+          enabled: settings.loyalty_enabled !== false,
+          requiredStamps: settings.loyalty_required_stamps || 7,
+          rewardName: settings.loyalty_reward_name || "Hediye Kahve",
+          itemType: settings.loyalty_stamp_item_type || "Kahve",
+        });
+      }
     };
+
     syncFromStore();
     const unsub = noaStore.subscribe(syncFromStore);
 
     const fetchLive = async () => {
+      if (typeof document !== "undefined" && document.hidden) return;
       try {
         const res = await fetch("/api/products");
         if (res.ok) {
           const data = await res.json();
           if (data.products && Array.isArray(data.products) && data.products.length > 0) {
-            setLiveProducts(data.products);
+            applyProductsDiff(data.products);
           }
           if (data.categories && Array.isArray(data.categories) && data.categories.length > 0) {
-            setLiveCategories(data.categories);
+            applyCategoriesDiff(data.categories);
           }
-          if (data.tables && Array.isArray(data.tables) && data.tables.length > 0) {
-            setLiveTables(data.tables);
+          if (data.settings) {
+            if (Array.isArray(data.settings.disabled_ingredients)) {
+              setDisabledIngredients((prev) => {
+                const same = JSON.stringify(prev) === JSON.stringify(data.settings.disabled_ingredients);
+                return same ? prev : data.settings.disabled_ingredients;
+              });
+            }
+            if (data.settings.wifi_ssid !== undefined || data.settings.wifi_password !== undefined) {
+              setWifiSettings({
+                ssid: data.settings.wifi_ssid || "",
+                password: data.settings.wifi_password || "",
+              });
+            }
+            setLoyaltySettings({
+              enabled: data.settings.loyalty_enabled !== false,
+              requiredStamps: data.settings.loyalty_required_stamps || 7,
+              rewardName: data.settings.loyalty_reward_name || "Hediye Kahve",
+              itemType: data.settings.loyalty_stamp_item_type || "Kahve",
+            });
           }
         }
       } catch (e) {}
     };
+
     fetchLive();
-    const pollInterval = setInterval(fetchLive, 3000);
+    const pollInterval = setInterval(fetchLive, 8000);
+    window.addEventListener("storage", syncFromStore);
 
     return () => {
       unsub();
       clearInterval(pollInterval);
+      window.removeEventListener("storage", syncFromStore);
     };
   }, []);
 
+  // Validate active token from server
+  useEffect(() => {
+    if (!activeToken) return;
+    const validateToken = async () => {
+      try {
+        const res = await fetch(`/api/tables/validate?token=${encodeURIComponent(activeToken)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.valid && data.table) {
+            // qr_token is not returned by the server (security) — populate from activeToken
+            // which the client already has from the URL/QR code scan
+            setCurrentTable({ ...data.table, qr_token: activeToken });
+          }
+        }
+      } catch (e) {}
+    };
+    validateToken();
+  }, [activeToken]);
+
   const resolvedInitialTable = useMemo(() => {
     if (initialTable) return initialTable;
-    if (activeToken) {
+    if (activeToken && liveTables.length > 0) {
       return liveTables.find((t) => t.qr_token === activeToken) || null;
     }
-    return liveTables[0] || null;
+    return null; // Visitors without QR token are never silently assigned to Masa 1
   }, [initialTable, activeToken, liveTables]);
 
   const [currentTable, setCurrentTable] = useState<DiningTable | null>(resolvedInitialTable);
@@ -174,17 +317,34 @@ export function MenuClient({
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isStoryOpen, setIsStoryOpen] = useState(false);
+  const [isWifiOpen, setIsWifiOpen] = useState(false);
+  const [isLoyaltyOpen, setIsLoyaltyOpen] = useState(false);
+  const [customerLoyaltyCard, setCustomerLoyaltyCard] = useState<LoyaltyCard | null>(null);
   const [language, setLanguage] = useState<Language>("tr");
+  const t = (key: string, fallback?: string) => getTranslation(language, key, fallback);
+
+  // Sync stored customer loyalty card
+  useEffect(() => {
+    const phone = getStoredCustomerPhone();
+    if (phone) {
+      fetchLoyaltyCard(phone)
+        .then((c) => setCustomerLoyaltyCard(c))
+        .catch(() => {});
+    }
+  }, []);
 
   // Auto-detect phone / device language on first load
   useEffect(() => {
     const autoLang = detectDeviceLanguage();
     setLanguage(autoLang);
-    if (typeof document !== "undefined") {
-      document.documentElement.lang = autoLang;
-      document.documentElement.dir = autoLang === "ar" ? "rtl" : "ltr";
-    }
   }, []);
+
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = language;
+      document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+    }
+  }, [language]);
 
   const handleLanguageChange = useCallback((newLang: Language) => {
     setLanguage(newLang);
@@ -293,7 +453,7 @@ export function MenuClient({
   return (
     <div className="min-h-screen bg-[#F8F1EB] text-[#4A2808]" suppressHydrationWarning>
       {/* Brand Opening Splash Animation */}
-      <OpeningSplash onOpenStory={() => setIsStoryOpen(true)} />
+      <OpeningSplash onOpenStory={() => setIsStoryOpen(true)} language={language} />
 
       {/* Smart Dual Sticky Header Wrapper */}
       <div
@@ -310,6 +470,9 @@ export function MenuClient({
           onOpenCart={() => setIsCartOpen(true)}
           onOpenSearch={() => setIsSearchOpen(true)}
           onOpenStory={() => setIsStoryOpen(true)}
+          onOpenWifi={() => setIsWifiOpen(true)}
+          loyaltyStamps={customerLoyaltyCard?.stamps}
+          hasFreeReward={(customerLoyaltyCard?.rewards_count || 0) > 0}
           isDevMode={isDevMode}
           language={language}
           onLanguageChange={handleLanguageChange}
@@ -343,7 +506,7 @@ export function MenuClient({
               {/* Category Header */}
               <div className="space-y-1 px-1">
                 <h2 className="text-3xl sm:text-4xl font-extrabold text-[#683B0C] tracking-tight">
-                  {translateCategory(cat.name, language)}
+                  {resolveLocalizedText(cat.name_i18n || cat.name, language)}
                 </h2>
                 <div className="text-[11px] sm:text-xs font-semibold text-[#8C5828] space-y-0.5 tracking-wider">
                   {notices.map((notice, idx) => (
@@ -362,6 +525,7 @@ export function MenuClient({
                     onQuickAdd={handleQuickAdd}
                     language={language}
                     priority={catIdx === 0 && prodIdx < 3}
+                    disabledIngredients={disabledIngredients}
                   />
                 ))}
               </div>
@@ -372,13 +536,13 @@ export function MenuClient({
 
       {/* Footer */}
       <footer className="max-w-3xl mx-auto px-4 sm:px-6 pt-10 pb-20 border-t border-[#683B0C]/12 flex flex-col items-center justify-center">
-        <div className="relative w-12 h-12 rounded-full overflow-hidden shadow-xs border border-[#683B0C]/15 opacity-80 hover:opacity-100 transition-opacity">
+        <div className="relative w-12 h-12 opacity-80 hover:opacity-100 transition-opacity">
           <Image
-            src="/noa_icon.jpg"
+            src="/brand/noa-icon.png"
             alt="NOA Amblem"
             fill
             sizes="48px"
-            className="object-cover"
+            className="object-contain"
           />
         </div>
       </footer>
@@ -388,6 +552,7 @@ export function MenuClient({
         totalCount={cartHook.totalItemCount}
         totalPrice={cartHook.totalPrice}
         onOpenCart={() => setIsCartOpen(true)}
+        language={language}
       />
 
       {/* Product Detail Modal */}
@@ -403,6 +568,7 @@ export function MenuClient({
           cartHook.addItem(prod, options, qty, note);
         }}
         language={language}
+        disabledIngredients={disabledIngredients}
       />
 
       {/* Cart Drawer */}
@@ -441,6 +607,7 @@ export function MenuClient({
         tableNumber={currentTable?.table_number || null}
         generalNote={cartHook.generalNote}
         onClearCart={cartHook.clearCart}
+        language={language}
       />
 
       {/* Search Modal */}
@@ -458,6 +625,74 @@ export function MenuClient({
         onClose={() => setIsStoryOpen(false)}
         language={language}
       />
+
+      {/* Wi-Fi Quick Connect Modal */}
+      <WifiModal
+        isOpen={isWifiOpen}
+        onClose={() => setIsWifiOpen(false)}
+        ssid={wifiSettings.ssid}
+        password={wifiSettings.password}
+        language={language}
+      />
+
+      {/* Floating Bottom-Left Luxury Loyalty Capsule Badge – Saf Beyaz İnci */}
+      {loyaltySettings.enabled && (
+        <div className="fixed bottom-6 sm:bottom-8 left-4 sm:left-6 z-30 animate-fadeIn">
+          <button
+            type="button"
+            onClick={() => setIsLoyaltyOpen(true)}
+            title={t("loyaltyCardTitle", "NOA Kahve Kartı")}
+            aria-label={t("loyaltyCardTitle", "NOA Kahve Kartı")}
+            className="group relative flex items-center gap-2.5 pl-2 pr-3.5 py-1.5 rounded-full bg-white hover:bg-[#FAF4EE] text-[#381D05] border border-[#E8DFD5] shadow-[0_10px_30px_rgba(56,29,5,0.14)] hover:shadow-[0_12px_36px_rgba(56,29,5,0.2)] backdrop-blur-md hover:scale-104 active:scale-96 transition-all duration-300 cursor-pointer"
+          >
+            {/* Round Mini Avatar */}
+            <div className="relative w-8 h-8 rounded-full overflow-hidden shrink-0 shadow-2xs border border-[#8C5828]/25 bg-white">
+              <Image
+                src="/noa_icon.jpg"
+                alt="NOA"
+                width={32}
+                height={32}
+                className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-300"
+              />
+            </div>
+
+            {/* Gift Icon & Stamp Counter */}
+            <div className="flex items-center gap-1.5 text-xs font-black tracking-tight">
+              <Gift className="w-3.5 h-3.5 text-[#8C5828]" />
+
+              {customerLoyaltyCard?.rewards_count && customerLoyaltyCard.rewards_count > 0 ? (
+                <span className="px-2 py-0.5 rounded-full bg-[#15803D] text-white text-[11px] font-black uppercase tracking-wider animate-pulse shadow-xs">
+                  🎁 {t("freeCoffeeReward", "Hediye!")}
+                </span>
+              ) : (
+                <div className="flex items-baseline gap-0.5">
+                  <span className="text-[#381D05] font-black text-xs">
+                    {customerLoyaltyCard?.stamps ?? 0}
+                  </span>
+                  <span className="text-[#8C5828]/70 font-bold text-[11px]">
+                    /{loyaltySettings.requiredStamps || 7}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <ChevronRight className="w-3.5 h-3.5 text-[#8C5828] stroke-[2.5] -ml-0.5 group-hover:translate-x-0.5 transition-transform shrink-0" />
+          </button>
+        </div>
+      )}
+
+      {/* NOA Digital Loyalty Club Modal */}
+      <LoyaltyModal
+        isOpen={isLoyaltyOpen}
+        onClose={() => setIsLoyaltyOpen(false)}
+        onCardUpdated={(c) => setCustomerLoyaltyCard(c)}
+        requiredStamps={loyaltySettings.requiredStamps}
+        rewardName={loyaltySettings.rewardName}
+        language={language}
+      />
+
+      {/* Cookie & Privacy Consent Banner */}
+      <CookieBanner language={language} />
     </div>
   );
 }

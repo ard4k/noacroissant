@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, Sparkles, Heart } from "lucide-react";
-import { Language } from "@/lib/i18n/translations";
+import { Language, getTranslation } from "@/lib/i18n/translations";
 
 export interface StorySlide {
   id: string;
@@ -54,7 +54,7 @@ export const STORY_SLIDES: StorySlide[] = [
       pl: "Prawdziwy croissant wymaga czasu. Nasze ciasto na francuskim maśle dojrzewa 48 godzin, tworząc setki chrupiących warstw.",
       ar: "الكرواسان الأصيل يحتاج وقتاً. نستخدم الزبدة الفرنسية النقية مع تخمير بطيء على البارد لمدة 48 ساعة لنصل إلى قرمشة فائقة وهشة.",
     },
-    image: "/story1.jpg",
+    image: "/story-1.jpg?v=4",
     highlight: {
       tr: "Kat Kat Çıtır & Havadar",
       en: "Flaky & Featherlight",
@@ -106,7 +106,7 @@ export const STORY_SLIDES: StorySlide[] = [
       pl: "Aksamitna, ciepła belgijska czekolada rozpływająca się w świeżo upieczonym croissancie to rozkosz w każdym kęsie.",
       ar: "الشوكولاتة البلجيكية الساخنة الغنية تذوب داخل الكرواسان المقرمش الطازج لتمنحك متعة تذوق استثنائية.",
     },
-    image: "/story2.jpg",
+    image: "/story-2.jpg?v=4",
     highlight: {
       tr: "Callebaut & Nutella",
       en: "Callebaut & Nutella",
@@ -158,7 +158,7 @@ export const STORY_SLIDES: StorySlide[] = [
       pl: "Codziennie rano świeżo wybierane truskawki, borówki i maliny w połączeniu z naszym aksamitnym kremem cukierniczym.",
       ar: "نختار كل صباح أجود حبات الفراولة، التوت البري وتوت العليق الطازج لنمزجها مع كريمة الباتيسير الفرنسية الفاخرة.",
     },
-    image: "/story3.jpg",
+    image: "/story-3.jpg?v=4",
     highlight: {
       tr: "Günlük El Emeği",
       en: "Handcrafted Daily",
@@ -210,7 +210,7 @@ export const STORY_SLIDES: StorySlide[] = [
       pl: "Od naszego kultowego serca Amora po okrągłe Roll i Kostki — zmieniamy klasyczne wypieki w nowoczesną sztukę kulinarną.",
       ar: "من كرواسان أمورا الأيقوني على شكل قلب إلى رول ومكعب الكرواسان المبتكر، نحول فن المخبوزات الكلاسيكي إلى تجربة عصرية استثنائية.",
     },
-    image: "/story4.jpg",
+    image: "/story-4.jpg?v=4",
     highlight: {
       tr: "NOA Özel İmzası",
       en: "NOA Signature Creations",
@@ -262,7 +262,7 @@ export const STORY_SLIDES: StorySlide[] = [
       pl: "Zapach ciepłych croissantów, wyśmienita kawa specialty i nasza serdeczna atmosfera umilą każdy Twój dzień.",
       ar: "مع عبير الكرواسان الطازج، القهوة المختصة الفاخرة وأجوائنا الدافئة، يسعدنا أن نضيف لمسة من البهجة إلى يومكم.",
     },
-    image: "/story5.jpg",
+    image: "/story-5.jpg?v=4",
     highlight: {
       tr: "Afiyet Olsun!",
       en: "Bon Appétit!",
@@ -389,20 +389,28 @@ export function StoryModal({
 
         {/* Story Phone Container */}
         <div className="relative w-full h-full sm:h-[90vh] sm:max-w-md sm:rounded-[36px] overflow-hidden bg-black shadow-2xl flex flex-col justify-between">
-          {/* Background Photo (Static & Uncropped) */}
+          {/* Background Photo (Ultra High Definition & Smooth Transition) */}
           <div className="absolute inset-0 z-0 overflow-hidden bg-black">
             <div className="relative w-full h-full">
-              <Image
-                src={currentSlide.image}
-                alt={title}
-                fill
-                priority
-                unoptimized
-                sizes="(max-width: 640px) 100vw, 480px"
-                className="object-cover object-center"
-              />
-              {/* Luxury Gradient Overlays */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-black/30 pointer-events-none" />
+              {STORY_SLIDES.map((slide, sIdx) => (
+                <div
+                  key={slide.id}
+                  className={`absolute inset-0 transition-opacity duration-300 ${
+                    sIdx === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+                  }`}
+                >
+                  <Image
+                    src={slide.image}
+                    alt={slide.title[language] || slide.title.tr}
+                    fill
+                    priority
+                    unoptimized
+                    className="object-cover object-center"
+                  />
+                  {/* Luxury Gradient Overlays */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/30 pointer-events-none" />
+                </div>
+              ))}
             </div>
           </div>
 
@@ -453,7 +461,7 @@ export function StoryModal({
                 type="button"
                 onClick={onClose}
                 className="w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-md transition-all active:scale-90 border border-white/20 cursor-pointer"
-                aria-label="Kapat"
+                aria-label={getTranslation(language, "closeModal", "Kapat")}
               >
                 <X className="w-4 h-4 stroke-[2.5]" />
               </button>
@@ -518,7 +526,7 @@ export function StoryModal({
                   onClick={onClose}
                   className="px-5 py-2 rounded-full bg-white text-[#381D05] font-black text-xs shadow-lg hover:bg-[#FAF0E4] active:scale-95 transition-all flex items-center gap-1.5"
                 >
-                  <span>Menüyü İncele</span>
+                  <span>{getTranslation(language, "viewMenu", "Menüyü İncele")}</span>
                   <span>➔</span>
                 </button>
               ) : (
@@ -527,7 +535,7 @@ export function StoryModal({
                   onClick={handleNext}
                   className="text-white/80 hover:text-white text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
                 >
-                  <span>Devam Et</span>
+                  <span>{getTranslation(language, "continue", "Devam Et")}</span>
                   <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               )}

@@ -9,6 +9,10 @@ import {
   BusinessSettings,
   StaffRole,
   OrderItemRecord,
+  ServiceRequest,
+  ServiceCallType,
+  LoyaltyCard,
+  SupportedLocale,
 } from "./types";
 import {
   INITIAL_CATEGORIES,
@@ -26,6 +30,8 @@ const STORAGE_KEYS = {
   SETTINGS: "noa_settings_v5",
   PROMOTIONS: "noa_promotions_v5",
   STAFF_USER: "noa_staff_user_v5",
+  SERVICE_REQUESTS: "noa_service_requests_v5",
+  LOYALTY_CARDS: "noa_loyalty_cards_v5",
 };
 
 // In-memory fallback singleton for server and client sync
@@ -34,13 +40,28 @@ class NoaStore {
   private products: Product[] = [...INITIAL_PRODUCTS];
   private categories: Category[] = [...INITIAL_CATEGORIES];
   private orders: OrderRecord[] = [];
+  private serviceRequests: ServiceRequest[] = [];
   private settings: BusinessSettings = { ...INITIAL_SETTINGS };
   private promotions: Promotion[] = [...INITIAL_PROMOTIONS];
+  private loyaltyCards: Record<string, LoyaltyCard> = {};
   private listeners: Set<() => void> = new Set();
   private broadcastChannel: BroadcastChannel | null = null;
 
   constructor() {
     this.loadFromStorage();
+
+    // Ensure all tables have a secure dynamic token at runtime if not set
+    for (const table of this.tables) {
+      if (!table.qr_token) {
+        const randomSuffix =
+          Math.random().toString(36).substring(2, 10) +
+          Date.now().toString(36).substring(4);
+        table.qr_token = `noa_tbl_${table.table_number
+          .toString()
+          .padStart(2, "0")}_${randomSuffix}`;
+      }
+    }
+
     if (typeof window !== "undefined") {
       try {
         this.broadcastChannel = new BroadcastChannel("noa_realtime_bus");
@@ -62,8 +83,11 @@ class NoaStore {
       try {
         const fs = require("fs");
         const path = require("path");
-        const dirPath = path.join(process.cwd(), ".data");
-        const filePath = path.join(dirPath, "noa_store.json");
+        const isServerless = process.env.VERCEL === "1" || Boolean(process.env.AWS_LAMBDA_FUNCTION_NAME);
+        const filePath = isServerless
+          ? path.join("/tmp", ".data", "noa_store.json")
+          : path.join(process.cwd(), ".data", "noa_store.json");
+
         if (fs.existsSync(filePath)) {
           const raw = fs.readFileSync(filePath, "utf-8");
           const data = JSON.parse(raw);
@@ -94,8 +118,19 @@ class NoaStore {
             return init;
           });
           if (data.orders && Array.isArray(data.orders)) this.orders = data.orders;
-          if (data.settings) this.settings = data.settings;
+          if (data.settings) {
+            this.settings = { ...INITIAL_SETTINGS, ...data.settings };
+            if (this.settings.loyalty_reward_name === "1 Adet Hediye Kahve") {
+              this.settings.loyalty_reward_name = "Hediye Kahve";
+            }
+          }
+          if (!Array.isArray(this.settings.disabled_ingredients)) {
+            this.settings.disabled_ingredients = [];
+          }
           if (data.promotions && Array.isArray(data.promotions)) this.promotions = data.promotions;
+          if (data.loyaltyCards && typeof data.loyaltyCards === "object") {
+            this.loyaltyCards = data.loyaltyCards;
+          }
         }
       } catch (e) {
         // Ignore file read error
@@ -105,26 +140,92 @@ class NoaStore {
 
     try {
       // Always reset and clean legacy localStorage items to prevent stale data
-      for (let i = 1; i <= 5; i++) {
+      for (let i = 1; i <= 6; i++) {
         localStorage.removeItem(`noa_products_v${i}`);
         localStorage.removeItem(`noa_categories_v${i}`);
+        localStorage.removeItem(`noa_orders_v${i}`);
+      }
+      localStorage.removeItem(STORAGE_KEYS.ORDERS);
+
+      this.tables = [...INITIAL_TABLES];
+      this.orders = [];
+
+      const storedProducts = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
+      if (storedProducts) {
+        try {
+          const parsed = JSON.parse(storedProducts) as Product[];
+          if (Array.isArray(parsed)) {
+            this.products = INITIAL_PRODUCTS.map((init) => {
+              const custom = parsed.find((p) => p.id === init.id);
+              if (custom) {
+                return {
+                  ...init,
+                  is_available: custom.is_available ?? init.is_available,
+                  is_featured: custom.is_featured ?? init.is_featured,
+                  base_price: custom.base_price ?? init.base_price,
+                };
+              }
+              return init;
+            });
+            const customOnly = parsed.filter((p) => !INITIAL_PRODUCTS.some((init) => init.id === p.id));
+            this.products.push(...customOnly);
+          } else {
+            this.products = [...INITIAL_PRODUCTS];
+          }
+        } catch {
+          this.products = [...INITIAL_PRODUCTS];
+        }
+      } else {
+        this.products = [...INITIAL_PRODUCTS];
       }
 
-      this.products = [...INITIAL_PRODUCTS];
-      this.categories = [...INITIAL_CATEGORIES];
-      this.tables = [...INITIAL_TABLES];
+      const storedCategories = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
+      if (storedCategories) {
+        try {
+          const parsed = JSON.parse(storedCategories) as Category[];
+          if (Array.isArray(parsed)) {
+            this.categories = INITIAL_CATEGORIES.map((init) => {
+              const custom = parsed.find((c) => c.id === init.id);
+              if (custom) {
+                return {
+                  ...init,
+                  is_active: custom.is_active ?? init.is_active,
+                  display_order: custom.display_order ?? init.display_order,
+                };
+              }
+              return init;
+            });
+          } else {
+            this.categories = [...INITIAL_CATEGORIES];
+          }
+        } catch {
+          this.categories = [...INITIAL_CATEGORIES];
+        }
+      } else {
+        this.categories = [...INITIAL_CATEGORIES];
+      }
 
       const storedTables = localStorage.getItem(STORAGE_KEYS.TABLES);
       if (storedTables) this.tables = JSON.parse(storedTables);
 
-      const storedOrders = localStorage.getItem(STORAGE_KEYS.ORDERS);
-      if (storedOrders) this.orders = JSON.parse(storedOrders);
-
       const storedSettings = localStorage.getItem(STORAGE_KEYS.SETTINGS);
-      if (storedSettings) this.settings = JSON.parse(storedSettings);
+      if (storedSettings) {
+        this.settings = { ...INITIAL_SETTINGS, ...JSON.parse(storedSettings) };
+        if (this.settings.loyalty_reward_name === "1 Adet Hediye Kahve") {
+          this.settings.loyalty_reward_name = "Hediye Kahve";
+        }
+      }
+      if (!Array.isArray(this.settings.disabled_ingredients)) {
+        this.settings.disabled_ingredients = [];
+      }
 
       const storedPromos = localStorage.getItem(STORAGE_KEYS.PROMOTIONS);
       if (storedPromos) this.promotions = JSON.parse(storedPromos);
+
+      const storedLoyalty = localStorage.getItem(STORAGE_KEYS.LOYALTY_CARDS);
+      if (storedLoyalty) {
+        this.loyaltyCards = JSON.parse(storedLoyalty);
+      }
     } catch (e) {
       console.warn("Could not load from localStorage:", e);
     }
@@ -136,7 +237,8 @@ class NoaStore {
       try {
         const fs = require("fs");
         const path = require("path");
-        const dirPath = path.join(process.cwd(), ".data");
+        const isServerless = process.env.VERCEL === "1" || Boolean(process.env.AWS_LAMBDA_FUNCTION_NAME);
+        const dirPath = isServerless ? path.join("/tmp", ".data") : path.join(process.cwd(), ".data");
         const filePath = path.join(dirPath, "noa_store.json");
         if (!fs.existsSync(dirPath)) {
           fs.mkdirSync(dirPath, { recursive: true });
@@ -148,6 +250,7 @@ class NoaStore {
           orders: this.orders,
           settings: this.settings,
           promotions: this.promotions,
+          loyaltyCards: this.loyaltyCards,
         };
         fs.writeFileSync(filePath, JSON.stringify(state, null, 2), "utf-8");
       } catch (e) {
@@ -160,9 +263,9 @@ class NoaStore {
       localStorage.setItem(STORAGE_KEYS.TABLES, JSON.stringify(this.tables));
       localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(this.products));
       localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(this.categories));
-      localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(this.orders));
       localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(this.settings));
       localStorage.setItem(STORAGE_KEYS.PROMOTIONS, JSON.stringify(this.promotions));
+      localStorage.setItem(STORAGE_KEYS.LOYALTY_CARDS, JSON.stringify(this.loyaltyCards));
 
       if (this.broadcastChannel) {
         this.broadcastChannel.postMessage("sync");
@@ -213,23 +316,11 @@ class NoaStore {
 
   // --- CATEGORIES & PRODUCTS ---
   public getCategories(): Category[] {
-    return [...INITIAL_CATEGORIES].sort((a, b) => a.display_order - b.display_order);
+    return [...this.categories].sort((a, b) => a.display_order - b.display_order);
   }
 
   public getProducts(): Product[] {
-    return INITIAL_PRODUCTS
-      .map((init) => {
-        const custom = this.products.find((p) => p.id === init.id);
-        if (custom) {
-          return {
-            ...init,
-            is_available: custom.is_available ?? init.is_available,
-            is_featured: custom.is_featured ?? init.is_featured,
-          };
-        }
-        return init;
-      })
-      .sort((a, b) => a.display_order - b.display_order);
+    return [...this.products].sort((a, b) => a.display_order - b.display_order);
   }
 
   public getProductBySlug(slug: string): Product | undefined {
@@ -248,6 +339,20 @@ class NoaStore {
     this.saveToStorage();
     this.notify();
     return this.products[idx];
+  }
+
+  public hydrateProducts(products: Product[]): void {
+    if (!products || products.length === 0) return;
+    for (const prod of products) {
+      const idx = this.products.findIndex((p) => p.id === prod.id);
+      if (idx >= 0) {
+        this.products[idx] = { ...this.products[idx], ...prod };
+      } else {
+        this.products.push(prod);
+      }
+    }
+    this.saveToStorage();
+    this.notify();
   }
 
   public addProduct(product: Omit<Product, "id"> & { id?: string }): Product {
@@ -315,6 +420,47 @@ class NoaStore {
     return this.orders.find((o) => o.id === id);
   }
 
+  public hydrateOrder(order: OrderRecord): void {
+    const idx = this.orders.findIndex(
+      (o) => o.id === order.id || o.tracking_token === order.tracking_token
+    );
+    if (idx >= 0) {
+      this.orders[idx] = { ...this.orders[idx], ...order };
+    } else {
+      this.orders.unshift(order);
+    }
+    this.saveToStorage();
+    this.notify();
+  }
+
+  public setOrders(orders: OrderRecord[]): void {
+    this.orders = Array.isArray(orders) ? [...orders] : [];
+    this.orders.sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+    this.saveToStorage();
+    this.notify();
+  }
+
+  public hydrateOrders(orders: OrderRecord[]): void {
+    if (!orders || orders.length === 0) return;
+    for (const ord of orders) {
+      const idx = this.orders.findIndex(
+        (o) => o.id === ord.id || o.tracking_token === ord.tracking_token
+      );
+      if (idx >= 0) {
+        this.orders[idx] = { ...this.orders[idx], ...ord };
+      } else {
+        this.orders.push(ord);
+      }
+    }
+    this.orders.sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+    this.saveToStorage();
+    this.notify();
+  }
+
   // Server-safe tamper-proof order creation
   public createOrder(params: {
     table_token: string;
@@ -328,6 +474,8 @@ class NoaStore {
     payment_method: PaymentMethod;
     general_note?: string;
     idempotency_key?: string;
+    customer_phone?: string;
+    language?: SupportedLocale;
   }): { order: OrderRecord; tracking_token: string } {
     let table = this.getTableByToken(params.table_token);
     if (!table) {
@@ -365,6 +513,43 @@ class NoaStore {
       }
       if (!product.is_available) {
         throw new Error(`"${product.name}" şu anda tükenmiştir.`);
+      }
+
+      // Check disabled / out-of-stock ingredients
+      const disabledList = (this.settings.disabled_ingredients || []).map((i) => i.toLowerCase().trim());
+      if (disabledList.length > 0) {
+        let productIngs: string[] = [];
+        if (Array.isArray(product.ingredients)) {
+          productIngs = product.ingredients;
+        } else if (typeof product.ingredients === "string") {
+          productIngs = (product.ingredients as string).split(",").map((s) => s.trim());
+        }
+
+        const matchedDisabled = disabledList.find((disabled) => {
+          if (productIngs.some((ing) => ing.toLowerCase().includes(disabled) || disabled.includes(ing.toLowerCase()))) {
+            return true;
+          }
+          if (product.name.toLowerCase().includes(disabled) || product.slug.toLowerCase().includes(disabled)) {
+            return true;
+          }
+          return false;
+        });
+
+        if (matchedDisabled) {
+          throw new Error(`"${matchedDisabled}" tükendiği için "${product.name}" şu anda sipariş verilemez.`);
+        }
+
+        if (item.selected_options && product.option_groups) {
+          for (const sel of item.selected_options) {
+            const group = product.option_groups.find((g) => g.id === sel.option_group_id);
+            if (group) {
+              const val = group.options.find((o) => o.id === sel.option_value_id);
+              if (val && disabledList.some((d) => val.name.toLowerCase().includes(d) || d.includes(val.name.toLowerCase()))) {
+                throw new Error(`"${val.name}" seçeneği tükendiği için seçilemez.`);
+              }
+            }
+          }
+        }
       }
 
       if (product.category_id === "cat-tuzlu") {
@@ -448,8 +633,10 @@ class NoaStore {
       payment_status: "unpaid",
       subtotal: calculatedSubtotal,
       total: calculatedSubtotal,
+      customer_phone: params.customer_phone,
       general_note: params.general_note ? params.general_note.trim().substring(0, 300) : undefined,
       idempotency_key: params.idempotency_key,
+      language: params.language,
       created_at: now,
       updated_at: now,
       items: orderItems,
@@ -542,6 +729,115 @@ class NoaStore {
     this.orders = [];
     this.saveToStorage();
     this.notify();
+  }
+
+  // --- SERVICE REQUESTS (CALL WAITER / BILL) ---
+  public getServiceRequests(status?: "pending" | "completed"): ServiceRequest[] {
+    const list = status
+      ? this.serviceRequests.filter((r) => r.status === status)
+      : this.serviceRequests;
+    return [...list].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+  }
+
+  public createServiceRequest(params: {
+    table_number: number;
+    table_label?: string;
+    type: ServiceCallType;
+    note?: string;
+  }): ServiceRequest {
+    const typeLabels: Record<ServiceCallType, string> = {
+      waiter: "Garson Çağrısı",
+      bill_card: "Hesap İstendi (Kredi Kartı)",
+      bill_cash: "Hesap İstendi (Nakit)",
+      water_napkin: "Su & Peçete İsteği",
+      tea_refresh: "Çay Tazeleme İsteği",
+    };
+
+    const newReq: ServiceRequest = {
+      id: `call-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      table_number: params.table_number,
+      table_label: params.table_label || `Masa ${params.table_number.toString().padStart(2, "0")}`,
+      type: params.type,
+      type_label: typeLabels[params.type] || "Garson Çağrısı",
+      note: params.note ? params.note.trim().substring(0, 200) : undefined,
+      status: "pending",
+      created_at: new Date().toISOString(),
+    };
+
+    this.serviceRequests.unshift(newReq);
+    this.saveToStorage();
+    this.notify();
+    return newReq;
+  }
+
+  public resolveServiceRequest(id: string, resolvedBy?: string): ServiceRequest | null {
+    const req = this.serviceRequests.find((r) => r.id === id);
+    if (!req) return null;
+
+    req.status = "completed";
+    req.resolved_at = new Date().toISOString();
+    req.resolved_by = resolvedBy || "Personel";
+
+    this.saveToStorage();
+    this.notify();
+    return req;
+  }
+
+  public hydrateServiceRequests(requests: ServiceRequest[]): void {
+    if (!requests || !Array.isArray(requests)) return;
+    this.serviceRequests = requests;
+    this.saveToStorage();
+    this.notify();
+  }
+
+  // --- INGREDIENT & OPTION STOCK MANAGEMENT ---
+  public getDisabledIngredients(): string[] {
+    return this.settings.disabled_ingredients || [];
+  }
+
+  public toggleIngredient(ingredientName: string, isAvailable?: boolean): string[] {
+    const current = new Set(this.settings.disabled_ingredients || []);
+    const normalized = ingredientName.trim();
+
+    if (isAvailable !== undefined) {
+      if (isAvailable) {
+        current.delete(normalized);
+      } else {
+        current.add(normalized);
+      }
+    } else {
+      if (current.has(normalized)) {
+        current.delete(normalized);
+      } else {
+        current.add(normalized);
+      }
+    }
+
+    this.settings.disabled_ingredients = Array.from(current);
+    this.saveToStorage();
+    this.notify();
+    return this.settings.disabled_ingredients;
+  }
+
+  // --- LOYALTY CARDS PERSISTENCE ---
+  public getLoyaltyCard(phoneE164: string): LoyaltyCard | undefined {
+    if (!phoneE164) return undefined;
+    const id = phoneE164.replace(/\D/g, "");
+    return this.loyaltyCards[id];
+  }
+
+  public saveLoyaltyCard(card: LoyaltyCard): void {
+    if (!card) return;
+    const id = card.id || card.phone_number.replace(/\D/g, "");
+    this.loyaltyCards[id] = { ...card, id };
+    this.saveToStorage();
+    this.notify();
+  }
+
+  public getAllLoyaltyCards(): LoyaltyCard[] {
+    return Object.values(this.loyaltyCards);
   }
 }
 

@@ -2,7 +2,8 @@
 
 import React, { useRef, useEffect } from "react";
 import { Category } from "@/lib/types";
-import { Language, translateCategory } from "@/lib/i18n/translations";
+import { Language } from "@/lib/i18n/translations";
+import { resolveLocalizedText } from "@/lib/i18n/resolver";
 
 interface CategoryTabsProps {
   categories: Category[];
@@ -35,7 +36,7 @@ export function CategoryTabs({
 
   return (
     <nav
-      aria-label="Menü Kategorileri"
+      aria-label={language === "en" ? "Menu Categories" : "Menü Kategorileri"}
       className="w-full bg-[#F8F1EB]/95 backdrop-blur-md py-3.5 border-b border-[#D1A37A]/25 shadow-2xs"
     >
       <div
@@ -53,7 +54,7 @@ export function CategoryTabs({
                 isActive ? "active" : ""
               }`}
             >
-              <span>{translateCategory(cat.name, language)}</span>
+              <span>{resolveLocalizedText(cat.name_i18n || cat.name, language)}</span>
             </button>
           );
         })}

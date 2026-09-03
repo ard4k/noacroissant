@@ -23,10 +23,33 @@ import {
   Check,
   Bell,
   BellRing,
+  Loader2,
+  UtensilsCrossed,
+  Coffee,
+  Flame,
+  PartyPopper,
+  Smile,
+  ChevronLeft,
+  BookOpen,
+  Utensils,
+  LayoutGrid,
+  Instagram,
+  ExternalLink,
 } from "lucide-react";
+import { BUSINESS_INFO } from "@/lib/businessConfig";
 import { OrderRecord, OrderStatus } from "@/lib/types";
 import { formatPrice, formatDateTime } from "@/lib/utils";
 import { noaStore } from "@/lib/store";
+import {
+  Language,
+  getTranslation,
+  detectDeviceLanguage,
+} from "@/lib/i18n/translations";
+import {
+  resolveLocalizedText,
+  formatLocalizedPrice,
+  getSortedAndFormattedOptionsLocalized,
+} from "@/lib/i18n/resolver";
 
 function playReadyNotificationSound() {
   try {
@@ -68,7 +91,7 @@ function playReadyNotificationSound() {
   }
 }
 
-function triggerReadyNotification(orderNumber: string, tableNumber?: number) {
+function triggerReadyNotification(orderNumber: string, tableNumber?: number, language: Language = "tr") {
   // 1. Play chime sound
   playReadyNotificationSound();
 
@@ -78,10 +101,17 @@ function triggerReadyNotification(orderNumber: string, tableNumber?: number) {
   }
 
   // 3. Native Push Notification (via ServiceWorker or window.Notification)
-  const title = "NOA Croissant • Siparişiniz Hazır! 🥐✨";
+  const isEn = language === "en";
+  const title = isEn
+    ? "NOA Croissant • Your Order is Ready! 🥐✨"
+    : "NOA Croissant • Siparişiniz Hazır! 🥐✨";
   const body = tableNumber
-    ? `Masa ${tableNumber}: Kruvasanlarınız ve siparişiniz fırından yeni çıktı, masanıza servis ediliyor!`
-    : `Sipariş #${orderNumber} hazırlandı, afiyet olsun!`;
+    ? (isEn
+        ? `Table ${tableNumber}: Your freshly baked croissants and order are ready, serving to your table!`
+        : `Masa ${tableNumber}: Kruvasanlarınız ve siparişiniz fırından yeni çıktı, masanıza servis ediliyor!`)
+    : (isEn
+        ? `Order #${orderNumber} is ready! Enjoy your meal!`
+        : `Sipariş #${orderNumber} hazırlandı, afiyet olsun!`);
   const icon = "/brand/logo-192.png";
 
   if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
@@ -105,71 +135,7 @@ function triggerReadyNotification(orderNumber: string, tableNumber?: number) {
   }
 }
 
-function getSortedAndFormattedOptions(options?: any[]) {
-  if (!options || options.length === 0) return [];
 
-  const getRank = (opt: { option_group_id?: string; option_group_name?: string; option_value_name: string }) => {
-    const gn = (opt.option_group_name || "").toLocaleLowerCase("tr-TR");
-    const vn = (opt.option_value_name || "").toLocaleLowerCase("tr-TR");
-    const gid = (opt.option_group_id || "").toLowerCase();
-
-    if (gn.includes("taban") || gn.includes("kruvasan") || gid.includes("taban") || gid.includes("kruvasan") || vn.includes("kruvasan") || vn.includes("danish") || vn.includes("twissy")) {
-      return 1;
-    }
-    if (gn.includes("iç dolgu") || gn.includes("ic dolgu") || gid.includes("ic_dolgu") || gid.includes("ic-dolgu") || gid.includes("ic_")) {
-      return 2;
-    }
-    if (gn.includes("dış dolgu") || gn.includes("dis dolgu") || gid.includes("dis_dolgu") || gid.includes("dis-dolgu") || gid.includes("dis_") || gn.includes("çikolata")) {
-      return 3;
-    }
-    if (gn.includes("krema") || gid.includes("krema") || vn.includes("krema")) {
-      return 4;
-    }
-    if (gn.includes("meyve") || gn.includes("malzeme") || gid.includes("meyve") || gid.includes("malzeme")) {
-      return 5;
-    }
-    if (gn.includes("sos") || gid.includes("sos") || gn.includes("süs") || gn.includes("topping")) {
-      return 6;
-    }
-    if (gn.includes("içecek") || gn.includes("icecek") || gid.includes("icecek")) {
-      return 7;
-    }
-    return 8;
-  };
-
-  return [...options]
-    .map((o) => {
-      if (typeof o === "string") return { option_value_name: o, option_group_name: "", price_modifier: 0 };
-      return {
-        option_group_id: o.option_group_id || "",
-        option_group_name: o.option_group_name || "",
-        option_value_name: o.option_value_name || o.option_name || o.name || "",
-        price_modifier: Number(o.price_modifier || 0),
-      };
-    })
-    .filter((o) => {
-      const name = (o.option_value_name || "").toLocaleLowerCase("tr-TR");
-      return name && !name.includes("istemiyorum") && !name.includes("yok");
-    })
-    .sort((a, b) => getRank(a) - getRank(b))
-    .map((o) => {
-      const gn = (o.option_group_name || "").toLocaleLowerCase("tr-TR");
-      const gid = (o.option_group_id || "").toLowerCase();
-      let label = o.option_value_name;
-
-      if (gn.includes("iç dolgu") || gn.includes("ic dolgu") || gid.includes("ic_dolgu") || gid.includes("ic-dolgu") || gid.includes("ic_")) {
-        label = `İç Dolgu: ${o.option_value_name}`;
-      } else if (gn.includes("dış dolgu") || gn.includes("dis dolgu") || gid.includes("dis_dolgu") || gid.includes("dis-dolgu") || gid.includes("dis_")) {
-        label = `Dış Dolgu: ${o.option_value_name}`;
-      }
-
-      if (o.price_modifier > 0) {
-        label += ` (+${o.price_modifier} TL)`;
-      }
-
-      return label;
-    });
-}
 
 export default function OrderTrackingPage() {
   const params = useParams();
@@ -180,6 +146,19 @@ export default function OrderTrackingPage() {
   const [error, setError] = useState<string | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [notificationPerm, setNotificationPerm] = useState<string>("default");
+  const [language, setLanguage] = useState<Language>(() => detectDeviceLanguage());
+  const [instagramConcept, setInstagramConcept] = useState<1 | 2 | 3>(1);
+
+  // Automatically adapt to the language used when placing the order, or device locale
+  useEffect(() => {
+    if (order?.language) {
+      setLanguage(order.language);
+    } else {
+      setLanguage(detectDeviceLanguage());
+    }
+  }, [order?.language]);
+
+  const t = (key: string, fallback?: string) => getTranslation(language, key, fallback);
 
   useEffect(() => {
     if (typeof window !== "undefined" && "Notification" in window) {
@@ -251,32 +230,62 @@ export default function OrderTrackingPage() {
   useEffect(() => {
     if (!token) return;
 
+    // Immediate check 1: In-memory store
+    const inMemory = noaStore.getOrderByTrackingToken(token);
+    if (inMemory) {
+      setOrder({ ...inMemory });
+      setIsLoading(false);
+    } else if (typeof window !== "undefined") {
+      // Immediate check 2: localStorage cache
+      try {
+        const cached = localStorage.getItem(`noa_order_${token}`);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && (parsed.id || parsed.tracking_token === token)) {
+            setOrder(parsed);
+            noaStore.hydrateOrder(parsed);
+            setIsLoading(false);
+          }
+        }
+      } catch (e) {}
+    }
+
     const fetchOrder = () => {
-      const found = noaStore.getOrderByTrackingToken(token);
-      if (found) {
-        setOrder({ ...found });
-        setIsLoading(false);
-      } else {
-        fetch(`/api/order/track?token=${encodeURIComponent(token)}`)
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.order) {
-              setOrder(data.order);
-            } else {
-              setError("Sipariş bilgisine ulaşılamadı.");
+      fetch(`/api/order/track?token=${encodeURIComponent(token)}`)
+        .then((res) => {
+          if (!res.ok) throw new Error("Order not found");
+          return res.json();
+        })
+        .then((data) => {
+          if (data.order) {
+            setOrder(data.order);
+            setError(null);
+            noaStore.hydrateOrder(data.order);
+            if (typeof window !== "undefined") {
+              try {
+                localStorage.setItem(`noa_order_${token}`, JSON.stringify(data.order));
+              } catch (e) {}
             }
-          })
-          .catch(() => {
-            setError("Sipariş yüklenirken bir hata oluştu.");
-          })
-          .finally(() => setIsLoading(false));
-      }
+          }
+        })
+        .catch(() => {
+          setOrder((current) => {
+            if (!current) {
+              setError("Sipariş bilgisine ulaşılamadı veya henüz sunucuya yansımadı.");
+            }
+            return current;
+          });
+        })
+        .finally(() => setIsLoading(false));
     };
 
     fetchOrder();
 
-    const unsubscribe = noaStore.subscribe(fetchOrder);
-    const interval = setInterval(fetchOrder, 2500);
+    const unsubscribe = noaStore.subscribe(() => {
+      const live = noaStore.getOrderByTrackingToken(token);
+      if (live) setOrder({ ...live });
+    });
+    const interval = setInterval(fetchOrder, 3000);
 
     return () => {
       unsubscribe();
@@ -318,7 +327,7 @@ export default function OrderTrackingPage() {
 
       // Fire notification & confetti on initial change to ready
       if (prevStatus !== "ready") {
-        triggerReadyNotification(orderNum, order.table_number);
+        triggerReadyNotification(orderNum, order.table_number, language);
         try {
           confetti({
             particleCount: 70,
@@ -375,10 +384,12 @@ export default function OrderTrackingPage() {
               NOA CROISSANT
             </span>
             <h1 className="font-editorial text-2xl font-bold text-[#381D05]">
-              Sipariş Bulunamadı
+              {language === "tr" ? "Sipariş Bulunamadı" : "Order Not Found"}
             </h1>
             <p className="text-xs text-[#5C3818] max-w-[260px] mx-auto leading-relaxed">
-              Aradığınız sipariş kaydına ulaşılamadı veya takip süresi sona ermiş olabilir.
+              {language === "tr"
+                ? "Aradığınız sipariş kaydına ulaşılamadı veya takip süresi sona ermiş olabilir."
+                : "The order record could not be found or tracking session has expired."}
             </p>
           </div>
 
@@ -388,14 +399,14 @@ export default function OrderTrackingPage() {
               className="w-full py-3.5 px-5 rounded-2xl bg-[#381D05] hover:bg-[#251202] text-white font-black text-xs flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.98] cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span>Menüye Dön</span>
+              <span>{t("backToMenu", "Menüye Dön")}</span>
             </Link>
 
             <button
               onClick={() => window.location.reload()}
               className="w-full py-3 px-5 rounded-2xl bg-[#FAF0E4] hover:bg-[#F5E6D3] text-[#381D05] border border-[#683B0C]/15 font-bold text-xs transition-all active:scale-[0.98] cursor-pointer"
             >
-              Sayfayı Yenile
+              {t("refreshPage", "Sayfayı Yenile")}
             </button>
           </div>
         </div>
@@ -408,65 +419,68 @@ export default function OrderTrackingPage() {
   }
 
   const isCancelled = order.status === "cancelled";
-  const isUnpaid = !isCancelled && (order.payment_status === "unpaid" || order.status === "received");
-  const isPreparing = !isCancelled && !isUnpaid && order.status === "preparing";
-  const isReady = !isCancelled && !isUnpaid && order.status === "ready";
-  const isServed = !isCancelled && !isUnpaid && order.status === "served";
+  const isReady = !isCancelled && order.status === "ready";
+  const isServed = !isCancelled && order.status === "served";
+  const isPreparing = !isCancelled && order.status === "preparing";
+  const isUnpaid = !isCancelled && order.status === "received";
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] py-8 px-4 sm:px-6">
+    <div className="min-h-[100dvh] bg-[#FAF7F2] pt-6 pb-[max(3rem,calc(env(safe-area-inset-bottom)+1.5rem))] px-4 sm:px-6">
       <div className="max-w-md mx-auto space-y-5">
-        {/* Top Header with Back Button (Sadece Teslim Edildi aşamasında görünür) */}
-        {isServed && (
-          <div className="flex items-center justify-between animate-fadeIn">
+        {/* Top Header Bar with Menu link (Only shown when order is completed or cancelled) */}
+        {(isServed || isCancelled) && (
+          <div className="flex items-center justify-between pb-1 animate-fadeIn">
             <Link
               href="/"
-              className="inline-flex items-center gap-1.5 text-xs font-black text-[#381D05] hover:bg-[#FAF4EE] transition-all bg-white px-3.5 py-2 rounded-xl border border-[#683B0C]/15 shadow-xs active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-xs font-black text-[#8C5828] hover:text-[#381D05] transition-all cursor-pointer py-1 group active:scale-95"
             >
-              <ArrowLeft className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span>Menüye Dön</span>
+              <span className="text-sm leading-none transition-transform group-hover:-translate-x-0.5">←</span>
+              <span className="underline decoration-[#8C5828]/40 underline-offset-4 font-black">
+                {t("backToMenu", "Menüye Dön")}
+              </span>
             </Link>
           </div>
         )}
 
         {/* Push Notification Banner */}
         {!isCancelled && !isServed && (
-          <div className="bg-white rounded-2xl p-4 border border-[#683B0C]/15 shadow-sm flex items-center justify-between gap-3 animate-fadeIn">
+          <div className={`rounded-2xl p-4 flex items-center justify-between gap-3 animate-fadeIn transition-all shadow-md border-0 text-white ${
+            notificationPerm === "granted"
+              ? "bg-[#15803D]"
+              : "bg-[#DC2626]"
+          }`}>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full overflow-hidden border border-[#683B0C]/20 shrink-0 relative bg-white shadow-xs">
+              <div className="w-10 h-10 shrink-0 relative">
                 <Image
-                  src="/noa_icon.jpg"
+                  src="/brand/noa-icon.png"
                   alt="NOA Logo"
                   fill
                   sizes="40px"
-                  className="object-cover"
+                  className="object-contain brightness-0 invert"
                 />
               </div>
               <div className="text-left">
-                <p className="text-xs font-black text-[#381D05]">
-                  {notificationPerm === "granted" ? "Bildirimler aktif." : "Sipariş bildirimlerini aç."}
-                </p>
-                <p className="text-[11px] text-[#683B0C]/80 font-medium">
+                <p className="text-xs font-black text-white">
                   {notificationPerm === "granted"
-                    ? "Kruvasanınız fırından çıkınca telefonunuz titreyecektir."
-                    : "Ekran kilitliyken bile sesli bildirim alın."}
+                    ? t("notificationsActive", "Bildirimler aktif.")
+                    : t("enableNotifications", "Sipariş bildirimlerini aç.")}
+                </p>
+                <p className="text-[11px] font-medium leading-tight text-white/95">
+                  {notificationPerm === "granted"
+                    ? t("notificationActiveDesc", "Kruvasanınız fırından çıkınca telefonunuz titreyecektir.")
+                    : t("notificationDesc", "Ekran kilitliyken bile sesli bildirim alın.")}
                 </p>
               </div>
             </div>
 
-            {notificationPerm !== "granted" ? (
+            {notificationPerm !== "granted" && (
               <button
                 onClick={handleRequestNotification}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl shrink-0 shadow-xs flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+                className="px-4 py-2 bg-[#15803D] hover:bg-[#166534] text-white text-xs font-black rounded-xl shrink-0 shadow-sm flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer border border-white/20"
               >
                 <BellRing className="w-3.5 h-3.5 stroke-[2.5]" />
-                <span>Aç</span>
+                <span>{t("enableBtn", "Aç")}</span>
               </button>
-            ) : (
-              <div className="flex items-center gap-1 text-[11px] font-black text-emerald-700 bg-emerald-50 px-2.5 py-1.5 rounded-xl border border-emerald-200 shrink-0">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Açık</span>
-              </div>
             )}
           </div>
         )}
@@ -474,19 +488,19 @@ export default function OrderTrackingPage() {
         {/* Order Status Card */}
         <div className={`bg-white rounded-[28px] p-6 shadow-md border text-center space-y-4 ${isCancelled ? "border-red-300" : "border-[#683B0C]/15"}`}>
           {/* Brand Emblem & Order Number Badge */}
-          <div className="flex flex-col items-center space-y-2">
-            <div className={`relative w-14 h-14 rounded-full overflow-hidden shadow-xs border bg-white ${isCancelled ? "border-red-300" : "border-[#683B0C]/15"}`}>
+          <div className="flex flex-col items-center space-y-1.5">
+            <div className="relative w-12 h-12">
               <Image
-                src="/noa_icon.jpg"
+                src="/brand/noa-icon.png"
                 alt="NOA Logo"
                 fill
-                sizes="56px"
-                className="object-cover"
+                sizes="48px"
+                className="object-contain"
                 priority
               />
             </div>
             <span className="text-[11px] font-black uppercase tracking-widest text-[#8C5828]">
-              Sipariş Numaranız
+              {t("orderNumber", "Sipariş Numaranız")}
             </span>
             <div className={`text-2xl sm:text-3xl font-black font-sans tracking-tight whitespace-nowrap ${isCancelled ? "text-red-700 line-through decoration-red-500/60" : "text-[#381D05]"}`}>
               #{order.order_number ? order.order_number.toString().padStart(3, "0") : order.id.slice(-4)}
@@ -500,15 +514,15 @@ export default function OrderTrackingPage() {
                 <XCircle className="w-7 h-7 stroke-[2.5]" />
               </div>
               <div className="font-black text-lg text-red-700">
-                Siparişiniz iptal edildi.
+                {t("cancelled", "Siparişiniz iptal edildi.")}
               </div>
               <p className="text-xs text-red-800 leading-relaxed font-medium">
-                Bu sipariş kasa veya işletme yöneticisi tarafından iptal edilmiştir.
+                {t("cancelledMsg", "Bu sipariş kasa veya işletme yöneticisi tarafından iptal edilmiştir.")}
               </p>
               {order.cancelled_reason && (
                 <div className="pt-2.5 mt-2 border-t border-red-200 text-xs text-red-900">
                   <span className="text-red-700 block text-[11px] uppercase tracking-wider font-black mb-1">
-                    İptal Gerekçesi:
+                    {t("cancelReasonLabel", "İptal Gerekçesi:")}
                   </span>
                   <span className="font-bold bg-white px-3 py-1.5 rounded-xl border border-red-200 inline-block shadow-xs">
                     {order.cancelled_reason}
@@ -519,96 +533,126 @@ export default function OrderTrackingPage() {
           )}
 
           {isUnpaid && (
-            <div className="p-4 rounded-2xl bg-[#FFF7ED] border border-[#FDBA74] text-[#C2410C] space-y-2 text-center shadow-xs">
-              <div className="font-black text-sm text-[#C2410C]">
-                Ödeme bekleniyor...
+            <div className="p-4 rounded-2xl bg-[#EA580C] text-white space-y-2 text-center shadow-md border-0">
+              <div className="font-black text-base text-white flex items-center justify-center gap-2">
+                <Loader2 className="w-5 h-5 text-white animate-spin stroke-[2.5]" />
+                <span>{t("paymentWaiting", "Ödeme bekleniyor...")}</span>
               </div>
-              <p className="text-xs text-[#9A3412] leading-relaxed">
-                Lütfen kasaya giderek Sipariş Numaranızı (<strong>#{order.order_number || order.id.slice(-4)}</strong>) belirtiniz ve <strong className="text-[#15803D] font-extrabold">{order.payment_method === "credit_card" ? "Kredi Kartı" : "Nakit"}</strong> ile ödemenizi tamamlayınız.
+              <p className="text-xs text-white/95 leading-relaxed font-medium">
+                {language === "en" ? (
+                  <>
+                    Please go to the cashier, provide your order number{" "}
+                    <strong className="font-black text-white">
+                      (#{order.order_number ? order.order_number.toString().padStart(3, "0") : order.id.slice(-4)})
+                    </strong>{" "}
+                    or show the QR code, and complete your payment with{" "}
+                    <strong className="font-black text-white">
+                      {order.payment_method === "credit_card" ? "Credit Card" : "Cash"}
+                    </strong>.
+                  </>
+                ) : language === "ru" ? (
+                  <>
+                    Пожалуйста, подойдите к кассе, назовите номер заказа{" "}
+                    <strong className="font-black text-white">
+                      (#{order.order_number ? order.order_number.toString().padStart(3, "0") : order.id.slice(-4)})
+                    </strong>{" "}
+                    или покажите QR-код и оплатите с помощью{" "}
+                    <strong className="font-black text-white">
+                      {order.payment_method === "credit_card" ? "Банковской картой" : "Наличными"}
+                    </strong>.
+                  </>
+                ) : (
+                  <>
+                    Lütfen kasaya giderek sipariş numaranızı{" "}
+                    <strong className="font-black text-white">
+                      (#{order.order_number ? order.order_number.toString().padStart(3, "0") : order.id.slice(-4)})
+                    </strong>{" "}
+                    belirtiniz veya QR kodu kasaya gösteriniz ve{" "}
+                    <strong className="font-black text-white">
+                      {order.payment_method === "credit_card" ? "Kredi Kartı" : "Nakit"}
+                    </strong>{" "}
+                    ile ödemenizi tamamlayınız.
+                  </>
+                )}
               </p>
             </div>
           )}
 
           {isPreparing && (
-            <div className="p-4 rounded-2xl bg-[#FEF3C7] border border-[#FCD34D] text-[#B45309] space-y-1.5 text-center shadow-xs">
-              <div className="font-black text-sm text-[#B45309]">
-                Ödeme onaylandı • Hazırlanıyor...
+            <div className="p-4 rounded-2xl bg-[#F59E0B] text-white space-y-1.5 text-center shadow-md border-0">
+              <div className="font-black text-base text-white flex items-center justify-center gap-2">
+                <ChefHat className="w-5 h-5 text-white stroke-[2.5]" />
+                <span>{t("preparing", "Ödeme onaylandı, sipariş hazırlanıyor...")}</span>
               </div>
-              <p className="text-xs text-[#92400E] font-medium leading-relaxed">
-                Ödemeniz kasada onaylandı! Şeflerimiz siparişinizi fırından taze olarak hazırlıyor. Hazırlandıktan sonra teslim almanız için sizi bu ekrandan ve sesli bildirimle bilgilendireceğiz.
+              <p className="text-xs text-white/95 font-medium leading-relaxed">
+                {t(
+                  "preparingMsg",
+                  "Ödemeniz kasada onaylandı! Şeflerimiz siparişinizi fırından taze olarak hazırlıyor. Hazırlandıktan sonra teslim almanız için sizi bu ekrandan ve sesli bildirimle bilgilendireceğiz."
+                )}
               </p>
             </div>
           )}
 
           {isReady && (
-            <div className="p-5 rounded-2xl bg-[#15803D] text-white space-y-2 text-center shadow-md">
-              <div className="font-black text-base">
-                Siparişiniz hazır • Teslim alabilirsiniz.
+            <div className="p-5 rounded-2xl bg-[#15803D] text-white space-y-2 text-center shadow-md border-0">
+              <div className="font-black text-base flex items-center justify-center gap-2">
+                <Smile className="w-5 h-5 text-white stroke-[2.5]" />
+                <span>{t("ready", "Siparişiniz hazır, teslim alabilirsiniz.")}</span>
               </div>
               <p className="text-xs text-white/95 font-medium leading-relaxed">
-                Lütfen servis tezgahından siparişinizi teslim alınız. Afiyet olsun!
+                {t("readyMsg", "Lütfen servis tezgahından siparişinizi teslim alınız. Afiyet olsun!")}
               </p>
             </div>
           )}
 
           {isServed && (
-            <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 space-y-1.5 text-center shadow-xs">
-              <div className="font-black text-sm text-[#15803D]">
-                Siparişiniz teslim edildi.
+            <div className="p-5 rounded-2xl bg-[#15803D] text-white space-y-2 text-center shadow-md border-0">
+              <div className="font-black text-base flex items-center justify-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-white stroke-[2.5]" />
+                <span>{t("served", "Siparişiniz teslim edildi.")}</span>
               </div>
-              <p className="text-xs text-emerald-800/95 font-medium leading-relaxed">
-                Bizi tercih ettiğiniz için teşekkür ederiz. Afiyet olsun!
+              <p className="text-xs text-white/95 font-medium leading-relaxed">
+                {t("servedMsg", "Bizi tercih ettiğiniz için teşekkür ederiz. Afiyet olsun!")}
               </p>
             </div>
           )}
 
-          {/* QR Code for Cashier Scan */}
-          {qrDataUrl && isUnpaid && (
-            <div className="p-4 bg-[#FAF7F2] rounded-2xl border border-[#683B0C]/10 flex flex-col items-center">
-              <div className="relative w-44 h-44 rounded-xl overflow-hidden shadow-xs bg-white p-2 border border-stone-200">
+          {/* QR Code (Seamless & Clean) */}
+          {qrDataUrl && (isUnpaid || order.payment_status === "unpaid") && !isServed && !isCancelled && (
+            <div className="flex flex-col items-center pt-2 pb-1 space-y-2">
+              <div className="relative w-44 h-44">
                 <Image
                   src={qrDataUrl}
-                  alt="Kasa Sipariş QR Kodu"
+                  alt="Sipariş QR Kodu"
                   fill
                   sizes="176px"
                   className="object-contain"
                   priority
                 />
               </div>
-              <span className="text-[10px] font-extrabold text-[#8C5828] uppercase tracking-widest mt-2">
-                QR CODE
-              </span>
+
+              <p className="text-[11px] font-bold text-stone-400 text-center max-w-xs leading-tight">
+                {language === "en"
+                  ? "Scan at the cashier if you want to quickly match your order."
+                  : language === "ru"
+                  ? "Отсканируйте на кассе для быстрого поиска заказа."
+                  : "Siparişinizi kasada hızlıca eşleştirmek isterseniz okutunuz."}
+              </p>
             </div>
           )}
-
-          {/* Payment Method Badge */}
-          <div className="pt-2 flex items-center justify-center gap-1.5 text-xs text-[#8C5828]">
-            <span className="font-semibold">Ödeme Yöntemi:</span>
-            {order.payment_method === "credit_card" ? (
-              <span className="inline-flex items-center gap-1 font-bold text-[#15803D]">
-                <CreditCard className="w-3.5 h-3.5 text-[#15803D]" />
-                Kredi Kartı
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 font-bold text-[#15803D]">
-                <Banknote className="w-3.5 h-3.5 text-[#15803D]" />
-                Nakit
-              </span>
-            )}
-          </div>
         </div>
 
         {/* Google Review & Experience Rating Card (Shown when order is served) */}
         {isServed && (
           <div className="bg-gradient-to-b from-white via-white to-[#FAF4EE] rounded-[30px] p-6 shadow-md border border-[#683B0C]/15 text-center space-y-4 animate-fadeIn relative overflow-hidden">
-            {/* 5 Big Gold Stars - Direct Clean Link without background frame */}
+            {/* 5 Big Gold Stars */}
             <div>
               <a
                 href="https://www.google.com/search?hl=en-TR&sxsrf=APpeQnvZaCTMY0gIJGPQqVmkLF9XDdBJzw:1787759720789&q=Noa+Croissant+Reviews&rflfq=1&num=20&stick=H4sIAAAAAAAAAONgkxIxNDQzNDEwMTIwNjA3NzM3MTU3Md7AyPiKUdQvP1HBuSg_s7g4Ma9EISi1LDO1vHgRK3ZxAF8h3qNLAAAA&rldimm=11614042030776745743&tbm=lcl&dpr=2#"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 py-1 group cursor-pointer transition-transform active:scale-95"
-                aria-label="Google'da 5 Yıldız Ver"
+                aria-label="Google Review"
               >
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
@@ -619,24 +663,26 @@ export default function OrderTrackingPage() {
               </a>
             </div>
 
-            {/* Title and Description without Emojis */}
+            {/* Title and Description */}
             <div className="space-y-1">
               <h2 className="font-editorial text-2xl font-bold text-[#381D05]">
-                Deneyiminizi paylaşın.
+                {t("shareExperience", "Deneyiminizi paylaşın.")}
               </h2>
               <p className="text-xs text-[#5C3818] leading-relaxed max-w-xs mx-auto">
-                Görüşleriniz bizim için çok değerli. Google üzerinde deneyiminizi puanlayarak gelişimimize katkıda bulunun.
+                {t(
+                  "reviewDesc",
+                  "Görüşleriniz bizim için çok değerli. Google üzerinde deneyiminizi puanlayarak gelişimimize katkıda bulunun."
+                )}
               </p>
             </div>
 
-            {/* Google Themed Action CTA Button - Solid Google Blue */}
+            {/* Google Themed Action CTA Button */}
             <a
               href="https://www.google.com/search?hl=en-TR&sxsrf=APpeQnvZaCTMY0gIJGPQqVmkLF9XDdBJzw:1787759720789&q=Noa+Croissant+Reviews&rflfq=1&num=20&stick=H4sIAAAAAAAAAONgkxIxNDQzNDEwMTIwNjA3NzM3MTU3Md7AyPiKUdQvP1HBuSg_s7g4Ma9EISi1LDO1vHgRK3ZxAF8h3qNLAAAA&rldimm=11614042030776745743&tbm=lcl&dpr=2#"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full py-3.5 px-4 rounded-2xl bg-[#4285F4] hover:bg-[#3367D6] text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2.5 shadow-md hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer"
             >
-              {/* White Circular Badge for Google G Logo */}
               <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-xs shrink-0">
                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
                   <path
@@ -657,7 +703,54 @@ export default function OrderTrackingPage() {
                   />
                 </svg>
               </div>
-              <span>Google&apos;da Değerlendirin</span>
+              <span>{t("rateOnGoogle", "Google'da Değerlendirin")}</span>
+            </a>
+          </div>
+        )}
+
+        {/* Instagram Discovery Card (Visible ONLY while order is preparing, placed ABOVE Order Summary) */}
+        {isPreparing && (
+          <div className="bg-white rounded-[32px] p-6 text-center border border-white/80 shadow-md space-y-4 animate-fadeIn">
+            {/* Frameless NOA Emblem with Instagram Gradient Lines */}
+            <div className="flex items-center justify-center pt-1">
+              <div className="relative w-16 h-16 transition-transform duration-300 hover:scale-110 drop-shadow-sm">
+                <Image
+                  src="/brand/noa-icon-insta.png"
+                  alt="NOA Instagram Emblem"
+                  fill
+                  sizes="64px"
+                  className="object-contain"
+                  priority
+                />
+              </div>
+            </div>
+
+            {/* Title and Description */}
+            <div className="space-y-1.5">
+              <h2 className="font-editorial text-2xl font-bold text-[#381D05]">
+                <span className="bg-gradient-to-r from-[#F58529] via-[#DD2A7B] to-[#8134AF] bg-clip-text text-transparent font-black">
+                  Instagram&apos;da
+                </span>{" "}
+                <span>buluşalım.</span>
+              </h2>
+              <p className="text-xs text-[#5C3818] leading-relaxed max-w-xs mx-auto font-medium">
+                Sıcak lezzetleriniz hazırlanana kadar
+                <span className="block mt-0.5">
+                  <strong className="font-black text-[#381D05]">NOA Croissant</strong> dünyasını keşfedin.
+                </span>
+              </p>
+            </div>
+
+            {/* Instagram Themed Action CTA Button */}
+            <a
+              href={BUSINESS_INFO.social.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#FCB045] hover:opacity-95 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-md hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer"
+            >
+              <Instagram className="w-4.5 h-4.5 text-white stroke-[2.4] shrink-0" />
+              <span className="leading-none pt-0.5">@noacroissant hesabına göz at</span>
+              <ExternalLink className="w-3.5 h-3.5 opacity-90 shrink-0 ml-0.5" />
             </a>
           </div>
         )}
@@ -666,7 +759,7 @@ export default function OrderTrackingPage() {
         <div className="bg-white rounded-[28px] p-6 shadow-md border border-[#683B0C]/15 space-y-4">
           <div className="flex items-center justify-between border-b border-[#683B0C]/10 pb-3">
             <span className="text-xs font-black uppercase tracking-wider text-[#381D05]">
-              Sipariş Özeti
+              {t("orderSummary", "Sipariş Özeti")}
             </span>
             <span className="text-xs text-[#8C5828]">
               {formatDateTime(order.created_at)}
@@ -677,13 +770,17 @@ export default function OrderTrackingPage() {
           <div className="divide-y divide-dashed divide-[#683B0C]/10">
             {order.items.map((item) => {
               const rawOpts = (item as any).options || (item as any).selected_options || [];
-              const formattedOpts = getSortedAndFormattedOptions(rawOpts);
+              const formattedOpts = getSortedAndFormattedOptionsLocalized(rawOpts, language);
+              const displayName = resolveLocalizedText(
+                (item as any).product_name_i18n || item.product_name,
+                language
+              );
 
               return (
                 <div key={item.id} className="py-2.5 first:pt-0 last:pb-0 flex items-start justify-between gap-3 text-xs">
                   <div className="flex-1 min-w-0 pr-2">
                     <div className="font-bold text-[#381D05]">
-                      {item.product_name} <span className="text-[#8C5828]">x{item.quantity}</span>
+                      {displayName} <span className="text-[#8C5828]">x{item.quantity}</span>
                     </div>
                     {formattedOpts.length > 0 && (
                       <div className="mt-1 space-y-0.5 text-[11.5px] text-[#8C5828] font-sans">
@@ -697,13 +794,13 @@ export default function OrderTrackingPage() {
                     )}
                     {item.item_note && (
                       <div className="text-[10.5px] italic text-[#8C5828] mt-1 pl-3">
-                        Not: {item.item_note}
+                        {t("notePrefix", "Not")}: {item.item_note}
                       </div>
                     )}
                   </div>
 
                   <span className="font-black text-[#381D05] font-sans shrink-0">
-                    {formatPrice(item.total_price)}
+                    {formatLocalizedPrice(item.total_price, language)}
                   </span>
                 </div>
               );
@@ -713,11 +810,29 @@ export default function OrderTrackingPage() {
           {/* Total Row */}
           <div className="pt-3 border-t border-[#683B0C]/15 flex items-center justify-between">
             <span className="text-xs font-black uppercase tracking-wider text-[#381D05]">
-              Toplam Tutar
+              {t("totalAmount", "Toplam Tutar")}
             </span>
             <span className="text-xl font-black text-[#15803D] font-sans">
-              {formatPrice(order.total)}
+              {formatLocalizedPrice(order.total, language)}
             </span>
+          </div>
+
+          {/* Payment Method Row */}
+          <div className="pt-2.5 border-t border-dashed border-[#683B0C]/10 flex items-center justify-between text-xs">
+            <span className="font-bold text-[#381D05]">
+              {t("paymentMethodLabel", "Ödeme Yöntemi:")}
+            </span>
+            {order.payment_method === "credit_card" ? (
+              <span className="inline-flex items-center gap-1.5 font-black text-[#15803D]">
+                <CreditCard className="w-3.5 h-3.5 text-[#15803D]" />
+                {t("creditCard", "Kredi Kartı")}
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 font-black text-[#15803D]">
+                <Banknote className="w-3.5 h-3.5 text-[#15803D]" />
+                {t("cash", "Nakit")}
+              </span>
+            )}
           </div>
         </div>
 
@@ -729,17 +844,17 @@ export default function OrderTrackingPage() {
               className="w-full py-3.5 px-6 rounded-2xl bg-[#381D05] hover:bg-[#251202] text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.98] cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4 stroke-[2.5]" />
-              <span>Menüye Dön & Yeni Sipariş Ver</span>
+              <span>{t("newOrder", "Menüye Dön & Yeni Sipariş Ver")}</span>
             </Link>
           ) : !isServed ? (
-            <>
-              <p className="text-[11px] sm:text-xs font-bold text-[#5C3818] whitespace-nowrap text-center">
-                Siparişiniz tamamlanana kadar lütfen bu ekrandan ayrılmayınız.
+            <div className="space-y-0.5">
+              <p className="text-[11px] sm:text-xs font-bold text-[#5C3818] whitespace-nowrap text-center leading-tight">
+                {t("screenStayNotice", "Siparişiniz tamamlanana kadar lütfen bu ekrandan ayrılmayınız.")}
               </p>
-              <p className="text-[10.5px] sm:text-[11.5px] font-medium text-[#8C5828] text-center">
-                Durum anlık olarak bu ekranda güncellenecektir.
+              <p className="text-[11px] font-bold text-stone-400 text-center leading-tight">
+                {t("instantStatusUpdate", "Durum anlık olarak bu ekranda güncellenecektir.")}
               </p>
-            </>
+            </div>
           ) : (
             <div className="flex items-center justify-center pt-3 opacity-80">
               <span className="text-[13px] sm:text-[14px] font-black uppercase tracking-[0.25em] text-[#683B0C] inline-flex items-center">

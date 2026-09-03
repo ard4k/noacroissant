@@ -1,8 +1,18 @@
+import { NextRequest, NextResponse } from "next/server";
 import { noaStore } from "@/lib/store";
+import { isRequestKitchenAuthenticated } from "@/lib/adminAuth";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
+  // Check staff session authentication
+  if (!isRequestKitchenAuthenticated(req)) {
+    return NextResponse.json(
+      { error: "Yetkisiz erişim: Personel oturumu gereklidir." },
+      { status: 401 }
+    );
+  }
+
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream({

@@ -9,9 +9,10 @@ import { Printer, X } from "lucide-react";
 interface ThermalReceiptProps {
   order: OrderRecord | null;
   onClose: () => void;
+  language?: string;
 }
 
-export function ThermalReceipt({ order, onClose }: ThermalReceiptProps) {
+export function ThermalReceipt({ order, onClose, language = "tr" }: ThermalReceiptProps) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -26,13 +27,14 @@ export function ThermalReceipt({ order, onClose }: ThermalReceiptProps) {
     window.print();
   };
 
+  const isEn = language === "en";
   const dateObj = new Date(order.created_at);
-  const formattedDate = dateObj.toLocaleDateString("tr-TR", {
+  const formattedDate = dateObj.toLocaleDateString(isEn ? "en-US" : "tr-TR", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
   });
-  const formattedTime = dateObj.toLocaleTimeString("tr-TR", {
+  const formattedTime = dateObj.toLocaleTimeString(isEn ? "en-US" : "tr-TR", {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
@@ -49,7 +51,7 @@ export function ThermalReceipt({ order, onClose }: ThermalReceiptProps) {
       const found = INITIAL_PRODUCTS.find((p) => p.id === item.product_id);
       if (found) return found.name;
     }
-    return "Kruvasan / Ürün";
+    return isEn ? "Croissant / Item" : "Kruvasan / Ürün";
   };
 
   const totalAmount =
@@ -127,17 +129,10 @@ export function ThermalReceipt({ order, onClose }: ThermalReceiptProps) {
                 <td className="text-stone-600 py-0.5">SİPARİŞ NO / ORDER NO:</td>
                 <td className="text-right font-black py-0.5">#{orderNumStr}</td>
               </tr>
-              {order.table_number ? (
-                <tr>
-                  <td className="text-stone-600 py-0.5">MASA / TABLE:</td>
-                  <td className="text-right font-black py-0.5">MASA {String(order.table_number).padStart(2, "0")}</td>
-                </tr>
-              ) : (
-                <tr>
-                  <td className="text-stone-600 py-0.5">SERVİS / TYPE:</td>
-                  <td className="text-right font-black py-0.5">{order.table_label || "SELF-SERVİS"}</td>
-                </tr>
-              )}
+              <tr>
+                <td className="text-stone-600 py-0.5">SERVİS / TYPE:</td>
+                <td className="text-right font-black py-0.5">GEL-AL / SELF-SERVİS</td>
+              </tr>
             </tbody>
           </table>
 
@@ -175,7 +170,7 @@ export function ThermalReceipt({ order, onClose }: ThermalReceiptProps) {
                   {/* Item Specific Note */}
                   {item.item_note && (
                     <div className="pl-2.5 text-[11px] font-bold text-amber-800">
-                      [NOT]: {item.item_note}
+                      [NOT / NOTE]: {item.item_note}
                     </div>
                   )}
                 </div>
@@ -186,7 +181,7 @@ export function ThermalReceipt({ order, onClose }: ThermalReceiptProps) {
           {/* General Order Note */}
           {order.general_note && (
             <div className="border-t border-dashed border-black py-1.5 text-[11.5px]">
-              <strong>MÜŞTERİ NOTU:</strong> {order.general_note}
+              <strong>MÜŞTERİ NOTU / CUSTOMER NOTE:</strong> {order.general_note}
             </div>
           )}
 
@@ -195,7 +190,7 @@ export function ThermalReceipt({ order, onClose }: ThermalReceiptProps) {
 
           {/* Total */}
           <div className="flex justify-between items-center text-sm font-black py-0.5">
-            <span>TOPLAM TUTAR:</span>
+            <span>TOPLAM TUTAR / TOTAL:</span>
             <span>{totalAmount} TL</span>
           </div>
 
@@ -215,10 +210,11 @@ export function ThermalReceipt({ order, onClose }: ThermalReceiptProps) {
             className="flex-1 py-3 bg-[#683B0C] hover:bg-[#4A2808] text-white text-xs font-black rounded-2xl flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer"
           >
             <Printer className="w-4 h-4" />
-            <span>Adisyon Yazdır (80mm)</span>
+            <span>{isEn ? "Print Receipt (80mm)" : "Adisyon Yazdır (80mm)"}</span>
           </button>
           <button
             onClick={onClose}
+            aria-label={isEn ? "Close" : "Kapat"}
             className="w-11 h-11 rounded-2xl bg-stone-100 hover:bg-stone-200 text-stone-700 flex items-center justify-center transition-all active:scale-95 cursor-pointer"
           >
             <X className="w-5 h-5 stroke-[2.5]" />

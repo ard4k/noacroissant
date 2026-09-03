@@ -4,7 +4,14 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { Sparkles, Plus, ArrowUpRight } from "lucide-react";
 import { Product } from "@/lib/types";
-import { Language, translateProduct, getTranslation } from "@/lib/i18n/translations";
+import { Language, getTranslation } from "@/lib/i18n/translations";
+import {
+  resolveLocalizedText,
+  resolveProductName,
+  resolveProductDescription,
+  formatLocalizedPrice,
+} from "@/lib/i18n/resolver";
+import { getProductImage } from "@/lib/images";
 
 interface ProductCardProps {
   product: Product;
@@ -12,6 +19,7 @@ interface ProductCardProps {
   onQuickAdd?: (product: Product) => void;
   language?: Language;
   priority?: boolean;
+  disabledIngredients?: string[];
 }
 
 export function ProductCard({
@@ -19,14 +27,35 @@ export function ProductCard({
   onOpenDetail,
   language = "tr",
   priority = false,
+  disabledIngredients = [],
 }: ProductCardProps) {
   const [imageError, setImageError] = useState(false);
-  const isAvailable = product.is_available;
-  const hasImage = Boolean(product.image_url && !imageError);
+  
+  // Check if primary ingredients or product name matches any disabled ingredient
+  const isIngredientDisabled = Boolean(
+    disabledIngredients &&
+    disabledIngredients.length > 0 &&
+    disabledIngredients.some((ing) => {
+      const lowerIng = ing.toLocaleLowerCase("tr-TR").trim();
+      if (!lowerIng) return false;
+      const lowerName = (product.name || "").toLocaleLowerCase("tr-TR");
+      const lowerDesc = (product.description || "").toLocaleLowerCase("tr-TR");
+      const lowerIngredients = (product.ingredients || "").toLocaleLowerCase("tr-TR");
+      return (
+        lowerName.includes(lowerIng) ||
+        lowerDesc.includes(lowerIng) ||
+        lowerIngredients.includes(lowerIng)
+      );
+    })
+  );
 
-  const translated = translateProduct(product, language);
-  const displayName = translated.name;
-  const displayDesc = translated.description || product.description || (product.ingredients ? `${product.ingredients} ile hazırlanarak servis edilir.` : "");
+  const isAvailable = product.is_available && !isIngredientDisabled;
+  const registeredImage = product.slug ? getProductImage(product.slug) : "";
+  const effectiveImageUrl = registeredImage || product.image_url;
+  const hasImage = Boolean(effectiveImageUrl && !imageError);
+
+  const displayName = resolveProductName(product, language);
+  const displayDesc = resolveProductDescription(product, language);
   const t = (key: string, fallback?: string) => getTranslation(language, key, fallback);
 
   // Imageless Compact Card (for Soft/Hot drinks)
@@ -35,8 +64,8 @@ export function ProductCard({
       <div
         suppressHydrationWarning
         onClick={() => isAvailable && onOpenDetail(product)}
-        className={`group relative flex flex-col justify-between bg-[#EAD8C5] rounded-[24px] p-5 sm:p-6 shadow-sm hover:-translate-y-1.5 transition-all duration-300 cursor-pointer min-h-[150px] ${
-          !isAvailable ? "opacity-60 cursor-not-allowed" : ""
+        className={`group relative flex flex-col justify-between bg-[#EAD8C5] rounded-[24px] p-5 sm:p-6 shadow-sm hover:-translate-y-1.5 transition-all duration-300 min-h-[150px] ${
+          isAvailable ? "cursor-pointer" : "opacity-60 cursor-not-allowed select-none"
         }`}
       >
         <div>
@@ -45,7 +74,7 @@ export function ProductCard({
               {displayName}
             </h3>
             <span className="text-lg font-black text-[#15803D] shrink-0">
-              {product.base_price}₺
+              {formatLocalizedPrice(product.base_price, language)}
             </span>
           </div>
 
@@ -59,10 +88,14 @@ export function ProductCard({
         </div>
 
         <div className="flex items-center justify-between pt-4 mt-2 border-t border-[#683B0C]/10">
-          <span className="text-[11px] font-extrabold text-[#7A4B22] tracking-wider uppercase group-hover:text-[#381D05] transition-colors">
-            {t("addToCart", "SEPETE EKLE")}
+          <span className={`text-[11px] font-extrabold tracking-wider uppercase transition-colors ${
+            isAvailable ? "text-[#7A4B22] group-hover:text-[#381D05]" : "text-red-700 font-black"
+          }`}>
+            {isAvailable ? t("addToCart", "SEPETE EKLE") : t("outOfStockUpper", "TÜKENDİ")}
           </span>
-          <div className="w-8 h-8 rounded-full bg-[#4A2808] text-white flex items-center justify-center shadow-sm group-hover:bg-[#683B0C] group-hover:scale-110 active:scale-95 transition-all">
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-sm transition-all ${
+            isAvailable ? "bg-[#4A2808] text-white group-hover:bg-[#683B0C] group-hover:scale-110 active:scale-95" : "bg-red-600/30 text-red-800"
+          }`}>
             <Plus className="w-4 h-4 stroke-[3]" />
           </div>
         </div>
@@ -85,10 +118,10 @@ export function ProductCard({
         className="relative aspect-square w-full shrink-0 rounded-[28px] overflow-hidden bg-[#EFE7DE] z-10 shadow-sm"
       >
         <Image
-          src={product.image_url!}
+          src={effectiveImageUrl!}
           alt={displayName}
           fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          unoptimized
           className="object-contain transition-transform duration-500 ease-out group-hover:scale-104"
           onError={() => setImageError(true)}
           priority={priority}
@@ -98,7 +131,7 @@ export function ProductCard({
 
         {!isAvailable && (
           <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center text-white text-xs font-bold uppercase tracking-wider">
-            Tükendi
+            {t("outOfStock", "Tükendi")}
           </div>
         )}
       </div>
@@ -113,7 +146,7 @@ export function ProductCard({
                 {displayName}
               </h3>
               <span className="text-xl sm:text-[22px] font-black text-[#15803D] tracking-tight shrink-0 whitespace-nowrap">
-                {product.base_price}₺
+                {formatLocalizedPrice(product.base_price, language)}
               </span>
             </div>
 
@@ -130,13 +163,19 @@ export function ProductCard({
 
           {/* Bottom Footer: Ultra-Chic Luxury Action Bar */}
           <div className="flex items-center justify-between pt-4 mt-2">
-            <div className="flex items-center gap-1.5 text-[11px] font-extrabold text-[#7A4B22] tracking-wider uppercase group-hover:text-[#381D05] transition-colors">
-              <span>{t("customize", "TIKLA & ÖZELLEŞTİR")}</span>
-              <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5] text-[#7A4B22] group-hover:text-[#381D05] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            <div className="flex items-center gap-1.5 text-[11px] font-extrabold tracking-wider uppercase transition-colors">
+              <span className={isAvailable ? "text-[#7A4B22] group-hover:text-[#381D05]" : "text-red-700 font-black"}>
+                {isAvailable ? t("customize", "TIKLA & ÖZELLEŞTİR") : t("outOfStockUpper", "TÜKENDİ (STOKTA YOK)")}
+              </span>
+              {isAvailable && (
+                <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5] text-[#7A4B22] group-hover:text-[#381D05] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              )}
             </div>
 
             {/* Luxury Circular Quick Action Button */}
-            <div className="w-9 h-9 rounded-full bg-[#4A2808] text-white flex items-center justify-center shadow-md group-hover:bg-[#683B0C] group-hover:scale-110 active:scale-95 transition-all">
+            <div className={`w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all ${
+              isAvailable ? "bg-[#4A2808] text-white group-hover:bg-[#683B0C] group-hover:scale-110 active:scale-95" : "bg-red-600/30 text-red-800"
+            }`}>
               <Plus className="w-4 h-4 text-white stroke-[3]" />
             </div>
           </div>
