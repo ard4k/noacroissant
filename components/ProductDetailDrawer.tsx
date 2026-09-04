@@ -448,7 +448,7 @@ export function ProductDetailDrawer({
                 src={currentImageSrc}
                 alt={product.name}
                 fill
-                unoptimized
+                sizes="(max-width: 640px) 90vw, 520px"
                 className="object-contain"
                 priority
               />

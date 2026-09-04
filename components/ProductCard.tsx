@@ -134,7 +134,7 @@ export function ProductCard({
           src={effectiveImageUrl!}
           alt={displayName}
           fill
-          unoptimized
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className="object-contain transition-transform duration-500 ease-out group-hover:scale-104"
           onError={() => setImageError(true)}
           priority={priority}

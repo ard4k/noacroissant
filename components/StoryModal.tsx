@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ChevronLeft, ChevronRight, Sparkles, Heart } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Heart, Sparkles, Volume2, VolumeX } from "lucide-react";
 import { Language, getTranslation } from "@/lib/i18n/translations";
 
 export interface StorySlide {
@@ -13,6 +13,7 @@ export interface StorySlide {
   description: Record<Language, string>;
   image: string;
   highlight?: Record<Language, string>;
+  stickerText?: Record<Language, string>;
 }
 
 export const STORY_SLIDES: StorySlide[] = [
@@ -54,7 +55,7 @@ export const STORY_SLIDES: StorySlide[] = [
       pl: "Prawdziwy croissant wymaga czasu. Nasze ciasto na francuskim maśle dojrzewa 48 godzin, tworząc setki chrupiących warstw.",
       ar: "الكرواسان الأصيل يحتاج وقتاً. نستخدم الزبدة الفرنسية النقية مع تخمير بطيء على البارد لمدة 48 ساعة لنصل إلى قرمشة فائقة وهشة.",
     },
-    image: "/story-1.jpg?v=4",
+    image: "/story-1.webp",
     highlight: {
       tr: "Kat Kat Çıtır & Havadar",
       en: "Flaky & Featherlight",
@@ -66,6 +67,18 @@ export const STORY_SLIDES: StorySlide[] = [
       fi: "Rapea & Ilmava",
       pl: "Chrupiący i Lekki",
       ar: "طبقات هشة ومقرمشة",
+    },
+    stickerText: {
+      tr: "🥐 Hakiki Fransız Tereyağı",
+      en: "🥐 Pure French Butter",
+      de: "🥐 Echte französische Butter",
+      ru: "🥐 Французское масло",
+      nl: "🥐 Franse Boter",
+      sv: "🥐 Franskt Smör",
+      no: "🥐 Fransk Smør",
+      fi: "🥐 Ranskalainen Voi",
+      pl: "🥐 Francuskie Masło",
+      ar: "🥐 زبدة فرنسية أصيلة",
     },
   },
   {
@@ -106,7 +119,7 @@ export const STORY_SLIDES: StorySlide[] = [
       pl: "Aksamitna, ciepła belgijska czekolada rozpływająca się w świeżo upieczonym croissancie to rozkosz w każdym kęsie.",
       ar: "الشوكولاتة البلجيكية الساخنة الغنية تذوب داخل الكرواسان المقرمش الطازج لتمنحك متعة تذوق استثنائية.",
     },
-    image: "/story-2.jpg?v=4",
+    image: "/story-2.webp",
     highlight: {
       tr: "Callebaut & Nutella",
       en: "Callebaut & Nutella",
@@ -118,6 +131,18 @@ export const STORY_SLIDES: StorySlide[] = [
       fi: "Callebaut & Nutella",
       pl: "Callebaut & Nutella",
       ar: "شوكولاتة بلجيكية فاخرة",
+    },
+    stickerText: {
+      tr: "🍫 Sıcak & Akışkan Lezzet",
+      en: "🍫 Warm & Silky Melt",
+      de: "🍫 Zartschmelzend & Warm",
+      ru: "🍫 Горячий Шоколад",
+      nl: "🍫 Warm Vloeiend",
+      sv: "🍫 Varm & Krämig",
+      no: "🍫 Varm & Kremet",
+      fi: "🍫 Lämmintä & Samettista",
+      pl: "🍫 Płynna Czekolada",
+      ar: "🍫 شوكولاتة ذائبة غنية",
     },
   },
   {
@@ -158,7 +183,7 @@ export const STORY_SLIDES: StorySlide[] = [
       pl: "Codziennie rano świeżo wybierane truskawki, borówki i maliny w połączeniu z naszym aksamitnym kremem cukierniczym.",
       ar: "نختار كل صباح أجود حبات الفراولة، التوت البري وتوت العليق الطازج لنمزجها مع كريمة الباتيسير الفرنسية الفاخرة.",
     },
-    image: "/story-3.jpg?v=4",
+    image: "/story-3.webp",
     highlight: {
       tr: "Günlük El Emeği",
       en: "Handcrafted Daily",
@@ -170,6 +195,18 @@ export const STORY_SLIDES: StorySlide[] = [
       fi: "Päivittäin Käsintehty",
       pl: "Codziennie Rzemieślniczo",
       ar: "صنع يدوي طازج يومياً",
+    },
+    stickerText: {
+      tr: "🍓 Sabah Bahçe Hasadı",
+      en: "🍓 Daily Morning Harvest",
+      de: "🍓 Frische Ernte",
+      ru: "🍓 Утренний Сбор",
+      nl: "🍓 Dagverse Oogst",
+      sv: "🍓 Morgonskörd",
+      no: "🍓 Morgenhøstet",
+      fi: "🍓 Aamun Satoa",
+      pl: "🍓 Świeże Zbiory",
+      ar: "🍓 قطاف صباحي طازج",
     },
   },
   {
@@ -210,7 +247,7 @@ export const STORY_SLIDES: StorySlide[] = [
       pl: "Od naszego kultowego serca Amora po okrągłe Roll i Kostki — zmieniamy klasyczne wypieki w nowoczesną sztukę kulinarną.",
       ar: "من كرواسان أمورا الأيقوني على شكل قلب إلى رول ومكعب الكرواسان المبتكر، نحول فن المخبوزات الكلاسيكي إلى تجربة عصرية استثنائية.",
     },
-    image: "/story-4.jpg?v=4",
+    image: "/story-4.webp",
     highlight: {
       tr: "NOA Özel İmzası",
       en: "NOA Signature Creations",
@@ -222,6 +259,18 @@ export const STORY_SLIDES: StorySlide[] = [
       fi: "NOA Signatuuriluomukset",
       pl: "Autorskie Kreacje NOA",
       ar: "إبداعات نوا الحصرية",
+    },
+    stickerText: {
+      tr: "✨ İkonik Amora & Roll",
+      en: "✨ Iconic Amora & Roll",
+      de: "✨ Ikonisches Amora & Roll",
+      ru: "✨ Культовая Амора и Ролл",
+      nl: "✨ Iconische Amora & Roll",
+      sv: "✨ Ikonisk Amora & Roll",
+      no: "✨ Ikonisk Amora & Roll",
+      fi: "✨ Ikoninen Amora & Roll",
+      pl: "✨ Kultowa Amora i Roll",
+      ar: "✨ أمورا ورول الأيقوني",
     },
   },
   {
@@ -262,7 +311,7 @@ export const STORY_SLIDES: StorySlide[] = [
       pl: "Zapach ciepłych croissantów, wyśmienita kawa specialty i nasza serdeczna atmosfera umilą każdy Twój dzień.",
       ar: "مع عبير الكرواسان الطازج، القهوة المختصة الفاخرة وأجوائنا الدافئة، يسعدنا أن نضيف لمسة من البهجة إلى يومكم.",
     },
-    image: "/story-5.jpg?v=4",
+    image: "/story-5.webp",
     highlight: {
       tr: "Afiyet Olsun!",
       en: "Bon Appétit!",
@@ -275,6 +324,18 @@ export const STORY_SLIDES: StorySlide[] = [
       pl: "Smacznego!",
       ar: "بالهناء والشفاء!",
     },
+    stickerText: {
+      tr: "☕ Nitelikli Kahve & Kruvasan",
+      en: "☕ Specialty Coffee & Pastry",
+      de: "☕ Spezialitätenkaffee & Genuss",
+      ru: "☕ Спешелти Кофе и Выпечка",
+      nl: "☕ Specialty Koffie & Croissant",
+      sv: "☕ Specialkaffe & Bakverk",
+      no: "☕ Spesialkaffe & Bakst",
+      fi: "☕ Erikoiskahvi & Croissant",
+      pl: "☕ Kawa Specialty i Rogalik",
+      ar: "☕ قهوة مختصة وكرواسان",
+    },
   },
 ];
 
@@ -282,29 +343,43 @@ interface StoryModalProps {
   isOpen: boolean;
   onClose: () => void;
   language?: Language;
+  initialSlideIndex?: number;
 }
 
 export function StoryModal({
   isOpen,
   onClose,
   language = "tr",
+  initialSlideIndex = 0,
 }: StoryModalProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(initialSlideIndex);
   const [isPaused, setIsPaused] = useState(false);
+  const [isHolding, setIsHolding] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [likedSlides, setLikedSlides] = useState<Record<number, boolean>>({});
+  const [floatingHearts, setFloatingHearts] = useState<{ id: number; x: number }[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const SLIDE_DURATION_MS = 5000;
   const TICK_MS = 50;
 
-  // Reset when opened
+  // Preload all story images in browser memory on initial render
+  useEffect(() => {
+    STORY_SLIDES.forEach((slide) => {
+      const img = new window.Image();
+      img.src = slide.image;
+    });
+  }, []);
+
+  // Sync initial slide index when opened
   useEffect(() => {
     if (isOpen) {
-      setCurrentIndex(0);
+      setCurrentIndex(initialSlideIndex);
       setProgress(0);
       setIsPaused(false);
+      setIsHolding(false);
     }
-  }, [isOpen]);
+  }, [isOpen, initialSlideIndex]);
 
   // Lock body scrolling when story is active
   useEffect(() => {
@@ -332,6 +407,21 @@ export function StoryModal({
     }
   }, [currentIndex]);
 
+  // Heart reaction animation
+  const handleToggleLike = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const isCurrentlyLiked = likedSlides[currentIndex];
+    setLikedSlides((prev) => ({ ...prev, [currentIndex]: !isCurrentlyLiked }));
+
+    if (!isCurrentlyLiked) {
+      const newHeart = { id: Date.now(), x: Math.random() * 40 - 20 };
+      setFloatingHearts((prev) => [...prev, newHeart]);
+      setTimeout(() => {
+        setFloatingHearts((prev) => prev.filter((h) => h.id !== newHeart.id));
+      }, 1000);
+    }
+  };
+
   // Timer loop for progress bar
   useEffect(() => {
     if (!isOpen || isPaused) return;
@@ -345,7 +435,7 @@ export function StoryModal({
     };
   }, [isOpen, isPaused]);
 
-  // When progress reaches 100%, safely advance slide in effect phase
+  // When progress reaches 100%, advance slide
   useEffect(() => {
     if (progress >= 100) {
       handleNext();
@@ -371,6 +461,8 @@ export function StoryModal({
   const title = currentSlide.title[language] || currentSlide.title.tr;
   const desc = currentSlide.description[language] || currentSlide.description.tr;
   const highlight = currentSlide.highlight?.[language] || currentSlide.highlight?.tr;
+  const sticker = currentSlide.stickerText?.[language] || currentSlide.stickerText?.tr;
+  const isLiked = Boolean(likedSlides[currentIndex]);
 
   return (
     <AnimatePresence>
@@ -378,45 +470,73 @@ export function StoryModal({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 sm:bg-black/80 backdrop-blur-2xl p-0 sm:p-4 select-none"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 sm:bg-black/85 backdrop-blur-2xl p-0 sm:p-4 select-none"
       >
         {/* Backdrop dismiss on desktop */}
         <div
           onClick={onClose}
-          className="absolute inset-0 hidden sm:block -z-10"
+          className="absolute inset-0 hidden sm:block -z-10 cursor-pointer"
           aria-hidden="true"
         />
 
-        {/* Story Phone Container */}
-        <div className="relative w-full h-full sm:h-[90vh] sm:max-w-md sm:rounded-[36px] overflow-hidden bg-black shadow-2xl flex flex-col justify-between">
-          {/* Background Photo (Ultra High Definition & Smooth Transition) */}
+        {/* Desktop Flanking Navigation: Prev */}
+        {currentIndex > 0 && (
+          <button
+            type="button"
+            onClick={handlePrev}
+            className="hidden sm:flex absolute left-8 lg:left-16 z-30 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white items-center justify-center backdrop-blur-md border border-white/15 shadow-xl transition-all hover:scale-110 active:scale-95 cursor-pointer"
+            aria-label={getTranslation(language, "previous", "Önceki")}
+          >
+            <ChevronLeft className="w-6 h-6 stroke-[2.5]" />
+          </button>
+        )}
+
+        {/* Desktop Flanking Navigation: Next */}
+        <button
+          type="button"
+          onClick={handleNext}
+          className="hidden sm:flex absolute right-8 lg:right-16 z-30 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white items-center justify-center backdrop-blur-md border border-white/15 shadow-xl transition-all hover:scale-110 active:scale-95 cursor-pointer"
+          aria-label={getTranslation(language, "next", "Sonraki")}
+        >
+          <ChevronRight className="w-6 h-6 stroke-[2.5]" />
+        </button>
+
+        {/* Story Phone Container - True Fullscreen on Mobile / 9:16 Frame on Desktop */}
+        <div className="relative w-full h-[100dvh] sm:h-[92vh] sm:max-h-[860px] sm:max-w-[420px] sm:aspect-[9/16] sm:rounded-[36px] overflow-hidden bg-black shadow-[0_25px_80px_rgba(0,0,0,0.9)] sm:border sm:border-white/15 flex flex-col justify-between">
+          {/* Background Fullscreen Photography */}
           <div className="absolute inset-0 z-0 overflow-hidden bg-black">
-            <div className="relative w-full h-full">
-              {STORY_SLIDES.map((slide, sIdx) => (
+            {STORY_SLIDES.map((slide, sIdx) => {
+              const isActive = sIdx === currentIndex;
+              return (
                 <div
                   key={slide.id}
                   className={`absolute inset-0 transition-opacity duration-300 ${
-                    sIdx === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+                    isActive ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
                   }`}
                 >
                   <Image
                     src={slide.image}
                     alt={slide.title[language] || slide.title.tr}
                     fill
-                    priority
-                    unoptimized
-                    className="object-cover object-center"
+                    sizes="(max-width: 640px) 100vw, 420px"
+                    priority={Math.abs(sIdx - currentIndex) <= 1}
+                    className="object-cover object-center transform scale-[1.01]"
                   />
-                  {/* Luxury Gradient Overlays */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/30 pointer-events-none" />
+                  {/* Luxury Ambient Instagram Gradients: Top for header/progress & Bottom for caption */}
+                  <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-black/80 via-black/40 to-transparent pointer-events-none" />
+                  <div className="absolute bottom-0 inset-x-0 h-96 bg-gradient-to-t from-black/95 via-black/65 via-50% to-transparent pointer-events-none" />
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
 
           {/* Top Bar: Progress Segments + Profile Header */}
-          <div className="relative z-20 pt-4 sm:pt-5 px-4 space-y-3">
-            {/* Story Progress Indicators */}
+          <div
+            className={`relative z-20 pt-3 sm:pt-4 px-3.5 sm:px-4 space-y-2.5 transition-opacity duration-200 ${
+              isHolding ? "opacity-0 pointer-events-none" : "opacity-100"
+            }`}
+          >
+            {/* Segmented Story Progress Indicators */}
             <div className="flex items-center gap-1.5 w-full">
               {STORY_SLIDES.map((slide, idx) => {
                 let fillPercent = 0;
@@ -426,7 +546,7 @@ export function StoryModal({
                 return (
                   <div
                     key={slide.id}
-                    className="flex-1 h-1 bg-white/30 rounded-full overflow-hidden backdrop-blur-xs"
+                    className="flex-1 h-[3px] bg-white/35 rounded-full overflow-hidden backdrop-blur-xs"
                   >
                     <div
                       className="h-full bg-white transition-all duration-75 rounded-full"
@@ -437,56 +557,85 @@ export function StoryModal({
               })}
             </div>
 
-            {/* Brand Header & Close Button */}
-            <div className="flex items-center justify-between">
+            {/* Instagram Profile Header & Controls */}
+            <div className="flex items-center justify-between pt-0.5">
               <div className="flex items-center gap-2.5">
-                <div className="relative w-9 h-9 rounded-full overflow-hidden border-2 border-white/60 p-0.5 bg-white/20 shadow-md">
-                  <Image
-                    src="/noa_icon.jpg"
-                    alt="NOA"
-                    fill
-                    sizes="36px"
-                    className="object-cover rounded-full"
-                  />
+                {/* Profile Avatar with Instagram Gradient Ring */}
+                <div className="relative p-[2px] rounded-full bg-gradient-to-tr from-[#F59E0B] via-[#E11D48] to-[#9333EA] shadow-md">
+                  <div className="relative w-8 h-8 rounded-full overflow-hidden border-[1.5px] border-black bg-black">
+                    <Image
+                      src="/noa_icon.jpg"
+                      alt="NOA"
+                      fill
+                      sizes="32px"
+                      className="object-cover"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <h4 className="text-white font-extrabold text-sm tracking-wide">
-                    Noa Croissant
-                  </h4>
+
+                <div className="flex items-center gap-1.5">
+                  <span className="text-white font-black text-sm tracking-tight drop-shadow-sm">
+                    noacroissant
+                  </span>
+                  <span className="w-1 h-1 rounded-full bg-white/60" />
+                  <span className="text-white/70 font-semibold text-xs drop-shadow-sm">
+                    {currentIndex + 1}/{STORY_SLIDES.length}
+                  </span>
                 </div>
               </div>
 
-              {/* Close Button */}
-              <button
-                type="button"
-                onClick={onClose}
-                className="w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-md transition-all active:scale-90 border border-white/20 cursor-pointer"
-                aria-label={getTranslation(language, "closeModal", "Kapat")}
-              >
-                <X className="w-4 h-4 stroke-[2.5]" />
-              </button>
+              {/* Top Right Controls: Pause Toggle & Close Button */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsPaused((prev) => !prev)}
+                  className="w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white/90 flex items-center justify-center backdrop-blur-md border border-white/20 transition-all active:scale-90 cursor-pointer"
+                  aria-label={isPaused ? "Oynat" : "Duraklat"}
+                >
+                  <span className="text-[10px] font-black uppercase">
+                    {isPaused ? "▶" : "❚❚"}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-md border border-white/20 transition-all active:scale-90 cursor-pointer"
+                  aria-label={getTranslation(language, "closeModal", "Kapat")}
+                >
+                  <X className="w-4 h-4 stroke-[2.5]" />
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Interactive Tap Areas for Navigation & Hold to Pause */}
+          {/* Interactive Tap Areas for Navigation & Hold to Pause / Hide UI */}
           <div
-            className="absolute inset-0 z-10 flex"
-            onMouseDown={() => setIsPaused(true)}
-            onMouseUp={() => setIsPaused(false)}
-            onTouchStart={() => setIsPaused(true)}
-            onTouchEnd={() => setIsPaused(false)}
+            className="absolute inset-0 z-10 flex cursor-pointer"
+            onPointerDown={() => {
+              setIsPaused(true);
+              setIsHolding(true);
+            }}
+            onPointerUp={() => {
+              setIsPaused(false);
+              setIsHolding(false);
+            }}
+            onPointerLeave={() => {
+              setIsPaused(false);
+              setIsHolding(false);
+            }}
           >
-            {/* Left Tap: Previous */}
+            {/* Left Tap Zone: 30% Width -> Previous Slide */}
             <div
-              className="w-1/3 h-full cursor-pointer"
+              className="w-1/3 h-full"
               onClick={(e) => {
                 e.stopPropagation();
                 handlePrev();
               }}
             />
-            {/* Right Tap: Next */}
+            {/* Right Tap Zone: 70% Width -> Next Slide */}
             <div
-              className="w-2/3 h-full cursor-pointer"
+              className="w-2/3 h-full"
               onClick={(e) => {
                 e.stopPropagation();
                 handleNext();
@@ -494,51 +643,82 @@ export function StoryModal({
             />
           </div>
 
-          {/* Bottom Content Area */}
-          <div className="relative z-20 pb-8 sm:pb-9 px-6 space-y-4">
-            {highlight && (
-              <div
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-amber-200 font-extrabold text-[11px] tracking-wider uppercase"
+          {/* Floating Hearts Animation Container */}
+          <div className="absolute inset-0 pointer-events-none z-30 overflow-hidden">
+            {floatingHearts.map((heart) => (
+              <motion.div
+                key={heart.id}
+                initial={{ opacity: 1, y: 0, x: heart.x, scale: 0.8 }}
+                animate={{ opacity: 0, y: -180, scale: 1.4 }}
+                transition={{ duration: 1, ease: "easeOut" }}
+                className="absolute bottom-20 right-6 text-rose-500"
               >
-                <Heart className="w-3 h-3 fill-amber-200" />
-                <span>{highlight}</span>
-              </div>
-            )}
+                <Heart className="w-7 h-7 fill-rose-500" />
+              </motion.div>
+            ))}
+          </div>
 
-            <div className="space-y-2">
-              <h2 className="text-2xl sm:text-3xl font-black text-white leading-tight tracking-tight drop-shadow-md">
+          {/* Bottom Content Area (Instagram Caption & Interactive Actions) */}
+          <div
+            className={`relative z-20 pb-6 sm:pb-7 px-5 space-y-3.5 transition-opacity duration-200 ${
+              isHolding ? "opacity-0 pointer-events-none" : "opacity-100"
+            }`}
+          >
+            {/* Stickers / Badges Row */}
+            <div className="flex flex-wrap items-center gap-2">
+              {sticker && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white font-extrabold text-[11px] shadow-sm">
+                  <span>{sticker}</span>
+                </div>
+              )}
+
+              {highlight && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/25 backdrop-blur-md border border-amber-300/40 text-amber-200 font-extrabold text-[11px] tracking-wide uppercase shadow-sm">
+                  <Sparkles className="w-3 h-3 fill-amber-300 text-amber-300" />
+                  <span>{highlight}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Story Title & Description */}
+            <div className="space-y-1.5">
+              <h2 className="text-2xl sm:text-3xl font-black text-white leading-tight tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
                 {title}
               </h2>
-              <p className="text-white/85 text-xs sm:text-[13px] font-medium leading-relaxed drop-shadow-xs">
+              <p className="text-white/90 text-xs sm:text-[13px] font-medium leading-relaxed drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)] line-clamp-3">
                 {desc}
               </p>
             </div>
 
-            {/* Bottom Action / Progress Cue */}
-            <div className="pt-2 flex items-center justify-between border-t border-white/15">
-              <span className="text-[10.5px] font-bold text-white/60 tracking-wider">
-                {currentIndex + 1} / {STORY_SLIDES.length}
-              </span>
+            {/* Bottom Interactive Bar (Instagram Story Swipe-up / Action Pill & Heart Reaction) */}
+            <div className="pt-2 flex items-center justify-between gap-3 border-t border-white/15 pointer-events-auto">
+              {/* Instagram Story Action Button */}
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 py-2.5 px-4 rounded-full bg-white hover:bg-[#FAF0E4] text-[#381D05] font-black text-xs shadow-lg active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>{getTranslation(language, "viewMenu", "Menüyü İncele")}</span>
+                <span className="text-[#8C5828] font-black">➔</span>
+              </button>
 
-              {currentIndex === STORY_SLIDES.length - 1 ? (
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-5 py-2 rounded-full bg-white text-[#381D05] font-black text-xs shadow-lg hover:bg-[#FAF0E4] active:scale-95 transition-all flex items-center gap-1.5"
-                >
-                  <span>{getTranslation(language, "viewMenu", "Menüyü İncele")}</span>
-                  <span>➔</span>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  className="text-white/80 hover:text-white text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
-                >
-                  <span>{getTranslation(language, "continue", "Devam Et")}</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-              )}
+              {/* Heart / Like Reaction Button */}
+              <button
+                type="button"
+                onClick={handleToggleLike}
+                className={`w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md border transition-all active:scale-90 cursor-pointer shadow-md ${
+                  isLiked
+                    ? "bg-rose-500/30 border-rose-400 text-rose-500 scale-105"
+                    : "bg-white/15 hover:bg-white/25 border-white/25 text-white"
+                }`}
+                aria-label="Beğen"
+              >
+                <Heart
+                  className={`w-5 h-5 transition-transform ${
+                    isLiked ? "fill-rose-500 stroke-rose-500 scale-110" : "stroke-white"
+                  }`}
+                />
+              </button>
             </div>
           </div>
         </div>

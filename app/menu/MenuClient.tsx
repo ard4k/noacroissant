@@ -10,6 +10,7 @@ import { ProductDetailDrawer } from "@/components/ProductDetailDrawer";
 import { CartDrawer } from "@/components/CartDrawer";
 import { CartBar } from "@/components/CartBar";
 import { OpeningSplash } from "@/components/OpeningSplash";
+import { StoryHighlights } from "@/components/StoryHighlights";
 import { Coffee, Gift, Sparkles, Award, Crown, Star, ChevronRight, Instagram } from "lucide-react";
 import { BUSINESS_INFO } from "@/lib/businessConfig";
 
@@ -318,6 +319,12 @@ export function MenuClient({
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isStoryOpen, setIsStoryOpen] = useState(false);
+  const [storyInitialIndex, setStoryInitialIndex] = useState(0);
+
+  const handleOpenStory = (index: number = 0) => {
+    setStoryInitialIndex(index);
+    setIsStoryOpen(true);
+  };
   const [isWifiOpen, setIsWifiOpen] = useState(false);
   const [isLoyaltyOpen, setIsLoyaltyOpen] = useState(false);
   const [customerLoyaltyCard, setCustomerLoyaltyCard] = useState<LoyaltyCard | null>(null);
@@ -470,7 +477,7 @@ export function MenuClient({
   return (
     <div className="min-h-screen bg-[#F8F1EB] text-[#4A2808]" suppressHydrationWarning>
       {/* Brand Opening Splash Animation */}
-      <OpeningSplash onOpenStory={() => setIsStoryOpen(true)} language={language} />
+      <OpeningSplash onOpenStory={() => handleOpenStory(0)} language={language} />
 
       {/* Smart Dual Sticky Header Wrapper */}
       <div
@@ -486,7 +493,7 @@ export function MenuClient({
           cartCount={cartHook.totalItemCount}
           onOpenCart={() => setIsCartOpen(true)}
           onOpenSearch={() => setIsSearchOpen(true)}
-          onOpenStory={() => setIsStoryOpen(true)}
+          onOpenStory={() => handleOpenStory(0)}
           onOpenWifi={() => setIsWifiOpen(true)}
           loyaltyStamps={customerLoyaltyCard?.stamps}
           hasFreeReward={(customerLoyaltyCard?.rewards_count || 0) > 0}
@@ -505,7 +512,15 @@ export function MenuClient({
       </div>
 
       {/* Main Menu Feed - 3 Cards Side-by-Side Grid */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-36 space-y-16">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-5 pb-36 space-y-12 sm:space-y-16">
+        {/* Instagram Highlights Bar */}
+        <section aria-label="NOA Hikayeleri" className="pt-1 pb-1">
+          <StoryHighlights
+            onSelectStory={(index) => handleOpenStory(index)}
+            language={language}
+          />
+        </section>
+
         {visibleCategories.map((cat, catIdx) => {
           const catProducts = productsByCategory[cat.id] || [];
           if (catProducts.length === 0) return null;
@@ -663,6 +678,7 @@ export function MenuClient({
         isOpen={isStoryOpen}
         onClose={() => setIsStoryOpen(false)}
         language={language}
+        initialSlideIndex={storyInitialIndex}
       />
 
       {/* Wi-Fi Quick Connect Modal */}
