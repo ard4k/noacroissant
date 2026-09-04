@@ -484,6 +484,58 @@ async function runVerification() {
     );
   }
 
+  // 18. Verify Hidden / Inactive Products & Cheesecake Category
+  const categories = noaStore.getCategories();
+  const cheesecakeCat = categories.find((c) => c.id === "cat-cheesecake");
+  assert(
+    cheesecakeCat?.is_active === false,
+    "Category 'cat-cheesecake' is marked is_active: false"
+  );
+
+  const hiddenProductIds = [
+    "prod-cedric-grolet",
+    "prod-san-sebastian-cheesecake-dilim",
+    "prod-san-sebastian-cheesecake-butun",
+    "prod-limonlu-cheesecake-dilim",
+    "prod-limonlu-cheesecake-butun",
+    "prod-lotuslu-cheesecake-dilim",
+    "prod-lotuslu-cheesecake-butun",
+    "prod-noa-tatli-tuzlu-ikili",
+    "prod-noa-tatli-ikili",
+    "prod-noa-tuzlu-ikili",
+    "prod-noa-roll-kup-ikili",
+  ];
+
+  for (const id of hiddenProductIds) {
+    const prod = noaStore.getProductById(id);
+    assert(
+      prod !== undefined,
+      `Product '${id}' still exists in database/store for future reactivation`
+    );
+    assert(
+      prod?.is_available === false && prod?.is_active === false,
+      `Product '${id}' has is_available: false and is_active: false`
+    );
+
+    // Attempt to order must fail
+    let orderBlocked = false;
+    try {
+      noaStore.createOrder({
+        table_token: "self_service",
+        items: [{ product_id: id, quantity: 1 }],
+        payment_method: "cash",
+      });
+    } catch (e: any) {
+      if (e.message.includes("tükenmiştir")) {
+        orderBlocked = true;
+      }
+    }
+    assert(
+      orderBlocked,
+      `Order creation for hidden/inactive product '${id}' is strictly blocked`
+    );
+  }
+
   // Clean up test order so it doesn't pollute admin panel
   noaStore.deleteOrder(createdOrder.order.id);
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = "noa-croissant-v7";
+const CACHE_NAME = "noa-croissant-v8";
 const STATIC_ASSETS = [
   "/manifest.webmanifest",
   "/favicon.png",

@@ -353,12 +353,37 @@ export function MenuClient({
 
   const cartHook = useCart();
 
-  // Scrollspy to detect active category
+  // Group active and available products by category
+  const productsByCategory = useMemo(() => {
+    const map: Record<string, Product[]> = {};
+    for (const cat of liveCategories) {
+      map[cat.id] = liveProducts.filter(
+        (p) => p.category_id === cat.id && p.is_available !== false && p.is_active !== false
+      );
+    }
+    return map;
+  }, [liveCategories, liveProducts]);
+
+  // Only categories that are active and contain at least one available product
+  const visibleCategories = useMemo(() => {
+    return liveCategories.filter(
+      (cat) => cat.is_active !== false && (productsByCategory[cat.id]?.length ?? 0) > 0
+    );
+  }, [liveCategories, productsByCategory]);
+
+  // Keep active category in sync with visible categories
+  useEffect(() => {
+    if (visibleCategories.length > 0 && !visibleCategories.some((c) => c.id === activeCategoryId)) {
+      setActiveCategoryId(visibleCategories[0].id);
+    }
+  }, [visibleCategories, activeCategoryId]);
+
+  // Scrollspy to detect active category among visible categories
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY + 140;
 
-      for (const cat of liveCategories) {
+      for (const cat of visibleCategories) {
         const el = document.getElementById(`category-${cat.id}`);
         if (el) {
           const top = el.offsetTop;
@@ -373,16 +398,7 @@ export function MenuClient({
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [liveCategories]);
-
-  // Group products by category
-  const productsByCategory = useMemo(() => {
-    const map: Record<string, Product[]> = {};
-    for (const cat of liveCategories) {
-      map[cat.id] = liveProducts.filter((p) => p.category_id === cat.id);
-    }
-    return map;
-  }, [liveCategories, liveProducts]);
+  }, [visibleCategories]);
 
   const handleScrollToCategory = useCallback((categoryId: string) => {
     setActiveCategoryId(categoryId);
@@ -480,7 +496,7 @@ export function MenuClient({
 
         {/* Category Tabs Pill Bar */}
         <CategoryTabs
-          categories={liveCategories}
+          categories={visibleCategories}
           activeCategoryId={activeCategoryId}
           onSelectCategory={handleScrollToCategory}
           language={language}
@@ -489,7 +505,7 @@ export function MenuClient({
 
       {/* Main Menu Feed - 3 Cards Side-by-Side Grid */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-36 space-y-16">
-        {liveCategories.map((cat, catIdx) => {
+        {visibleCategories.map((cat, catIdx) => {
           const catProducts = productsByCategory[cat.id] || [];
           if (catProducts.length === 0) return null;
 
@@ -627,7 +643,7 @@ export function MenuClient({
       <SearchModal
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
-        products={liveProducts}
+        products={liveProducts.filter((p) => p.is_available !== false && p.is_active !== false)}
         onSelectProduct={(prod) => setSelectedProductForDetail(prod)}
         language={language}
       />

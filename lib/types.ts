@@ -71,6 +71,7 @@ export interface Product {
   badge_i18n?: LocalizedText;
   base_price: number;
   is_available: boolean;
+  is_active?: boolean;
   is_featured?: boolean;
   image_url?: string;
   display_order: number;

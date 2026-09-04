@@ -23,15 +23,15 @@ import {
 } from "./seedData";
 
 const STORAGE_KEYS = {
-  TABLES: "noa_tables_v7",
-  PRODUCTS: "noa_products_v7",
-  CATEGORIES: "noa_categories_v7",
-  ORDERS: "noa_orders_v7",
-  SETTINGS: "noa_settings_v7",
-  PROMOTIONS: "noa_promotions_v7",
-  STAFF_USER: "noa_staff_user_v7",
-  SERVICE_REQUESTS: "noa_service_requests_v7",
-  LOYALTY_CARDS: "noa_loyalty_cards_v7",
+  TABLES: "noa_tables_v8",
+  PRODUCTS: "noa_products_v8",
+  CATEGORIES: "noa_categories_v8",
+  ORDERS: "noa_orders_v8",
+  SETTINGS: "noa_settings_v8",
+  PROMOTIONS: "noa_promotions_v8",
+  STAFF_USER: "noa_staff_user_v8",
+  SERVICE_REQUESTS: "noa_service_requests_v8",
+  LOYALTY_CARDS: "noa_loyalty_cards_v8",
 };
 
 // In-memory fallback singleton for server and client sync
@@ -92,31 +92,38 @@ class NoaStore {
           const raw = fs.readFileSync(filePath, "utf-8");
           const data = JSON.parse(raw);
           if (data.tables && Array.isArray(data.tables)) this.tables = data.tables;
-          const storedProducts = (data.products && Array.isArray(data.products)) ? (data.products as Product[]) : [];
-          this.products = INITIAL_PRODUCTS.map((init) => {
-            const stored = storedProducts.find((p) => p.id === init.id);
-            if (stored) {
-              return {
-                ...init,
-                is_available: stored.is_available ?? init.is_available,
-                is_featured: stored.is_featured ?? init.is_featured,
-              };
-            }
-            return init;
-          });
 
-          const storedCategories = (data.categories && Array.isArray(data.categories)) ? (data.categories as Category[]) : [];
-          this.categories = INITIAL_CATEGORIES.map((init) => {
-            const stored = storedCategories.find((c) => c.id === init.id);
-            if (stored) {
-              return {
-                ...init,
-                is_active: stored.is_active ?? init.is_active,
-                display_order: stored.display_order ?? init.display_order,
-              };
-            }
-            return init;
-          });
+          if (data.version !== STORAGE_KEYS.PRODUCTS) {
+            this.products = [...INITIAL_PRODUCTS];
+            this.categories = [...INITIAL_CATEGORIES];
+          } else {
+            const storedProducts = (data.products && Array.isArray(data.products)) ? (data.products as Product[]) : [];
+            this.products = INITIAL_PRODUCTS.map((init) => {
+              const stored = storedProducts.find((p) => p.id === init.id);
+              if (stored) {
+                return {
+                  ...init,
+                  is_available: init.is_available === false ? false : (stored.is_available ?? init.is_available),
+                  is_active: init.is_active === false ? false : (stored.is_active ?? init.is_active),
+                  is_featured: init.is_featured === false ? false : (stored.is_featured ?? init.is_featured),
+                };
+              }
+              return init;
+            });
+
+            const storedCategories = (data.categories && Array.isArray(data.categories)) ? (data.categories as Category[]) : [];
+            this.categories = INITIAL_CATEGORIES.map((init) => {
+              const stored = storedCategories.find((c) => c.id === init.id);
+              if (stored) {
+                return {
+                  ...init,
+                  is_active: init.is_active === false ? false : (stored.is_active ?? init.is_active),
+                  display_order: stored.display_order ?? init.display_order,
+                };
+              }
+              return init;
+            });
+          }
           if (data.orders && Array.isArray(data.orders)) this.orders = data.orders;
           if (data.settings) {
             this.settings = { ...INITIAL_SETTINGS, ...data.settings };
@@ -140,7 +147,7 @@ class NoaStore {
 
     try {
       // Always reset and clean legacy localStorage items to prevent stale data
-      for (let i = 1; i <= 7; i++) {
+      for (let i = 1; i <= 8; i++) {
         localStorage.removeItem(`noa_products_v${i}`);
         localStorage.removeItem(`noa_categories_v${i}`);
         localStorage.removeItem(`noa_orders_v${i}`);
@@ -161,6 +168,7 @@ class NoaStore {
                 return {
                   ...init,
                   is_available: custom.is_available ?? init.is_available,
+                  is_active: custom.is_active ?? init.is_active,
                   is_featured: custom.is_featured ?? init.is_featured,
                 };
               }
@@ -243,6 +251,7 @@ class NoaStore {
           fs.mkdirSync(dirPath, { recursive: true });
         }
         const state = {
+          version: STORAGE_KEYS.PRODUCTS,
           tables: this.tables,
           products: this.products,
           categories: this.categories,
@@ -510,7 +519,7 @@ class NoaStore {
       if (!product) {
         throw new Error(`Ürün bulunamadı: ${item.product_id}`);
       }
-      if (!product.is_available) {
+      if (!product.is_available || product.is_active === false) {
         throw new Error(`"${product.name}" şu anda tükenmiştir.`);
       }
 

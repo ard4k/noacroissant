@@ -34,6 +34,7 @@ export function SearchModal({
     if (!query.trim()) return [];
     const q = query.toLowerCase().trim();
     return products.filter((p) => {
+      if (p.is_available === false || p.is_active === false) return false;
       const name = resolveLocalizedText(p.name_i18n || p.name, language).toLowerCase();
       const desc = resolveLocalizedText(p.description_i18n || p.description, language).toLowerCase();
       const ingr = resolveLocalizedText(p.ingredients_i18n || p.ingredients, language).toLowerCase();

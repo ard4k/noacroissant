@@ -145,26 +145,31 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Rich Menu Structure for all products across categories
-  const menuSections = INITIAL_CATEGORIES.map((cat) => {
-    const items = INITIAL_PRODUCTS.filter((p) => p.category_id === cat.id);
-    return {
-      "@type": "MenuSection",
-      name: cat.name,
-      hasMenuItem: items.map((prod) => ({
-        "@type": "MenuItem",
-        name: prod.name,
-        description: prod.description,
-        image: prod.image_url ? `${SITE_URL}${encodeURI(prod.image_url)}` : `${SITE_URL}/noa-croissant.jpg`,
-        offers: {
-          "@type": "Offer",
-          price: prod.base_price,
-          priceCurrency: "TRY",
-          availability: "https://schema.org/InStock",
-        },
-      })),
-    };
-  });
+  // Rich Menu Structure for all active products across active categories
+  const menuSections = INITIAL_CATEGORIES
+    .filter((cat) => cat.is_active !== false)
+    .map((cat) => {
+      const items = INITIAL_PRODUCTS.filter(
+        (p) => p.category_id === cat.id && p.is_available !== false && p.is_active !== false
+      );
+      return {
+        "@type": "MenuSection",
+        name: cat.name,
+        hasMenuItem: items.map((prod) => ({
+          "@type": "MenuItem",
+          name: prod.name,
+          description: prod.description,
+          image: prod.image_url ? `${SITE_URL}${encodeURI(prod.image_url)}` : `${SITE_URL}/noa-croissant.jpg`,
+          offers: {
+            "@type": "Offer",
+            price: prod.base_price,
+            priceCurrency: "TRY",
+            availability: "https://schema.org/InStock",
+          },
+        })),
+      };
+    })
+    .filter((section) => section.hasMenuItem.length > 0);
 
   const jsonLd = {
     "@context": "https://schema.org",
