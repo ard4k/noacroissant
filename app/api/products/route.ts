@@ -8,17 +8,20 @@ export async function GET() {
   try {
     const { getAllProductsFromFirestore, getSettingsFromFirestore, isFirebaseConfigured } = await import("@/lib/firebase/firestore");
     if (isFirebaseConfigured) {
-      const localProducts = noaStore.getProducts();
-      const firestoreProducts = await getAllProductsFromFirestore();
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Firestore timeout")), 2500)
+      );
 
-      if (firestoreProducts && firestoreProducts.length > 0) {
+      const firestoreProducts = await Promise.race([
+        getAllProductsFromFirestore(),
+        timeoutPromise,
+      ]).catch(() => null);
+
+      if (firestoreProducts && Array.isArray(firestoreProducts) && firestoreProducts.length > 0) {
+        const localProducts = noaStore.getProducts();
         if (localProducts.length === 0) {
-          // Cold start (serverless) — no local data, use Firestore as source of truth
           noaStore.hydrateProducts(firestoreProducts);
         } else {
-          // Local store already has data (from file or previous update).
-          // Only sync fields that DON'T represent admin overrides (e.g. new products added elsewhere).
-          // Do NOT overwrite is_available — those are admin-controlled locally.
           const localIds = new Set(localProducts.map((p) => p.id));
           const newFromFirestore = firestoreProducts.filter((p) => !localIds.has(p.id));
           if (newFromFirestore.length > 0) {
@@ -27,7 +30,11 @@ export async function GET() {
         }
       }
 
-      const firestoreSettings = await getSettingsFromFirestore();
+      const firestoreSettings = await Promise.race([
+        getSettingsFromFirestore(),
+        timeoutPromise,
+      ]).catch(() => null);
+
       if (firestoreSettings) {
         noaStore.updateSettings(firestoreSettings);
       }

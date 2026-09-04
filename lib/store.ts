@@ -23,15 +23,15 @@ import {
 } from "./seedData";
 
 const STORAGE_KEYS = {
-  TABLES: "noa_tables_v6",
-  PRODUCTS: "noa_products_v6",
-  CATEGORIES: "noa_categories_v6",
-  ORDERS: "noa_orders_v6",
-  SETTINGS: "noa_settings_v6",
-  PROMOTIONS: "noa_promotions_v6",
-  STAFF_USER: "noa_staff_user_v6",
-  SERVICE_REQUESTS: "noa_service_requests_v6",
-  LOYALTY_CARDS: "noa_loyalty_cards_v6",
+  TABLES: "noa_tables_v7",
+  PRODUCTS: "noa_products_v7",
+  CATEGORIES: "noa_categories_v7",
+  ORDERS: "noa_orders_v7",
+  SETTINGS: "noa_settings_v7",
+  PROMOTIONS: "noa_promotions_v7",
+  STAFF_USER: "noa_staff_user_v7",
+  SERVICE_REQUESTS: "noa_service_requests_v7",
+  LOYALTY_CARDS: "noa_loyalty_cards_v7",
 };
 
 // In-memory fallback singleton for server and client sync
@@ -140,7 +140,7 @@ class NoaStore {
 
     try {
       // Always reset and clean legacy localStorage items to prevent stale data
-      for (let i = 1; i <= 6; i++) {
+      for (let i = 1; i <= 7; i++) {
         localStorage.removeItem(`noa_products_v${i}`);
         localStorage.removeItem(`noa_categories_v${i}`);
         localStorage.removeItem(`noa_orders_v${i}`);
@@ -162,7 +162,6 @@ class NoaStore {
                   ...init,
                   is_available: custom.is_available ?? init.is_available,
                   is_featured: custom.is_featured ?? init.is_featured,
-                  base_price: custom.base_price ?? init.base_price,
                 };
               }
               return init;
