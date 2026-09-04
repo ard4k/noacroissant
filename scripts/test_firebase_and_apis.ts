@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-// Auto-load .env.local if present
+// Auto-load .env.local synchronously before anything else
 try {
   const envPath = path.resolve(process.cwd(), ".env.local");
   if (fs.existsSync(envPath)) {
@@ -16,31 +16,13 @@ try {
         if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
           val = val.slice(1, -1);
         }
-        if (!process.env[key]) {
-          process.env[key] = val;
-        }
+        process.env[key] = val;
       }
     }
   }
 } catch (e) {}
 
-import {
-  db,
-  isFirebaseConfigured,
-} from "../lib/firebase/config";
-import {
-  getAllProductsFromFirestore,
-  getSettingsFromFirestore,
-  getAllTablesFromFirestore,
-  saveOrderToFirestore,
-  getOrderByIdFromFirestore,
-  getOrderByTrackingTokenFromFirestore,
-  updateOrderStatusInFirestore,
-  saveServiceRequestToFirestore,
-  getAllServiceRequestsFromFirestore,
-  COLLECTIONS,
-} from "../lib/firebase/firestore";
-import { doc, deleteDoc, getDoc } from "firebase/firestore";
+import { doc, deleteDoc } from "firebase/firestore";
 import { OrderRecord, ServiceRequest } from "../lib/types";
 
 const LIVE_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.noacroissant.com";
@@ -63,6 +45,20 @@ async function runDirectFirebaseTests() {
   console.log("\n========================================================");
   console.log("🔥 PHASE 1: DIRECT FIREBASE / FIRESTORE INTEGRATION TESTS");
   console.log("========================================================");
+
+  const { db, isFirebaseConfigured } = await import("../lib/firebase/config");
+  const {
+    getAllProductsFromFirestore,
+    getSettingsFromFirestore,
+    getAllTablesFromFirestore,
+    saveOrderToFirestore,
+    getOrderByIdFromFirestore,
+    getOrderByTrackingTokenFromFirestore,
+    updateOrderStatusInFirestore,
+    saveServiceRequestToFirestore,
+    getAllServiceRequestsFromFirestore,
+    COLLECTIONS,
+  } = await import("../lib/firebase/firestore");
 
   assert(isFirebaseConfigured === true, "Firebase is configured with valid environment variables");
   assert(Boolean(db), "Firestore instance (db) is initialized");
@@ -271,10 +267,16 @@ async function runLiveApiScenarioTests() {
   assert(authData.success === true, "Admin authentication succeeded");
 
   // Extract session cookie from Set-Cookie header
-  const setCookie = authRes.headers.get("set-cookie") || "";
-  const cookieMatch = setCookie.match(/noa_admin_token=[^;]+/);
-  const adminCookie = cookieMatch ? cookieMatch[0] : "";
-  assert(Boolean(adminCookie), "Received noa_admin_token session cookie");
+  const rawSetCookie = (authRes.headers as any).getSetCookie ? (authRes.headers as any).getSetCookie() : [authRes.headers.get("set-cookie") || ""];
+  let adminCookie = "";
+  for (const sc of rawSetCookie) {
+    const match = sc.match(/noa_admin_session=[^;]+/);
+    if (match) {
+      adminCookie = match[0];
+      break;
+    }
+  }
+  assert(Boolean(adminCookie), "Received noa_admin_session session cookie");
 
   // 6. GET /api/admin/orders (Admin View Orders Queue)
   console.log(`\nTesting GET ${LIVE_BASE_URL}/api/admin/orders (Personel Sipariş Ekranı)...`);
@@ -315,8 +317,32 @@ async function runLiveApiScenarioTests() {
   const trackPrepData = await trackPrepRes.json();
   assert(trackPrepData.order?.status === "preparing", "Customer tracking endpoint reflects updated status 'preparing'");
 
-  // Update to 'delivered' / completed
-  console.log(`\nTesting POST ${LIVE_BASE_URL}/api/admin/order-status -> 'delivered' (Teslim Edildi)...`);
+  // Transition: preparing -> ready
+  console.log(`\nTesting POST ${LIVE_BASE_URL}/api/admin/order-status -> 'ready' (Sipariş Hazırlandı)...`);
+  const statusReadyRes = await fetch(`${LIVE_BASE_URL}/api/admin/order-status`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Origin": LIVE_BASE_URL,
+      Cookie: adminCookie,
+    },
+    body: JSON.stringify({
+      order_id: liveOrderId,
+      status: "ready",
+      staff_name: "Test Barista",
+      note: "Sipariş hazır, masaya götürülüyor",
+    }),
+  });
+  assert(statusReadyRes.status === 200, `Status change to 'ready' returned 200 (got: ${statusReadyRes.status})`);
+
+  const trackReadyRes = await fetch(`${LIVE_BASE_URL}/api/order/track?token=${encodeURIComponent(liveTrackingToken)}`, {
+    cache: "no-store",
+  });
+  const trackReadyData = await trackReadyRes.json();
+  assert(trackReadyData.order?.status === "ready", "Customer tracking endpoint reflects updated status 'ready'");
+
+  // Transition: ready -> served
+  console.log(`\nTesting POST ${LIVE_BASE_URL}/api/admin/order-status -> 'served' (Masaya Servis Edildi)...`);
   const statusDelivRes = await fetch(`${LIVE_BASE_URL}/api/admin/order-status`, {
     method: "POST",
     headers: {
@@ -326,19 +352,19 @@ async function runLiveApiScenarioTests() {
     },
     body: JSON.stringify({
       order_id: liveOrderId,
-      status: "delivered",
+      status: "served",
       payment_status: "paid",
       staff_name: "Test Barista",
       note: "Sipariş masaya teslim edildi. Afiyet olsun!",
     }),
   });
-  assert(statusDelivRes.status === 200, `Status change to 'delivered' returned 200`);
+  assert(statusDelivRes.status === 200, `Status change to 'served' returned 200`);
 
   const trackDelivRes = await fetch(`${LIVE_BASE_URL}/api/order/track?token=${encodeURIComponent(liveTrackingToken)}`, {
     cache: "no-store",
   });
   const trackDelivData = await trackDelivRes.json();
-  assert(trackDelivData.order?.status === "delivered", "Customer tracking endpoint reflects completed status 'delivered'");
+  assert(trackDelivData.order?.status === "served", "Customer tracking endpoint reflects completed status 'served'");
 
   // 8. GET /api/loyalty
   console.log(`\nTesting GET ${LIVE_BASE_URL}/api/loyalty?phone=05550001122 (Sadakat Kartı)...`);
@@ -347,6 +373,16 @@ async function runLiveApiScenarioTests() {
   const loyaltyData = await loyaltyRes.json();
   assert(loyaltyData.success === true, "GET /api/loyalty responded with success: true");
   assert(Boolean(loyaltyData.card?.phone_number), `Loyalty card exists for phone: ${loyaltyData.card?.phone_number}`);
+
+  // 9. Clean up live test order from Firestore
+  try {
+    const { db } = await import("../lib/firebase/config");
+    const { COLLECTIONS } = await import("../lib/firebase/firestore");
+    if (db) {
+      await deleteDoc(doc(db, COLLECTIONS.ORDERS, liveOrderId));
+      console.log(`🧹 Cleaned up live test order (${liveOrderId}) from Firestore`);
+    }
+  } catch (e) {}
 }
 
 async function main() {

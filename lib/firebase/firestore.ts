@@ -354,21 +354,45 @@ export async function seedAllDataToFirestore(data: {
  */
 export async function getAllProductsFromFirestore(): Promise<Product[]> {
   if (!isFirebaseConfigured || !db) return [];
-  try {
-    const q = query(
-      collection(db, COLLECTIONS.PRODUCTS),
-      orderBy("display_order", "asc")
-    );
-    const snap = await getDocs(q);
-    const products: Product[] = [];
-    snap.forEach((docSnap) => {
-      products.push({ id: docSnap.id, ...docSnap.data() } as Product);
-    });
-    return products;
-  } catch (err) {
-    console.error("Error fetching all products from Firestore:", err);
-    return [];
-  }
+  return withFirestoreTimeout(
+    async () => {
+      const q = query(
+        collection(db!, COLLECTIONS.PRODUCTS),
+        orderBy("display_order", "asc")
+      );
+      const snap = await getDocs(q);
+      const products: Product[] = [];
+      snap.forEach((docSnap) => {
+        products.push({ id: docSnap.id, ...docSnap.data() } as Product);
+      });
+      return products;
+    },
+    [],
+    3500
+  );
+}
+
+/**
+ * Fetch all dining tables from Firestore
+ */
+export async function getAllTablesFromFirestore(): Promise<DiningTable[]> {
+  if (!isFirebaseConfigured || !db) return [];
+  return withFirestoreTimeout(
+    async () => {
+      const q = query(
+        collection(db!, COLLECTIONS.TABLES),
+        orderBy("table_number", "asc")
+      );
+      const snap = await getDocs(q);
+      const tables: DiningTable[] = [];
+      snap.forEach((docSnap) => {
+        tables.push({ id: docSnap.id, ...docSnap.data() } as DiningTable);
+      });
+      return tables;
+    },
+    [],
+    3500
+  );
 }
 
 /**
