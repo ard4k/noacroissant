@@ -58,6 +58,14 @@ export function ProductCard({
   const displayDesc = resolveProductDescription(product, language);
   const t = (key: string, fallback?: string) => getTranslation(language, key, fallback);
 
+  const teaBadge =
+    product.id === "prod-noa-kahvalti-tabagi"
+      ? "2 Adet Çay İkramdır ☕"
+      : (product.category_id === "cat-tuzlu" && product.id !== "prod-sade-kruvasan") ||
+        product.option_groups?.some((og) => og.id === "opt-tuzlu-ikram-cay")
+      ? "İlk Çay İkramdır ☕"
+      : null;
+
   // Imageless Compact Card (for Soft/Hot drinks)
   if (!hasImage) {
     return (
@@ -69,6 +77,11 @@ export function ProductCard({
         }`}
       >
         <div>
+          {teaBadge && (
+            <span className="inline-block mb-1.5 px-2.5 py-0.5 rounded-full bg-[#381D05]/10 text-[#381D05] text-[10px] font-bold">
+              {teaBadge}
+            </span>
+          )}
           <div className="flex items-start justify-between gap-3">
             <h3 className="text-[17px] sm:text-[18px] font-extrabold text-[#381D05] tracking-tight leading-snug group-hover:text-[#683B0C] transition-colors">
               {displayName}
@@ -132,6 +145,12 @@ export function ProductCard({
         {!isAvailable && (
           <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center text-white text-xs font-bold uppercase tracking-wider">
             {t("outOfStock", "Tükendi")}
+          </div>
+        )}
+
+        {isAvailable && teaBadge && (
+          <div className="absolute top-3 left-3 z-20 px-2.5 py-1 rounded-full bg-[#381D05]/85 backdrop-blur-md border border-[#EAD8C5]/30 text-[#F5EBE1] text-[10.5px] font-bold flex items-center gap-1 shadow-md">
+            <span>{teaBadge}</span>
           </div>
         )}
       </div>

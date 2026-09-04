@@ -189,6 +189,15 @@ export function ProductDetailDrawer({
     : "";
   const t = (key: string, fallback?: string) => getTranslation(language, key, fallback);
 
+  const teaBadge = product
+    ? product.id === "prod-noa-kahvalti-tabagi"
+      ? "2 Adet Çay İkramdır ☕"
+      : (product.category_id === "cat-tuzlu" && product.id !== "prod-sade-kruvasan") ||
+        product.option_groups?.some((og) => og.id === "opt-tuzlu-ikram-cay")
+      ? "İlk Çay İkramdır ☕"
+      : null
+    : null;
+
   // Reset selections ONLY when a new product is opened or drawer transitions from closed to open
   useEffect(() => {
     if (!isOpen || !product) {
@@ -470,6 +479,14 @@ export function ProductDetailDrawer({
               <p className="text-xs sm:text-[13px] text-[#5C3818] mt-2 leading-relaxed font-medium">
                 {displayDesc}
               </p>
+            )}
+
+            {teaBadge && (
+              <div className="mt-2.5">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#381D05]/10 border border-[#381D05]/15 text-[#381D05] text-xs font-bold">
+                  {teaBadge}
+                </span>
+              </div>
             )}
           </div>
 

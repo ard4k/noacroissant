@@ -25,7 +25,6 @@ async function main() {
   console.log("Total products in Firestore:", products.length);
 
   const hiddenIds = [
-    "prod-cedric-grolet",
     "prod-san-sebastian-cheesecake-dilim",
     "prod-san-sebastian-cheesecake-butun",
     "prod-limonlu-cheesecake-dilim",
@@ -33,7 +32,6 @@ async function main() {
     "prod-lotuslu-cheesecake-dilim",
     "prod-lotuslu-cheesecake-butun",
     "prod-noa-tatli-tuzlu-ikili",
-    "prod-noa-tatli-ikili",
     "prod-noa-tuzlu-ikili",
     "prod-noa-roll-kup-ikili",
   ];
@@ -42,6 +40,20 @@ async function main() {
   for (const id of hiddenIds) {
     const p = products.find((x) => x.id === id);
     console.log(`- ${id}: is_available=${p?.is_available}, is_active=${p?.is_active}`);
+  }
+
+  const updatedActiveIds = [
+    "prod-cedric-grolet",
+    "prod-noa-tatli-ikili",
+    "prod-mini-kruvasan",
+    "prod-lotus-cruffin",
+    "prod-limonlu-cilekli-danish",
+  ];
+
+  console.log("\nChecking updated active products in Firestore:");
+  for (const id of updatedActiveIds) {
+    const p = products.find((x) => x.id === id);
+    console.log(`- ${id}: name=${p?.name_tr}, price=${p?.base_price}, is_available=${p?.is_available}, is_active=${p?.is_active}`);
   }
 
   process.exit(0);

@@ -206,16 +206,27 @@ export default function AboutPage() {
                 Alanya’nın merkezinde, taptaze kruvasanlar ve sıcak kahve eşliğinde bekliyoruz.
               </p>
             </div>
-            <a
-              href={BUSINESS_INFO.social.googleMapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#FAF4EE] hover:bg-[#EAD8C5] text-xs font-bold text-[#381D05] border border-[#D1A37A]/40 transition-all active:scale-95 shrink-0"
-            >
-              <MapPin className="w-4 h-4 text-[#8C5828]" />
-              <span>Haritada Aç</span>
-              <ExternalLink className="w-3.5 h-3.5 opacity-70" />
-            </a>
+            <div className="flex items-center gap-2 flex-wrap">
+              <a
+                href={BUSINESS_INFO.social.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white text-xs font-bold transition-all hover:opacity-90 active:scale-95 shrink-0 shadow-xs"
+              >
+                <Instagram className="w-3.5 h-3.5 text-white" />
+                <span>@noacroissant</span>
+              </a>
+              <a
+                href={BUSINESS_INFO.social.googleMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#FAF4EE] hover:bg-[#EAD8C5] text-xs font-bold text-[#381D05] border border-[#D1A37A]/40 transition-all active:scale-95 shrink-0"
+              >
+                <MapPin className="w-4 h-4 text-[#8C5828]" />
+                <span>Haritada Aç</span>
+                <ExternalLink className="w-3.5 h-3.5 opacity-70" />
+              </a>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs text-stone-700">

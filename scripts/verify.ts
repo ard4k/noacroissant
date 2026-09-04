@@ -493,7 +493,6 @@ async function runVerification() {
   );
 
   const hiddenProductIds = [
-    "prod-cedric-grolet",
     "prod-san-sebastian-cheesecake-dilim",
     "prod-san-sebastian-cheesecake-butun",
     "prod-limonlu-cheesecake-dilim",
@@ -501,7 +500,6 @@ async function runVerification() {
     "prod-lotuslu-cheesecake-dilim",
     "prod-lotuslu-cheesecake-butun",
     "prod-noa-tatli-tuzlu-ikili",
-    "prod-noa-tatli-ikili",
     "prod-noa-tuzlu-ikili",
     "prod-noa-roll-kup-ikili",
   ];
@@ -535,6 +533,54 @@ async function runVerification() {
       `Order creation for hidden/inactive product '${id}' is strictly blocked`
     );
   }
+
+  // 19. Verify Menu & Customization Options Updates
+  const miniKruvasan = noaStore.getProductById("prod-mini-kruvasan");
+  assert(
+    miniKruvasan !== undefined && miniKruvasan.base_price === 550 && miniKruvasan.category_id === "cat-spesiyal",
+    "Mini Kruvasan Tabağı is 550 TL in cat-spesiyal"
+  );
+  const miniOpt = miniKruvasan?.option_groups?.find((g) => g.id === "opt-ozellestirme-secenekleri");
+  assert(
+    miniOpt !== undefined && miniOpt.options.some((o) => o.name === "Frambuazlı Danish" && o.price_modifier === 40),
+    "Mini Kruvasan contains Frambuazlı Danish (+40 TL) option"
+  );
+  assert(
+    miniOpt !== undefined && miniOpt.options.some((o) => o.name === "Orman Meyveli Danish" && o.price_modifier === 20),
+    "Mini Kruvasan contains Orman Meyveli Danish (+20 TL) option"
+  );
+  assert(
+    miniOpt !== undefined && miniOpt.options.some((o) => o.name === "Antep Fıstıklı Kruvasan" && o.price_modifier === 40),
+    "Mini Kruvasan contains Antep Fıstıklı Kruvasan (+40 TL) option"
+  );
+  assert(
+    miniOpt !== undefined && miniOpt.options.some((o) => o.name.includes("Lotus") && o.price_modifier === 40),
+    "Mini Kruvasan contains Lotus (+40 TL) option"
+  );
+
+  const tatliIkili = noaStore.getProductById("prod-noa-tatli-ikili");
+  assert(
+    tatliIkili !== undefined && tatliIkili.is_active === true && tatliIkili.is_available === true && tatliIkili.base_price === 620,
+    "NOA Tatlı İkili is active and 620 TL"
+  );
+
+  const cedricGrolet = noaStore.getProductById("prod-cedric-grolet");
+  assert(
+    cedricGrolet !== undefined && cedricGrolet.is_active === true && cedricGrolet.is_available === true && cedricGrolet.base_price === 250,
+    "Cedric Grolet is active and 250 TL"
+  );
+
+  const lotusCruffin = noaStore.getProductById("prod-lotus-cruffin");
+  assert(
+    lotusCruffin !== undefined && lotusCruffin.name === "Lotus Cruffin" && lotusCruffin.base_price === 350,
+    "Lotus Cruffin is active and 350 TL"
+  );
+
+  const limonluCilekliDanish = noaStore.getProductById("prod-limonlu-cilekli-danish");
+  assert(
+    limonluCilekliDanish !== undefined && limonluCilekliDanish.base_price === 340,
+    "Limonlu Çilekli Danish is added and 340 TL"
+  );
 
   // Clean up test order so it doesn't pollute admin panel
   noaStore.deleteOrder(createdOrder.order.id);

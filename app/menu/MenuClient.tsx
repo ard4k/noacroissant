@@ -10,7 +10,8 @@ import { ProductDetailDrawer } from "@/components/ProductDetailDrawer";
 import { CartDrawer } from "@/components/CartDrawer";
 import { CartBar } from "@/components/CartBar";
 import { OpeningSplash } from "@/components/OpeningSplash";
-import { Coffee, Gift, Sparkles, Award, Crown, Star, ChevronRight } from "lucide-react";
+import { Coffee, Gift, Sparkles, Award, Crown, Star, ChevronRight, Instagram } from "lucide-react";
+import { BUSINESS_INFO } from "@/lib/businessConfig";
 
 // Lazy-load non-critical modals for improved initial page load performance
 const CheckoutModal = dynamic(
@@ -561,6 +562,15 @@ export function MenuClient({
             className="object-contain"
           />
         </div>
+        <a
+          href={BUSINESS_INFO.social.instagram}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white text-xs font-bold shadow-xs hover:opacity-95 transition-all active:scale-95"
+        >
+          <Instagram className="w-3.5 h-3.5 text-white stroke-[2.2]" />
+          <span>Instagram @noacroissant</span>
+        </a>
         <p className="text-[11px] text-[#683B0C]/70 flex items-center gap-1">
           <span>made with</span>
           <span className="text-[#D1A37A]">♡</span>

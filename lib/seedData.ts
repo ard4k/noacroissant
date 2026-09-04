@@ -32,7 +32,7 @@ export const INITIAL_TABLES: DiningTable[] = [
 
 
 export const INITIAL_CATEGORIES: Category[] = [
-  { id: "cat-spesiyal", name: "NOA Menüler", slug: "noa-menuler", display_order: 1, is_active: true },
+  { id: "cat-spesiyal", name: "Öne Çıkanlar & Menüler", slug: "noa-menuler", display_order: 1, is_active: true },
   { id: "cat-klasik", name: "Klasik Tatlı", slug: "klasik-tatli-kruvasan", display_order: 2, is_active: true },
   { id: "cat-twissy", name: "Twissy", slug: "twissy-kruvasan", display_order: 3, is_active: true },
   { id: "cat-danish", name: "Danish", slug: "danish-kruvasan", display_order: 4, is_active: true },
@@ -158,7 +158,7 @@ const DONDURMA_PORSIYON: OptionGroup = {
   max_selection: 1,
   options: [
     { id: "porsiyon-1-top", option_group_id: "opt-dondurma-porsiyon", name: "1 Top", price_modifier: 0, display_order: 1 },
-    { id: "porsiyon-3-top", option_group_id: "opt-dondurma-porsiyon", name: "3 Top", price_modifier: 120, display_order: 2 },
+    { id: "porsiyon-3-top", option_group_id: "opt-dondurma-porsiyon", name: "1 Kap / 3 Top", price_modifier: 120, display_order: 2 },
   ],
 };
 
@@ -166,7 +166,7 @@ const DONDURMA_PORSIYON: OptionGroup = {
 export const OPT_TATLI_KRUVASAN_SECIMI: OptionGroup = {
   id: "opt-tatli-kruvasan-secimi",
   name: "tatli_kruvasan_secimi",
-  display_name: "Kruvasan Seçimi",
+  display_name: "Kruvasan & Danish Seçimi",
   is_required: true,
   min_selection: 1,
   max_selection: 1,
@@ -174,6 +174,13 @@ export const OPT_TATLI_KRUVASAN_SECIMI: OptionGroup = {
     { id: "kruv-roll", option_group_id: "opt-tatli-kruvasan-secimi", name: "Roll Kruvasan", price_modifier: 0, display_order: 1 },
     { id: "kruv-klasik", option_group_id: "opt-tatli-kruvasan-secimi", name: "Klasik Kruvasan", price_modifier: 0, display_order: 2 },
     { id: "kruv-twissy", option_group_id: "opt-tatli-kruvasan-secimi", name: "Twissy Kruvasan", price_modifier: 0, display_order: 3 },
+    { id: "kruv-frambuaz-danish", option_group_id: "opt-tatli-kruvasan-secimi", name: "Frambuazlı Danish", price_modifier: 40, display_order: 4 },
+    { id: "kruv-orman-danish", option_group_id: "opt-tatli-kruvasan-secimi", name: "Orman Meyveli Danish", price_modifier: 20, display_order: 5 },
+    { id: "kruv-yaban-danish", option_group_id: "opt-tatli-kruvasan-secimi", name: "Yaban Mersinli Danish", price_modifier: 20, display_order: 6 },
+    { id: "kruv-limon-cilek-danish", option_group_id: "opt-tatli-kruvasan-secimi", name: "Limonlu Çilekli Danish", price_modifier: 20, display_order: 7 },
+    { id: "kruv-mangolu-danish", option_group_id: "opt-tatli-kruvasan-secimi", name: "Mangolu Danish", price_modifier: 40, display_order: 8 },
+    { id: "kruv-antep-fistikli", option_group_id: "opt-tatli-kruvasan-secimi", name: "Antep Fıstıklı Kruvasan", price_modifier: 40, display_order: 9 },
+    { id: "kruv-lotuslu", option_group_id: "opt-tatli-kruvasan-secimi", name: "Lotuslu (Lotus Cruffin / Lotus seçimi)", price_modifier: 40, display_order: 10 },
   ],
 };
 export const TATLI_KRUVASAN_SECIMI = OPT_TATLI_KRUVASAN_SECIMI;
@@ -354,8 +361,8 @@ const OPT_KAHVALTI_PORSIYON: OptionGroup = {
   min_selection: 1,
   max_selection: 1,
   options: [
-    { id: "kahvalti-1-kisi", option_group_id: "opt-kahvalti-porsiyon", name: "1 Kişilik", price_modifier: 0, display_order: 1 },
-    { id: "kahvalti-2-kisi", option_group_id: "opt-kahvalti-porsiyon", name: "2 Kişilik", price_modifier: 180, display_order: 2 },
+    { id: "kahvalti-1-kisi", option_group_id: "opt-kahvalti-porsiyon", name: "1 Tabak (1 Kişilik)", price_modifier: 0, display_order: 1 },
+    { id: "kahvalti-2-kisi", option_group_id: "opt-kahvalti-porsiyon", name: "2 Tabak (2 Kişilik)", price_modifier: 180, display_order: 2 },
   ],
 };
 
@@ -977,36 +984,65 @@ const PAIRING_DONDURMA = makePairing("dondurma", [
 ]);
 
 // --- YEMEKSEPETI RESMİ İKİLİ MENÜ ÜRÜN SEÇİM OPSİYONLARI ---
-const OPT_IKILI_TATLI_SECIMI: OptionGroup = {
+// --- YEMEKSEPETI RESMİ İKİLİ MENÜ ÜRÜN SEÇİM OPSİYONLARI ---
+export const OPT_IKILI_TATLI_SECIMI: OptionGroup = {
   id: "opt-ikili-tatli-secimi",
   name: "ikili_tatli_secimi",
-  display_name: "Tatlı Kruvasan Seçimi",
+  display_name: "Tatlı Kruvasan / Danish Seçimi",
+  display_name_i18n: {
+    tr: "Tatlı Kruvasan / Danish Seçimi",
+    en: "Sweet Croissant / Danish Selection",
+  },
   is_required: true,
   min_selection: 1,
   max_selection: 1,
   options: [
-    { id: "ikili-antep-fistikli", option_group_id: "opt-ikili-tatli-secimi", name: "Antep Fıstıklı Kruvasan", price_modifier: 40, display_order: 1 },
-    { id: "ikili-cilekli-nutella", option_group_id: "opt-ikili-tatli-secimi", name: "Çilekli Muzlu Nutellalı Kruvasan", price_modifier: 0, display_order: 2 },
-    { id: "ikili-cilekli-kremali", option_group_id: "opt-ikili-tatli-secimi", name: "Çilekli Muzlu Kremalı Kruvasan", price_modifier: 0, display_order: 3 },
-    { id: "ikili-lotus", option_group_id: "opt-ikili-tatli-secimi", name: "Lotuslu Kruvasan", price_modifier: 40, display_order: 4 },
-    { id: "ikili-antep-twissy", option_group_id: "opt-ikili-tatli-secimi", name: "Antep Fıstıklı Twissy", price_modifier: 0, display_order: 5 },
-    { id: "ikili-limon-twissy", option_group_id: "opt-ikili-tatli-secimi", name: "Limonlu Twissy", price_modifier: 0, display_order: 6 },
-    { id: "ikili-cikolata-twissy", option_group_id: "opt-ikili-tatli-secimi", name: "Sütlü Belçika Çikolatalı Twissy", price_modifier: 0, display_order: 7 },
-    { id: "ikili-yaban-danish", option_group_id: "opt-ikili-tatli-secimi", name: "Yaban Mersinli Danish", price_modifier: 20, display_order: 8 },
-    { id: "ikili-limon-danish", option_group_id: "opt-ikili-tatli-secimi", name: "Limonlu Danish", price_modifier: 20, display_order: 9 },
-    { id: "ikili-orman-danish", option_group_id: "opt-ikili-tatli-secimi", name: "Orman Meyveli Danish", price_modifier: 20, display_order: 10 },
-    { id: "ikili-cilek-danish", option_group_id: "opt-ikili-tatli-secimi", name: "Çilekli Danish", price_modifier: 20, display_order: 11 },
-    { id: "ikili-mango-danish", option_group_id: "opt-ikili-tatli-secimi", name: "Mangolu Danish", price_modifier: 40, display_order: 12 },
-    { id: "ikili-frambuaz-danish", option_group_id: "opt-ikili-tatli-secimi", name: "Frambuazlı Danish", price_modifier: 40, display_order: 13 },
-    { id: "ikili-sutlu-roll", option_group_id: "opt-ikili-tatli-secimi", name: "Sütlü Belçika Çikolatalı Roll Kruvasan", price_modifier: 40, display_order: 14 },
-    { id: "ikili-bitter-roll", option_group_id: "opt-ikili-tatli-secimi", name: "Bitter Belçika Çikolatalı Roll Kruvasan", price_modifier: 40, display_order: 15 },
-    { id: "ikili-beyaz-roll", option_group_id: "opt-ikili-tatli-secimi", name: "Beyaz Belçika Çikolatalı Roll Kruvasan", price_modifier: 40, display_order: 16 },
-    { id: "ikili-sutlu-kup", option_group_id: "opt-ikili-tatli-secimi", name: "Sütlü Belçika Çikolatalı Küp Kruvasan", price_modifier: 40, display_order: 17 },
-    { id: "ikili-bitter-kup", option_group_id: "opt-ikili-tatli-secimi", name: "Bitter Belçika Çikolatalı Küp Kruvasan", price_modifier: 40, display_order: 18 },
-    { id: "ikili-beyaz-kup", option_group_id: "opt-ikili-tatli-secimi", name: "Beyaz Belçika Çikolatalı Küp Kruvasan", price_modifier: 40, display_order: 19 },
-    { id: "ikili-sutlu-amora", option_group_id: "opt-ikili-tatli-secimi", name: "Sütlü Belçika Çikolatalı Amora", price_modifier: 40, display_order: 20 },
-    { id: "ikili-bitter-amora", option_group_id: "opt-ikili-tatli-secimi", name: "Bitter Belçika Çikolatalı Amora", price_modifier: 40, display_order: 21 },
-    { id: "ikili-beyaz-amora", option_group_id: "opt-ikili-tatli-secimi", name: "Beyaz Belçika Çikolatalı Amora", price_modifier: 40, display_order: 22 },
+    { id: "ikili-frambuaz-danish", option_group_id: "opt-ikili-tatli-secimi", name: "Frambuazlı Danish", price_modifier: 40, display_order: 1 },
+    { id: "ikili-orman-danish", option_group_id: "opt-ikili-tatli-secimi", name: "Orman Meyveli Danish", price_modifier: 20, display_order: 2 },
+    { id: "ikili-yaban-danish", option_group_id: "opt-ikili-tatli-secimi", name: "Yaban Mersinli Danish", price_modifier: 20, display_order: 3 },
+    { id: "ikili-limon-cilek-danish", option_group_id: "opt-ikili-tatli-secimi", name: "Limonlu Çilekli Danish", price_modifier: 20, display_order: 4 },
+    { id: "ikili-mango-danish", option_group_id: "opt-ikili-tatli-secimi", name: "Mangolu Danish", price_modifier: 40, display_order: 5 },
+    { id: "ikili-antep-fistikli", option_group_id: "opt-ikili-tatli-secimi", name: "Antep Fıstıklı Kruvasan", price_modifier: 40, display_order: 6 },
+    { id: "ikili-lotus", option_group_id: "opt-ikili-tatli-secimi", name: "Lotuslu (Lotus Cruffin / Lotus seçimi)", price_modifier: 40, display_order: 7 },
+    { id: "ikili-cilekli-nutella", option_group_id: "opt-ikili-tatli-secimi", name: "Çilekli Muzlu Nutellalı Kruvasan", price_modifier: 0, display_order: 8 },
+    { id: "ikili-cilekli-kremali", option_group_id: "opt-ikili-tatli-secimi", name: "Çilekli Muzlu Kremalı Kruvasan", price_modifier: 0, display_order: 9 },
+    { id: "ikili-limon-danish", option_group_id: "opt-ikili-tatli-secimi", name: "Limonlu Danish", price_modifier: 0, display_order: 10 },
+    { id: "ikili-cilek-danish", option_group_id: "opt-ikili-tatli-secimi", name: "Çilekli Danish", price_modifier: 0, display_order: 11 },
+    { id: "ikili-antep-twissy", option_group_id: "opt-ikili-tatli-secimi", name: "Antep Fıstıklı Twissy", price_modifier: 0, display_order: 12 },
+    { id: "ikili-limon-twissy", option_group_id: "opt-ikili-tatli-secimi", name: "Limonlu Twissy", price_modifier: 0, display_order: 13 },
+    { id: "ikili-cikolata-twissy", option_group_id: "opt-ikili-tatli-secimi", name: "Sütlü Belçika Çikolatalı Twissy", price_modifier: 0, display_order: 14 },
+    { id: "ikili-sutlu-roll", option_group_id: "opt-ikili-tatli-secimi", name: "Sütlü Belçika Çikolatalı Roll Kruvasan", price_modifier: 40, display_order: 15 },
+    { id: "ikili-bitter-roll", option_group_id: "opt-ikili-tatli-secimi", name: "Bitter Belçika Çikolatalı Roll Kruvasan", price_modifier: 40, display_order: 16 },
+    { id: "ikili-beyaz-roll", option_group_id: "opt-ikili-tatli-secimi", name: "Beyaz Belçika Çikolatalı Roll Kruvasan", price_modifier: 40, display_order: 17 },
+    { id: "ikili-sutlu-kup", option_group_id: "opt-ikili-tatli-secimi", name: "Sütlü Belçika Çikolatalı Küp Kruvasan", price_modifier: 40, display_order: 18 },
+    { id: "ikili-bitter-kup", option_group_id: "opt-ikili-tatli-secimi", name: "Bitter Belçika Çikolatalı Küp Kruvasan", price_modifier: 40, display_order: 19 },
+    { id: "ikili-beyaz-kup", option_group_id: "opt-ikili-tatli-secimi", name: "Beyaz Belçika Çikolatalı Küp Kruvasan", price_modifier: 40, display_order: 20 },
+    { id: "ikili-sutlu-amora", option_group_id: "opt-ikili-tatli-secimi", name: "Sütlü Belçika Çikolatalı Amora", price_modifier: 40, display_order: 21 },
+    { id: "ikili-bitter-amora", option_group_id: "opt-ikili-tatli-secimi", name: "Bitter Belçika Çikolatalı Amora", price_modifier: 40, display_order: 22 },
+    { id: "ikili-beyaz-amora", option_group_id: "opt-ikili-tatli-secimi", name: "Beyaz Belçika Çikolatalı Amora", price_modifier: 40, display_order: 23 },
+  ],
+};
+
+// --- ÖZELLEŞTİRME (MODIFIER / ADD-ON / LEZZET SEÇENEKLERİ) ---
+export const OPT_OZELLESTIRME_SECENEKLERI: OptionGroup = {
+  id: "opt-ozellestirme-secenekleri",
+  name: "ozellestirme_secenekleri",
+  display_name: "Özel Tercih / Ekleme Opsiyonları",
+  display_name_i18n: {
+    tr: "Özel Tercih / Ekleme Opsiyonları",
+    en: "Customization & Add-on Options",
+  },
+  is_required: false,
+  min_selection: 0,
+  max_selection: 7,
+  options: [
+    { id: "opt-frambuazli-danish", option_group_id: "opt-ozellestirme-secenekleri", name: "Frambuazlı Danish", price_modifier: 40, display_order: 1 },
+    { id: "opt-orman-meyveli-danish", option_group_id: "opt-ozellestirme-secenekleri", name: "Orman Meyveli Danish", price_modifier: 20, display_order: 2 },
+    { id: "opt-yaban-mersinli-danish", option_group_id: "opt-ozellestirme-secenekleri", name: "Yaban Mersinli Danish", price_modifier: 20, display_order: 3 },
+    { id: "opt-limonlu-cilekli-danish", option_group_id: "opt-ozellestirme-secenekleri", name: "Limonlu Çilekli Danish", price_modifier: 20, display_order: 4 },
+    { id: "opt-mangolu-danish", option_group_id: "opt-ozellestirme-secenekleri", name: "Mangolu Danish", price_modifier: 40, display_order: 5 },
+    { id: "opt-antep-fistikli-kruvasan", option_group_id: "opt-ozellestirme-secenekleri", name: "Antep Fıstıklı Kruvasan", price_modifier: 40, display_order: 6 },
+    { id: "opt-lotuslu", option_group_id: "opt-ozellestirme-secenekleri", name: "Lotuslu (Lotus Cruffin / Lotus seçimi)", price_modifier: 40, display_order: 7 },
   ],
 };
 
@@ -1133,7 +1169,7 @@ export const INITIAL_PRODUCTS: Product[] = [
   {
     id: "prod-lotus-cruffin",
     category_id: "cat-klasik",
-    name: "Lotuslu Kruvasan",
+    name: "Lotus Cruffin",
     slug: "lotus-cruffin",
     description: "Kat kat çıtır kruvasan; yoğun Lotus Biscoff kreması ve karamelize bisküvi parçalarıyla hazırlanır. Günlük taze olarak sunulur.",
     base_price: 350,
@@ -1160,17 +1196,17 @@ export const INITIAL_PRODUCTS: Product[] = [
   },
   {
     id: "prod-mini-kruvasan",
-    category_id: "cat-klasik",
+    category_id: "cat-spesiyal",
     name: "Mini Kruvasan Tabağı",
     slug: "mini-kruvasan",
     description: "Çıtır taze mini kruvasanlar, yanında sıcak eritilmiş Belçika çikolatası ve taze mevsim meyveleri ile.",
     base_price: 550,
     is_available: true,
-    is_featured: false,
+    is_featured: true,
     image_url: getProductImage("mini-kruvasan"),
-    display_order: 6,
+    display_order: 30.5,
     card_density: "large",
-    option_groups: [PAIRING_MINI_KRUVASAN],
+    option_groups: [OPT_OZELLESTIRME_SECENEKLERI, PAIRING_MINI_KRUVASAN],
   },
   {
     id: "prod-cedric-grolet",
@@ -1179,9 +1215,9 @@ export const INITIAL_PRODUCTS: Product[] = [
     slug: "cedric-grolet",
     description: "İkonik Fransız pastacılık stilinde, taze dolgusu ve ipeksi kremasıyla hazırlanan imza şef tatlısı.",
     base_price: 250,
-    is_available: false,
-    is_active: false,
-    is_featured: false,
+    is_available: true,
+    is_active: true,
+    is_featured: true,
     image_url: getProductImage("cedric-grolet"),
     display_order: 7,
     card_density: "large",
@@ -1437,6 +1473,20 @@ export const INITIAL_PRODUCTS: Product[] = [
     display_order: 14,
     card_density: "large",
     option_groups: [PAIRING_FRAMBUAZ_DANISH],
+  },
+  {
+    id: "prod-limonlu-cilekli-danish",
+    category_id: "cat-danish",
+    name: "Limonlu Çilekli Danish",
+    slug: "limonlu-cilekli-danish",
+    description: "Kat kat çıtır Danish hamuru; ferah limon kreması ve taze bahçe çilekleriyle hazırlanır. Günlük taze olarak sunulur.",
+    base_price: 340,
+    is_available: true,
+    is_featured: false,
+    image_url: getProductImage("limonlu-cilekli-danish"),
+    display_order: 15,
+    card_density: "large",
+    option_groups: [PAIRING_CILEK_DANISH],
   },
 
   // --- ROLL KRUVASAN (İç Dolgu Çikolata Seçimi + İçecek Eşleştirmesi) ---
@@ -1799,15 +1849,16 @@ export const INITIAL_PRODUCTS: Product[] = [
     slug: "noa-tatli-ikili",
     description: "İki adet enfes tatlı kruvasan lezzeti bir arada.",
     base_price: 620,
-    is_available: false,
-    is_active: false,
-    is_featured: false,
+    is_available: true,
+    is_active: true,
+    is_featured: true,
     image_url: getProductImage("noa-tatli-ikili"),
     display_order: 34,
     card_density: "large",
     option_groups: [
-      cloneOptionGroup(OPT_IKILI_TATLI_SECIMI, "ti1", "1. Tatlı Kruvasan"),
-      cloneOptionGroup(OPT_IKILI_TATLI_SECIMI, "ti2", "2. Tatlı Kruvasan"),
+      cloneOptionGroup(OPT_IKILI_TATLI_SECIMI, "ti1", "1. Tatlı Kruvasan / Danish Seçimi"),
+      cloneOptionGroup(OPT_IKILI_TATLI_SECIMI, "ti2", "2. Tatlı Kruvasan / Danish Seçimi"),
+      OPT_OZELLESTIRME_SECENEKLERI,
     ],
   },
   {
