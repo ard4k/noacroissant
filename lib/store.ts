@@ -23,15 +23,15 @@ import {
 } from "./seedData";
 
 const STORAGE_KEYS = {
-  TABLES: "noa_tables_v9",
-  PRODUCTS: "noa_products_v9",
-  CATEGORIES: "noa_categories_v9",
-  ORDERS: "noa_orders_v9",
-  SETTINGS: "noa_settings_v9",
-  PROMOTIONS: "noa_promotions_v9",
-  STAFF_USER: "noa_staff_user_v9",
-  SERVICE_REQUESTS: "noa_service_requests_v9",
-  LOYALTY_CARDS: "noa_loyalty_cards_v9",
+  TABLES: "noa_tables_v10",
+  PRODUCTS: "noa_products_v10",
+  CATEGORIES: "noa_categories_v10",
+  ORDERS: "noa_orders_v10",
+  SETTINGS: "noa_settings_v10",
+  PROMOTIONS: "noa_promotions_v10",
+  STAFF_USER: "noa_staff_user_v10",
+  SERVICE_REQUESTS: "noa_service_requests_v10",
+  LOYALTY_CARDS: "noa_loyalty_cards_v10",
 };
 
 // In-memory fallback singleton for server and client sync

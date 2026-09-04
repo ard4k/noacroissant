@@ -502,6 +502,8 @@ async function runVerification() {
     "prod-noa-tatli-tuzlu-ikili",
     "prod-noa-tuzlu-ikili",
     "prod-noa-roll-kup-ikili",
+    "prod-cedric-grolet",
+    "prod-noa-tatli-ikili",
   ];
 
   for (const id of hiddenProductIds) {
@@ -556,18 +558,6 @@ async function runVerification() {
   assert(
     miniOpt !== undefined && miniOpt.options.some((o) => o.name.includes("Lotus") && o.price_modifier === 40),
     "Mini Kruvasan contains Lotus (+40 TL) option"
-  );
-
-  const tatliIkili = noaStore.getProductById("prod-noa-tatli-ikili");
-  assert(
-    tatliIkili !== undefined && tatliIkili.is_active === true && tatliIkili.is_available === true && tatliIkili.base_price === 620,
-    "NOA Tatlı İkili is active and 620 TL"
-  );
-
-  const cedricGrolet = noaStore.getProductById("prod-cedric-grolet");
-  assert(
-    cedricGrolet !== undefined && cedricGrolet.is_active === true && cedricGrolet.is_available === true && cedricGrolet.base_price === 250,
-    "Cedric Grolet is active and 250 TL"
   );
 
   const lotusCruffin = noaStore.getProductById("prod-lotus-cruffin");

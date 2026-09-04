@@ -34,6 +34,8 @@ async function main() {
     "prod-noa-tatli-tuzlu-ikili",
     "prod-noa-tuzlu-ikili",
     "prod-noa-roll-kup-ikili",
+    "prod-cedric-grolet",
+    "prod-noa-tatli-ikili",
   ];
 
   console.log("\nChecking hidden products in Firestore:");
@@ -43,8 +45,6 @@ async function main() {
   }
 
   const updatedActiveIds = [
-    "prod-cedric-grolet",
-    "prod-noa-tatli-ikili",
     "prod-mini-kruvasan",
     "prod-lotus-cruffin",
     "prod-limonlu-cilekli-danish",

@@ -76,7 +76,23 @@ export function OpeningSplash({
           onTouchMove={(e) => e.preventDefault()}
           onWheel={(e) => e.preventDefault()}
           className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-full h-[100dvh] min-h-[100dvh] z-[99999] flex flex-col items-center justify-center bg-[#F8F1EB] select-none overflow-hidden touch-none overscroll-none"
-          style={{ willChange: "opacity, transform" }}
+          style={{
+            position: "fixed",
+            inset: 0,
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            width: "100vw",
+            height: "100dvh",
+            backgroundColor: "#F8F1EB",
+            zIndex: 99999,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            willChange: "opacity, transform",
+          }}
         >
           {/* Central Animated Content Card */}
           <div className="relative flex flex-col items-center text-center px-4 max-w-sm w-full">
@@ -87,14 +103,18 @@ export function OpeningSplash({
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
               className="relative mb-5"
             >
-              <div className="relative w-28 h-28 sm:w-32 sm:h-32">
+              <div
+                className="relative w-28 h-28 sm:w-32 sm:h-32"
+                style={{ position: "relative", width: 112, height: 112 }}
+              >
                 <Image
                   src="/brand/noa-icon.png"
                   alt="NOA Croissant Logo"
-                  fill
-                  sizes="128px"
+                  width={112}
+                  height={112}
                   priority
                   className="object-contain"
+                  style={{ width: "100%", height: "100%", objectFit: "contain" }}
                 />
               </div>
             </motion.div>
@@ -105,14 +125,16 @@ export function OpeningSplash({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.25 }}
               className="relative w-64 sm:w-72 h-14 sm:h-16 my-1 mx-auto flex items-center justify-center"
+              style={{ position: "relative", width: 260, height: 56 }}
             >
               <Image
                 src="/noa_text.png"
                 alt="NOA Croissant"
-                fill
-                sizes="320px"
+                width={260}
+                height={56}
                 priority
                 className="object-contain"
+                style={{ width: "auto", height: "100%", objectFit: "contain" }}
               />
             </motion.div>
 

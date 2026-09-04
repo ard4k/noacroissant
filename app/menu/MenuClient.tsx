@@ -10,34 +10,27 @@ import { ProductDetailDrawer } from "@/components/ProductDetailDrawer";
 import { CartDrawer } from "@/components/CartDrawer";
 import { CartBar } from "@/components/CartBar";
 import { OpeningSplash } from "@/components/OpeningSplash";
-import { StoryHighlights } from "@/components/StoryHighlights";
 import { Coffee, Gift, Sparkles, Award, Crown, Star, ChevronRight, Instagram } from "lucide-react";
 import { BUSINESS_INFO } from "@/lib/businessConfig";
 
 // Lazy-load non-critical modals for improved initial page load performance
-const CheckoutModal = dynamic(
-  () => import("@/components/CheckoutModal").then((mod) => mod.CheckoutModal),
-  { ssr: false }
+const CheckoutModal = dynamic(() =>
+  import("@/components/CheckoutModal").then((mod) => mod.CheckoutModal)
 );
-const SearchModal = dynamic(
-  () => import("@/components/SearchModal").then((mod) => mod.SearchModal),
-  { ssr: false }
+const SearchModal = dynamic(() =>
+  import("@/components/SearchModal").then((mod) => mod.SearchModal)
 );
-const StoryModal = dynamic(
-  () => import("@/components/StoryModal").then((mod) => mod.StoryModal),
-  { ssr: false }
+const StoryModal = dynamic(() =>
+  import("@/components/StoryModal").then((mod) => mod.StoryModal)
 );
-const WifiModal = dynamic(
-  () => import("@/components/WifiModal").then((mod) => mod.WifiModal),
-  { ssr: false }
+const WifiModal = dynamic(() =>
+  import("@/components/WifiModal").then((mod) => mod.WifiModal)
 );
-const LoyaltyModal = dynamic(
-  () => import("@/components/LoyaltyModal").then((mod) => mod.LoyaltyModal),
-  { ssr: false }
+const LoyaltyModal = dynamic(() =>
+  import("@/components/LoyaltyModal").then((mod) => mod.LoyaltyModal)
 );
-const CookieBanner = dynamic(
-  () => import("@/components/CookieBanner").then((mod) => mod.CookieBanner),
-  { ssr: false }
+const CookieBanner = dynamic(() =>
+  import("@/components/CookieBanner").then((mod) => mod.CookieBanner)
 );
 import { useCart } from "@/lib/useCart";
 import { useSearchParams } from "next/navigation";
@@ -513,14 +506,6 @@ export function MenuClient({
 
       {/* Main Menu Feed - 3 Cards Side-by-Side Grid */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-5 pb-36 space-y-12 sm:space-y-16">
-        {/* Instagram Highlights Bar */}
-        <section aria-label="NOA Hikayeleri" className="pt-1 pb-1">
-          <StoryHighlights
-            onSelectStory={(index) => handleOpenStory(index)}
-            language={language}
-          />
-        </section>
-
         {visibleCategories.map((cat, catIdx) => {
           const catProducts = productsByCategory[cat.id] || [];
           if (catProducts.length === 0) return null;
@@ -651,44 +636,52 @@ export function MenuClient({
       />
 
       {/* Checkout Modal */}
-      <CheckoutModal
-        isOpen={isCheckoutOpen}
-        onClose={() => setIsCheckoutOpen(false)}
-        items={cartHook.items}
-        subtotal={cartHook.subtotal}
-        total={cartHook.totalPrice}
-        tableToken={currentTable?.qr_token || tableTokenFromUrl}
-        tableNumber={currentTable?.table_number || null}
-        generalNote={cartHook.generalNote}
-        onClearCart={cartHook.clearCart}
-        language={language}
-      />
+      {isCheckoutOpen && (
+        <CheckoutModal
+          isOpen={isCheckoutOpen}
+          onClose={() => setIsCheckoutOpen(false)}
+          items={cartHook.items}
+          subtotal={cartHook.subtotal}
+          total={cartHook.totalPrice}
+          tableToken={currentTable?.qr_token || tableTokenFromUrl}
+          tableNumber={currentTable?.table_number || null}
+          generalNote={cartHook.generalNote}
+          onClearCart={cartHook.clearCart}
+          language={language}
+        />
+      )}
 
       {/* Search Modal */}
-      <SearchModal
-        isOpen={isSearchOpen}
-        onClose={() => setIsSearchOpen(false)}
-        products={liveProducts.filter((p) => p.is_available !== false && p.is_active !== false)}
-        onSelectProduct={(prod) => setSelectedProductForDetail(prod)}
-        language={language}
-      />
+      {isSearchOpen && (
+        <SearchModal
+          isOpen={isSearchOpen}
+          onClose={() => setIsSearchOpen(false)}
+          products={liveProducts.filter((p) => p.is_available !== false && p.is_active !== false)}
+          onSelectProduct={(prod) => setSelectedProductForDetail(prod)}
+          language={language}
+        />
+      )}
 
       {/* NOA Story Slideshow Modal */}
-      <StoryModal
-        isOpen={isStoryOpen}
-        onClose={() => setIsStoryOpen(false)}
-        language={language}
-        initialSlideIndex={storyInitialIndex}
-      />
+      {isStoryOpen && (
+        <StoryModal
+          isOpen={isStoryOpen}
+          onClose={() => setIsStoryOpen(false)}
+          language={language}
+          initialSlideIndex={storyInitialIndex}
+        />
+      )}
 
       {/* Wi-Fi Quick Connect Modal */}
-      <WifiModal
-        isOpen={isWifiOpen}
-        onClose={() => setIsWifiOpen(false)}
-        ssid={wifiSettings.ssid}
-        password={wifiSettings.password}
-        language={language}
-      />
+      {isWifiOpen && (
+        <WifiModal
+          isOpen={isWifiOpen}
+          onClose={() => setIsWifiOpen(false)}
+          ssid={wifiSettings.ssid}
+          password={wifiSettings.password}
+          language={language}
+        />
+      )}
 
       {/* Floating Bottom-Left Luxury Loyalty Capsule Badge – Saf Beyaz İnci */}
       {loyaltySettings.enabled && (
@@ -737,14 +730,16 @@ export function MenuClient({
       )}
 
       {/* NOA Digital Loyalty Club Modal */}
-      <LoyaltyModal
-        isOpen={isLoyaltyOpen}
-        onClose={() => setIsLoyaltyOpen(false)}
-        onCardUpdated={(c) => setCustomerLoyaltyCard(c)}
-        requiredStamps={loyaltySettings.requiredStamps}
-        rewardName={loyaltySettings.rewardName}
-        language={language}
-      />
+      {isLoyaltyOpen && (
+        <LoyaltyModal
+          isOpen={isLoyaltyOpen}
+          onClose={() => setIsLoyaltyOpen(false)}
+          onCardUpdated={(c) => setCustomerLoyaltyCard(c)}
+          requiredStamps={loyaltySettings.requiredStamps}
+          rewardName={loyaltySettings.rewardName}
+          language={language}
+        />
+      )}
 
       {/* Cookie & Privacy Consent Banner */}
       <CookieBanner language={language} />

@@ -129,12 +129,13 @@ export function ProductCard({
       <div
         suppressHydrationWarning
         className="relative aspect-square w-full shrink-0 rounded-[28px] overflow-hidden bg-[#EFE7DE] z-10 shadow-sm"
+        style={{ position: "relative", width: "100%", aspectRatio: "1 / 1", overflow: "hidden" }}
       >
         <Image
           src={effectiveImageUrl!}
           alt={displayName}
           fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          sizes="(max-width: 640px) 90vw, (max-width: 1024px) 48vw, 380px"
           className="object-contain transition-transform duration-500 ease-out group-hover:scale-104"
           onError={() => setImageError(true)}
           priority={priority}
