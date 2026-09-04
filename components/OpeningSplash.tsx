@@ -62,6 +62,9 @@ export function OpeningSplash({
     setIsVisible(false);
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, behavior: "instant" });
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+      document.body.style.touchAction = "";
     }
     onComplete?.();
   };
@@ -70,11 +73,16 @@ export function OpeningSplash({
     <AnimatePresence>
       {isVisible && (
         <motion.div
+          key="noa-opening-splash"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0, scale: 1.04 }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          onTouchMove={(e) => e.preventDefault()}
-          onWheel={(e) => e.preventDefault()}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          onTouchMove={(e) => {
+            if (isVisible) e.preventDefault();
+          }}
+          onWheel={(e) => {
+            if (isVisible) e.preventDefault();
+          }}
           className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-full h-[100dvh] min-h-[100dvh] z-[99999] flex flex-col items-center justify-center bg-[#F8F1EB] select-none overflow-hidden touch-none overscroll-none"
           style={{
             position: "fixed",
@@ -91,6 +99,7 @@ export function OpeningSplash({
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
+            pointerEvents: isVisible ? "auto" : "none",
             willChange: "opacity, transform",
           }}
         >
@@ -165,6 +174,12 @@ export function OpeningSplash({
                     onClick={() => {
                       handleDismiss();
                       onOpenStory();
+                    }}
+                    onMouseEnter={() => {
+                      import("@/components/StoryModal");
+                    }}
+                    onTouchStart={() => {
+                      import("@/components/StoryModal");
                     }}
                     className="flex-1 min-w-[135px] px-3.5 py-3 rounded-full bg-gradient-to-r from-[#FAF0E4] via-[#F6E9DA] to-[#EFE2D2] hover:from-[#F6E9DA] hover:to-[#EAD8C5] text-[#381D05] border border-[#8C5828]/35 font-extrabold text-[11.5px] sm:text-xs tracking-wider shadow-sm flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer whitespace-nowrap shrink-0 group"
                   >

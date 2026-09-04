@@ -637,50 +637,58 @@ export function MenuClient({
 
       {/* Checkout Modal */}
       {isCheckoutOpen && (
-        <CheckoutModal
-          isOpen={isCheckoutOpen}
-          onClose={() => setIsCheckoutOpen(false)}
-          items={cartHook.items}
-          subtotal={cartHook.subtotal}
-          total={cartHook.totalPrice}
-          tableToken={currentTable?.qr_token || tableTokenFromUrl}
-          tableNumber={currentTable?.table_number || null}
-          generalNote={cartHook.generalNote}
-          onClearCart={cartHook.clearCart}
-          language={language}
-        />
+        <React.Suspense fallback={null}>
+          <CheckoutModal
+            isOpen={isCheckoutOpen}
+            onClose={() => setIsCheckoutOpen(false)}
+            items={cartHook.items}
+            subtotal={cartHook.subtotal}
+            total={cartHook.totalPrice}
+            tableToken={currentTable?.qr_token || tableTokenFromUrl}
+            tableNumber={currentTable?.table_number || null}
+            generalNote={cartHook.generalNote}
+            onClearCart={cartHook.clearCart}
+            language={language}
+          />
+        </React.Suspense>
       )}
 
       {/* Search Modal */}
       {isSearchOpen && (
-        <SearchModal
-          isOpen={isSearchOpen}
-          onClose={() => setIsSearchOpen(false)}
-          products={liveProducts.filter((p) => p.is_available !== false && p.is_active !== false)}
-          onSelectProduct={(prod) => setSelectedProductForDetail(prod)}
-          language={language}
-        />
+        <React.Suspense fallback={null}>
+          <SearchModal
+            isOpen={isSearchOpen}
+            onClose={() => setIsSearchOpen(false)}
+            products={liveProducts.filter((p) => p.is_available !== false && p.is_active !== false)}
+            onSelectProduct={(prod) => setSelectedProductForDetail(prod)}
+            language={language}
+          />
+        </React.Suspense>
       )}
 
       {/* NOA Story Slideshow Modal */}
       {isStoryOpen && (
-        <StoryModal
-          isOpen={isStoryOpen}
-          onClose={() => setIsStoryOpen(false)}
-          language={language}
-          initialSlideIndex={storyInitialIndex}
-        />
+        <React.Suspense fallback={null}>
+          <StoryModal
+            isOpen={isStoryOpen}
+            onClose={() => setIsStoryOpen(false)}
+            language={language}
+            initialSlideIndex={storyInitialIndex}
+          />
+        </React.Suspense>
       )}
 
       {/* Wi-Fi Quick Connect Modal */}
       {isWifiOpen && (
-        <WifiModal
-          isOpen={isWifiOpen}
-          onClose={() => setIsWifiOpen(false)}
-          ssid={wifiSettings.ssid}
-          password={wifiSettings.password}
-          language={language}
-        />
+        <React.Suspense fallback={null}>
+          <WifiModal
+            isOpen={isWifiOpen}
+            onClose={() => setIsWifiOpen(false)}
+            ssid={wifiSettings.ssid}
+            password={wifiSettings.password}
+            language={language}
+          />
+        </React.Suspense>
       )}
 
       {/* Floating Bottom-Left Luxury Loyalty Capsule Badge – Saf Beyaz İnci */}
@@ -731,14 +739,16 @@ export function MenuClient({
 
       {/* NOA Digital Loyalty Club Modal */}
       {isLoyaltyOpen && (
-        <LoyaltyModal
-          isOpen={isLoyaltyOpen}
-          onClose={() => setIsLoyaltyOpen(false)}
-          onCardUpdated={(c) => setCustomerLoyaltyCard(c)}
-          requiredStamps={loyaltySettings.requiredStamps}
-          rewardName={loyaltySettings.rewardName}
-          language={language}
-        />
+        <React.Suspense fallback={null}>
+          <LoyaltyModal
+            isOpen={isLoyaltyOpen}
+            onClose={() => setIsLoyaltyOpen(false)}
+            onCardUpdated={(c) => setCustomerLoyaltyCard(c)}
+            requiredStamps={loyaltySettings.requiredStamps}
+            rewardName={loyaltySettings.rewardName}
+            language={language}
+          />
+        </React.Suspense>
       )}
 
       {/* Cookie & Privacy Consent Banner */}

@@ -467,10 +467,12 @@ export function StoryModal({
   return (
     <AnimatePresence>
       <motion.div
+        key="story-modal-overlay"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 sm:bg-black/85 backdrop-blur-2xl p-0 sm:p-4 select-none"
+        className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/95 sm:bg-black/85 backdrop-blur-2xl p-0 sm:p-4 select-none"
+        style={{ zIndex: 100000 }}
       >
         {/* Backdrop dismiss on desktop */}
         <div
