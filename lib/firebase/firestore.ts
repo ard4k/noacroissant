@@ -89,23 +89,55 @@ function sanitizeForFirestore(obj: any): any {
 }
 
 /**
+ * Defensive timeout wrapper to prevent serverless Lambda functions from hanging
+ */
+async function withFirestoreTimeout<T>(
+  operation: () => Promise<T>,
+  fallback: T,
+  timeoutMs: number = 3500
+): Promise<T> {
+  let timer: NodeJS.Timeout | undefined;
+  const timeoutPromise = new Promise<T>((resolve) => {
+    timer = setTimeout(() => {
+      console.warn(`[Firestore] Operation exceeded ${timeoutMs}ms limit. Returning fallback gracefully.`);
+      resolve(fallback);
+    }, timeoutMs);
+  });
+
+  return Promise.race([
+    operation()
+      .then((val) => {
+        if (timer) clearTimeout(timer);
+        return val;
+      })
+      .catch((err) => {
+        if (timer) clearTimeout(timer);
+        console.error("[Firestore] Operation error:", err);
+        return fallback;
+      }),
+    timeoutPromise,
+  ]);
+}
+
+/**
  * Create or save order in Firestore
  */
 export async function saveOrderToFirestore(order: OrderRecord): Promise<boolean> {
   if (!isFirebaseConfigured || !db) return false;
 
-  try {
-    const docRef = doc(db, COLLECTIONS.ORDERS, order.id);
-    const sanitized = sanitizeForFirestore({
-      ...order,
-      updated_at: new Date().toISOString(),
-    });
-    await setDoc(docRef, sanitized);
-    return true;
-  } catch (error) {
-    console.error("Error saving order to Firestore:", error);
-    return false;
-  }
+  return withFirestoreTimeout(
+    async () => {
+      const docRef = doc(db!, COLLECTIONS.ORDERS, order.id);
+      const sanitized = sanitizeForFirestore({
+        ...order,
+        updated_at: new Date().toISOString(),
+      });
+      await setDoc(docRef, sanitized);
+      return true;
+    },
+    false,
+    3500
+  );
 }
 
 /**
@@ -116,22 +148,23 @@ export async function getOrderByTrackingTokenFromFirestore(
 ): Promise<OrderRecord | null> {
   if (!isFirebaseConfigured || !db) return null;
 
-  try {
-    const q = query(
-      collection(db, COLLECTIONS.ORDERS),
-      where("tracking_token", "==", trackingToken),
-      limit(1)
-    );
-    const snap = await getDocs(q);
-    if (!snap.empty) {
-      const docSnap = snap.docs[0];
-      return { id: docSnap.id, ...docSnap.data() } as OrderRecord;
-    }
-    return null;
-  } catch (err) {
-    console.error("Error fetching order from Firestore by tracking token:", err);
-    return null;
-  }
+  return withFirestoreTimeout(
+    async () => {
+      const q = query(
+        collection(db!, COLLECTIONS.ORDERS),
+        where("tracking_token", "==", trackingToken),
+        limit(1)
+      );
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        const docSnap = snap.docs[0];
+        return { id: docSnap.id, ...docSnap.data() } as OrderRecord;
+      }
+      return null;
+    },
+    null,
+    3500
+  );
 }
 
 /**
@@ -140,17 +173,18 @@ export async function getOrderByTrackingTokenFromFirestore(
 export async function getOrderByIdFromFirestore(orderId: string): Promise<OrderRecord | null> {
   if (!isFirebaseConfigured || !db) return null;
 
-  try {
-    const docRef = doc(db, COLLECTIONS.ORDERS, orderId);
-    const snap = await getDoc(docRef);
-    if (snap.exists()) {
-      return { id: snap.id, ...snap.data() } as OrderRecord;
-    }
-    return null;
-  } catch (err) {
-    console.error("Error fetching order from Firestore by ID:", err);
-    return null;
-  }
+  return withFirestoreTimeout(
+    async () => {
+      const docRef = doc(db!, COLLECTIONS.ORDERS, orderId);
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        return { id: snap.id, ...snap.data() } as OrderRecord;
+      }
+      return null;
+    },
+    null,
+    3500
+  );
 }
 
 /**
@@ -159,22 +193,23 @@ export async function getOrderByIdFromFirestore(orderId: string): Promise<OrderR
 export async function getAllOrdersFromFirestore(): Promise<OrderRecord[]> {
   if (!isFirebaseConfigured || !db) return [];
 
-  try {
-    const q = query(
-      collection(db, COLLECTIONS.ORDERS),
-      orderBy("created_at", "desc"),
-      limit(200)
-    );
-    const snap = await getDocs(q);
-    const orders: OrderRecord[] = [];
-    snap.forEach((docSnap) => {
-      orders.push({ id: docSnap.id, ...docSnap.data() } as OrderRecord);
-    });
-    return orders;
-  } catch (err) {
-    console.error("Error fetching all orders from Firestore:", err);
-    return [];
-  }
+  return withFirestoreTimeout(
+    async () => {
+      const q = query(
+        collection(db!, COLLECTIONS.ORDERS),
+        orderBy("created_at", "desc"),
+        limit(200)
+      );
+      const snap = await getDocs(q);
+      const orders: OrderRecord[] = [];
+      snap.forEach((docSnap) => {
+        orders.push({ id: docSnap.id, ...docSnap.data() } as OrderRecord);
+      });
+      return orders;
+    },
+    [],
+    3500
+  );
 }
 
 /**
@@ -215,27 +250,28 @@ export async function updateOrderStatusInFirestore(
 ): Promise<boolean> {
   if (!isFirebaseConfigured || !db) return false;
 
-  try {
-    const docRef = doc(db, COLLECTIONS.ORDERS, orderId);
-    const updatePayload: Record<string, any> = {
-      status,
-      updated_at: new Date().toISOString(),
-    };
+  return withFirestoreTimeout(
+    async () => {
+      const docRef = doc(db!, COLLECTIONS.ORDERS, orderId);
+      const updatePayload: Record<string, any> = {
+        status,
+        updated_at: new Date().toISOString(),
+      };
 
-    if (paymentStatus) {
-      updatePayload.payment_status = paymentStatus;
-    }
+      if (paymentStatus) {
+        updatePayload.payment_status = paymentStatus;
+      }
 
-    if (staffRole) {
-      updatePayload.last_updated_by = staffRole;
-    }
+      if (staffRole) {
+        updatePayload.last_updated_by = staffRole;
+      }
 
-    await updateDoc(docRef, updatePayload);
-    return true;
-  } catch (error) {
-    console.error("Error updating order in Firestore:", error);
-    return false;
-  }
+      await updateDoc(docRef, updatePayload);
+      return true;
+    },
+    false,
+    3500
+  );
 }
 
 /**
@@ -408,14 +444,16 @@ export function subscribeToServiceRequests(
  */
 export async function saveServiceRequestToFirestore(req: ServiceRequest): Promise<boolean> {
   if (!isFirebaseConfigured || !db) return false;
-  try {
-    const docRef = doc(db, COLLECTIONS.SERVICE_REQUESTS, req.id);
-    await setDoc(docRef, sanitizeForFirestore(req));
-    return true;
-  } catch (error) {
-    console.error("Error saving service request to Firestore:", error);
-    return false;
-  }
+
+  return withFirestoreTimeout(
+    async () => {
+      const docRef = doc(db!, COLLECTIONS.SERVICE_REQUESTS, req.id);
+      await setDoc(docRef, sanitizeForFirestore(req));
+      return true;
+    },
+    false,
+    3500
+  );
 }
 
 /**
@@ -423,22 +461,24 @@ export async function saveServiceRequestToFirestore(req: ServiceRequest): Promis
  */
 export async function getAllServiceRequestsFromFirestore(): Promise<ServiceRequest[]> {
   if (!isFirebaseConfigured || !db) return [];
-  try {
-    const q = query(
-      collection(db, COLLECTIONS.SERVICE_REQUESTS),
-      orderBy("created_at", "desc"),
-      limit(50)
-    );
-    const snap = await getDocs(q);
-    const requests: ServiceRequest[] = [];
-    snap.forEach((d) => {
-      requests.push({ id: d.id, ...d.data() } as ServiceRequest);
-    });
-    return requests;
-  } catch (error) {
-    console.error("Error fetching service requests from Firestore:", error);
-    return [];
-  }
+
+  return withFirestoreTimeout(
+    async () => {
+      const q = query(
+        collection(db!, COLLECTIONS.SERVICE_REQUESTS),
+        orderBy("created_at", "desc"),
+        limit(50)
+      );
+      const snap = await getDocs(q);
+      const requests: ServiceRequest[] = [];
+      snap.forEach((d) => {
+        requests.push({ id: d.id, ...d.data() } as ServiceRequest);
+      });
+      return requests;
+    },
+    [],
+    3500
+  );
 }
 
 /**
@@ -449,18 +489,20 @@ export async function resolveServiceRequestInFirestore(
   resolvedBy: string = "Personel"
 ): Promise<boolean> {
   if (!isFirebaseConfigured || !db) return false;
-  try {
-    const docRef = doc(db, COLLECTIONS.SERVICE_REQUESTS, requestId);
-    await updateDoc(docRef, {
-      status: "completed",
-      resolved_at: new Date().toISOString(),
-      resolved_by: resolvedBy,
-    });
-    return true;
-  } catch (error) {
-    console.error("Error resolving service request in Firestore:", error);
-    return false;
-  }
+
+  return withFirestoreTimeout(
+    async () => {
+      const docRef = doc(db!, COLLECTIONS.SERVICE_REQUESTS, requestId);
+      await updateDoc(docRef, {
+        status: "completed",
+        resolved_at: new Date().toISOString(),
+        resolved_by: resolvedBy,
+      });
+      return true;
+    },
+    false,
+    3500
+  );
 }
 
 /**
@@ -468,17 +510,19 @@ export async function resolveServiceRequestInFirestore(
  */
 export async function getSettingsFromFirestore(): Promise<BusinessSettings | null> {
   if (!isFirebaseConfigured || !db) return null;
-  try {
-    const docRef = doc(db, COLLECTIONS.SETTINGS, "business");
-    const snap = await getDoc(docRef);
-    if (snap.exists()) {
-      return snap.data() as BusinessSettings;
-    }
-    return null;
-  } catch (error) {
-    console.error("Error getting settings from Firestore:", error);
-    return null;
-  }
+
+  return withFirestoreTimeout(
+    async () => {
+      const docRef = doc(db!, COLLECTIONS.SETTINGS, "business");
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        return snap.data() as BusinessSettings;
+      }
+      return null;
+    },
+    null,
+    3500
+  );
 }
 
 /**

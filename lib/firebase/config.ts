@@ -7,22 +7,28 @@ import { getAuth, Auth } from "firebase/auth";
 // Never hardcode API keys, project IDs, or app IDs here.
 // Configure these in Vercel Dashboard → Project → Environment Variables.
 // ---------------------------------------------------------------------------
-export const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "",
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "",
+const cleanEnv = (val: string | undefined): string => {
+  if (!val) return "";
+  return val.trim().replace(/^["']|["']$/g, "").trim().replace(/\\n$/, "").replace(/[\r\n]/g, "");
 };
 
-// Detect placeholder / missing values
+export const firebaseConfig = {
+  apiKey: cleanEnv(process.env.NEXT_PUBLIC_FIREBASE_API_KEY),
+  authDomain: cleanEnv(process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN),
+  projectId: cleanEnv(process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID),
+  storageBucket: cleanEnv(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET),
+  messagingSenderId: cleanEnv(process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID),
+  appId: cleanEnv(process.env.NEXT_PUBLIC_FIREBASE_APP_ID),
+};
+
+// Detect placeholder / missing / corrupted values
 const isPlaceholder = (val: string) =>
   !val ||
+  val.length < 3 ||
+  val === "y" ||
   val.includes("AIzaSy...") ||
   val.includes("XXXXXXXXXX") ||
-  val.includes("1234567890") ||
-  val === "";
+  val.includes("1234567890");
 
 export const isFirebaseConfigured = Boolean(
   !isPlaceholder(firebaseConfig.apiKey) &&

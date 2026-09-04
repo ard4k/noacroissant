@@ -130,7 +130,7 @@ export async function fetchLoyaltyCard(phoneE164: string): Promise<LoyaltyCard> 
   }
 
   // 4. Try Firestore if configured
-  if (isFirebaseConfigured && db && typeof window !== "undefined") {
+  if (isFirebaseConfigured && db) {
     try {
       const { doc, getDoc } = await import("firebase/firestore");
       const docRef = doc(db, "loyalty_cards", id);
@@ -170,7 +170,7 @@ export async function fetchLoyaltyCard(phoneE164: string): Promise<LoyaltyCard> 
     localStorage.setItem(`noa_card_${id}`, JSON.stringify(newCard));
   }
 
-  if (isFirebaseConfigured && db && typeof window !== "undefined") {
+  if (isFirebaseConfigured && db) {
     try {
       const { doc, setDoc } = await import("firebase/firestore");
       await setDoc(doc(db, "loyalty_cards", id), newCard);
@@ -239,8 +239,8 @@ export async function addStampsToCustomer(
     localStorage.setItem(`noa_card_${id}`, JSON.stringify(updatedCard));
   }
 
-  // Persist to Firestore if client configured
-  if (isFirebaseConfigured && db && typeof window !== "undefined") {
+  // Persist to Firestore if configured
+  if (isFirebaseConfigured && db) {
     try {
       const { doc, setDoc } = await import("firebase/firestore");
       await setDoc(doc(db, "loyalty_cards", id), updatedCard, { merge: true });
@@ -286,7 +286,7 @@ export async function removeStampFromCustomer(
     localStorage.setItem(`noa_card_${id}`, JSON.stringify(updatedCard));
   }
 
-  if (isFirebaseConfigured && db && typeof window !== "undefined") {
+  if (isFirebaseConfigured && db) {
     try {
       const { doc, setDoc } = await import("firebase/firestore");
       await setDoc(doc(db, "loyalty_cards", id), updatedCard, { merge: true });
@@ -334,7 +334,7 @@ export async function redeemFreeCoffee(phoneE164: string): Promise<LoyaltyCard> 
     localStorage.setItem(`noa_card_${id}`, JSON.stringify(updatedCard));
   }
 
-  if (isFirebaseConfigured && db && typeof window !== "undefined") {
+  if (isFirebaseConfigured && db) {
     try {
       const { doc, setDoc } = await import("firebase/firestore");
       await setDoc(doc(db, "loyalty_cards", id), updatedCard, { merge: true });
