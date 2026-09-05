@@ -568,8 +568,8 @@ async function runVerification() {
 
   const limonluCilekliDanish = noaStore.getProductById("prod-limonlu-cilekli-danish");
   assert(
-    limonluCilekliDanish !== undefined && limonluCilekliDanish.base_price === 340,
-    "Limonlu Çilekli Danish is added and 340 TL"
+    limonluCilekliDanish === undefined,
+    "Limonlu Çilekli Danish is completely removed"
   );
 
   // Clean up test order so it doesn't pollute admin panel

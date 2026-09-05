@@ -38,11 +38,6 @@ export const PRODUCT_IMAGES: Record<string, ProductImageMeta> = {
     alt: "Mangolu Danish",
     objectPosition: "center",
   },
-  "limonlu-cilekli-danish": {
-    src: "/cilekli-danish.jpg",
-    alt: "Limonlu Çilekli Danish",
-    objectPosition: "center",
-  },
 
   // Amora Çeşitleri
   "sutlu-amora": {

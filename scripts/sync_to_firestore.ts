@@ -47,7 +47,6 @@ async function main() {
   const updatedActiveIds = [
     "prod-mini-kruvasan",
     "prod-lotus-cruffin",
-    "prod-limonlu-cilekli-danish",
   ];
 
   console.log("\nChecking updated active products in Firestore:");
